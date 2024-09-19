@@ -30,3 +30,9 @@ A continuación, se detallan los pasos necesarios para lograrlo:
 
 ---
 
+El siguiente es el diagrama con el cual nos guiamos para la implementación de este trabajo. Se observa el comportamiento de la ALU en su interacion con los switches y pulsadores de la placa, donde se dirigen los datos y el operador en direccion hacia la ALU. Donde finalmente vemos reflejado el resultado de la operacion en los LEDs de la placa.
+
+<p align="center">
+    <img src="./imgs/TP1-ALU-diagrama.jpg"><br>
+    <em>Fig 1. Diagrama del Trabajo Practico.</em>
+</p>
