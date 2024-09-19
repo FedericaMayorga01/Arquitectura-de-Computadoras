@@ -2,7 +2,9 @@
 
 ## Objetivo
 Implementar en FPGA una ALU (Arithmetic Logic Unit).
+
 La misma debe ser parametrizable.
+
 Su desarrollo debe ser validado por medio de Test Bench.
 
 Debe realizar las siguientes operaciones:
