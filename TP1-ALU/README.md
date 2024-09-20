@@ -5,7 +5,8 @@
 El objetivo es desarrollar una Unidad Lógica Aritmética (ALU) parametrizable, que pueda operar sobre un bus de datos configurable. Esta ALU se implementará en una placa NEXYS 4 con FPGA Artix-7 y se validará mediante un Test Bench (banco de pruebas). Además, simularemos el diseño utilizando las herramientas de simulación de Vivado (Version 2023.1).
 A continuación, se detallan los pasos necesarios para lograrlo:
 
-- Desarrollo de la ALU en lenguaje Verilog:
+- **Desarrollo de la ALU en lenguaje Verilog:**
+  
     Crearemos una ALU simple, combinacional y parametrizable que pueda adaptarse a diferentes configuraciones de bus de datos, para implementar las operaciones aritméticas y lógicas necesarias en el diseño de la ALU.
 
     Las operaciones de la ALU son las siguientes:
@@ -20,13 +21,16 @@ A continuación, se detallan los pasos necesarios para lograrlo:
     | SRL | 000010 |
     | NOR | 100111 |
 
-- Implementación en FPGA:
+- **Implementación en FPGA:**
+  
     Utilizaremos una FPGA para implementar físicamente nuestra ALU y le configuraremos los recursos para que coincidan con las especificaciones de la ALU.
 
-- Validación mediante Test Bench:
+- **Validación mediante Test Bench:**
+  
     Crearemos un Test Bench que genere entradas aleatorias para la ALU y verificaremos que las salidas de la ALU sean correctas según las operaciones realizadas.
 
-- Simulación con Vivado:
+- **Simulación con Vivado:**
+  
     Utilizaremos las herramientas de simulación de Vivado para simular el comportamiento de la ALU.
 
 ---
@@ -45,7 +49,8 @@ Realizamos dos modulos:
 - `mod_ALU`, donde esta implementado el funcionamiento de la ALU.
 - `mod_TOP`, donde esta instanciada la ALU, y se generan los demas componentes de la placa (swtiches, pulsadores, LEDs).
 
-### Modulo ALU
+
+## Modulo ALU
 
 Al comienzo, tenemos los parametros del modulo ALU: `NB_MODALU_DATA` y `NB_MODALU_OP`. Recordemos que los parametros son constantes.
 
@@ -77,3 +82,7 @@ Dentro de nuestro case, tenemos las ocho operaciones diferenciadas por sus codig
 En el caso de ingresar en el case, un valor distinto a los codigos operacionales, el resultado de salida (`default`) es poner en cero todos los LEDs.
 
 Por ultimo, asignamos a `o_modALU_data_RES` el valor del registro `tmp`.
+
+## Modulo TOP
+
+Al comienzo, tenemos los parametros del modulo
