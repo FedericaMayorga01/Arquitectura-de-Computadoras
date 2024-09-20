@@ -1,44 +1,32 @@
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
-// 
+// TP1 ALU - Modulo ALU
+// Mayorga - Segura
+//
 // Create Date: 12.09.2024 16:36:40
-// Design Name: 
 // Module Name: mod_top
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: 
-// 
-// Dependencies: 
-// 
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-// 
 //////////////////////////////////////////////////////////////////////////////////
 
 
 module top_module
 #
 (
-    parameter NB_MODTOP_DATA=8,
-    parameter NB_MODTOP_OP=6,
-    parameter NB_MODTOP_BUT=3
+    parameter NB_MODTOP_DATA = 8,
+    parameter NB_MODTOP_OP   = 6,
+    parameter NB_MODTOP_BUT  = 3
 )
 (
-    input wire i_clk,
-    input wire i_modtop_reset,
-    input wire [NB_MODTOP_DATA-1:0] i_modtop_sw,
-    input wire [NB_MODTOP_BUT-1:0] i_modtop_but,
-    output wire [NB_MODTOP_DATA-1:0] o_modtop_leds
+    input   wire                        i_clk,
+    input   wire                        i_modtop_reset,
+    input   wire [NB_MODTOP_DATA-1:0]   i_modtop_sw,
+    input   wire [NB_MODTOP_BUT-1:0]    i_modtop_but,
+    output  wire [NB_MODTOP_DATA-1:0]   o_modtop_leds
 );
 
 // Declaración de señales internas
     reg signed [NB_MODTOP_DATA-1:0] i_modtop_data_A;
     reg signed [NB_MODTOP_DATA-1:0] i_modtop_data_B;
-    reg [NB_MODTOP_OP-1:0] i_modtop_OP;
+    reg        [NB_MODTOP_OP-1:0]   i_modtop_OP;
 
 // Instancia del módulo ALU
 mod_ALU #(
@@ -55,14 +43,15 @@ always @(posedge i_clk)begin
         if(i_modtop_reset)begin
             i_modtop_data_A <= {NB_MODTOP_DATA{1'b0}};
             i_modtop_data_B <= {NB_MODTOP_DATA{1'b0}};
-            i_modtop_OP <= {NB_MODTOP_OP{1'b0}};
+            i_modtop_OP     <= {NB_MODTOP_OP{1'b0}};
         end     
         else    
-        if(i_modtop_but[0]) // corresponde al pulsador 1 en el tp
+        if(i_modtop_but[0])                                 // Corresponde al pulsador 1
             i_modtop_data_A <= i_modtop_sw;
-        if(i_modtop_but[1]) // corresponde al pulsador 2 en el tp
+        if(i_modtop_but[1])                                 // Corresponde al pulsador 2
             i_modtop_data_B <= i_modtop_sw;
-        if(i_modtop_but[2]) // corresponde al pulsador 3 en el tp
-            i_modtop_OP <= i_modtop_sw[NB_MODTOP_OP-1:0]; // se realiza el truncamiento
-end                     
+        if(i_modtop_but[2])                                 // Corresponde al pulsador 3
+            i_modtop_OP <= i_modtop_sw [NB_MODTOP_OP-1:0];  // Se realiza el truncamiento
+end
+
 endmodule
