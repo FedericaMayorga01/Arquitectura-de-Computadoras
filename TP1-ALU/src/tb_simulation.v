@@ -1,5 +1,10 @@
-// Testbench con valores aleatorios para probar todas las operaciones de la ALU
 `timescale 1ns / 1ps
+//////////////////////////////////////////////////////////////////////////////////
+// TP1 ALU - Modulo ALU
+// Mayorga - Segura
+// 
+// Testbench con valores aleatorios para probar todas las operaciones de la ALU
+//////////////////////////////////////////////////////////////////////////////////
 
 module tb_top_module;
 
@@ -9,13 +14,13 @@ module tb_top_module;
     parameter NB_MODSIMU_BUT = 3;
     
     // Señales de entrada
-    reg i_simu_clk;
-    reg i_simu_reset;
-    reg [NB_MODSIMU_DATA-1:0] i_simu_sw;
-    reg [NB_MODSIMU_BUT-1:0] i_simu_but;
+    reg                         i_simu_clk;
+    reg                         i_simu_reset;
+    reg [NB_MODSIMU_DATA-1:0]   i_simu_sw;
+    reg [NB_MODSIMU_BUT-1:0]    i_simu_but;
     
     // Señales de salida
-    wire [NB_MODSIMU_DATA-1:0] o_simu_leds;
+    wire [NB_MODSIMU_DATA-1:0]  o_simu_leds;
 
     // Variables temporales para generar valores aleatorios
     reg [NB_MODSIMU_DATA-1:0] A, B, expected_result;

@@ -109,4 +109,50 @@ En la siguiente parte de `else`, vemos las asignaciones no bloqueantes `<=` que 
 El funcionamiento para la logica del mod_top es que al utilizar registros, para almacenar los valores de entrada y asi poder realizar las operaciones, recomendamos y pensamos en pulsar el boton de reset antes de almacenar dichos valores; al igual que posteriormente de hacer una operacion, y asi asegurarnos que los valores se pongan en cero.
 
 Cargando los valores deseados en los switches de la placa, y luego presionando los pulsadores 1, 2 o 3, para asi desginar los valores a los registros denominados "dato A", "dato B" y "Operando".
+En la imagen, vemos delimitado de color amarillo los switches y de color rojo, los pulsadores utilizados.
 
+<p align="center">
+    <img src="./imgs/TP1-switches-pulsadores.png"><br>
+    <em>Fig 2. Switches y pulsadores.</em>
+</p>
+
+
+## Constraints
+
+Dentro de este archivo, es donde se definen las conexiones fisicas de la placa y se le asignan las señales logicas que definimos en el codigo de Verilog. Es decir, donde se mapean las señales del diseño a los pines especificos de la placa FPGA y se establecen las propiedades electricas de dichos pines, como por ejemplo, el estandar de voltaje.
+
+Nos encontramos con `set_property PACKAGE_PIN X [get_ports Y]`, que indica que la señal logica `Y` se conecta al pin fisico `X` en la FPGA. Tambien con `set_property IOSTANDARD LVCMOS33 [get_ports Y]`, que define el estandar de voltaje y los niveles de la señal, para el pin asociado a la señal `Y`. `LVCMOS33` es un estandar, y significa _Low Voltaje CMOS a 3.3V_, que es utilizado comunmente para señales de entrada y salida que operan a 3.3V. 
+
+Tambien se definen diseños del clock (clk) como `create_clock -add -name sys_clk_pin -period 10.00 -waveform {0 5} [get_ports i_clk]`, que nos dara un reloj virtual para la señal de reloj `i_clk`, que es frecuentemente utilizado durante la sintesis y los analisis de tiempo de FPGA. Su periodo sera de 10 nanosegundos [10.00ns], lo que es equivalente a una frecuencia de 100MHz. El borde de subida de la señal esta en [0.00ns] y el borde de bajada en [5.00ns], lo que es equivalente a un duty cycle del 50%. 
+
+<p align="center">
+    <img src="./imgs/TP1-constraints.JPG"><br>
+    <em>Fig 2. Ejemplo de Constraints.</em>
+</p>
+
+
+## Test Bench
+
+Es aca donde verificaremos nuestro diseño, en Verilog dentro de Vivado. Porque imitamos un laboratorio fisico para probar el circuito y generamos las señales de entrada, para asi poder evaluar las salidas del mismo. 
+
+De forma similar a los modulos anteriores, declaramos los parametros y variables necesarias. Y en las particularidades de este tipo de archivo/simulacion, hacemos uso del bloque `initial`, en donde creamos el estímulo del componente a testear, su inicialización. Aparecen valores como `#N` donde es el delay de N unidades de escala de tiempo.
+
+Utilizamos algunas funciones de testbench como `$display` para ver por consola ciertos valores, `$random` para la generacion de valores aleatorios dentro de las operaciones y `$finish` para frenar la simulacion. 
+
+Observamos en la simulacion, los valores de los datos A y B, la operacion, el resultado esperado y el valor mostrado por la salida en los LEDs de la placa. Vemos un poco de retraso en las lineas de tiempo entre `o_simu_leds` y `expected_result`, pero en el funcionamiento de la placa, vemos que esta correcto a lo esperado.
+<p align="center">
+    <img src="./imgs/TP1-testebench-binario.JPG"><br>
+    <em>Fig 3. Test Bench en binario.</em>
+</p>
+
+<p align="center">
+    <img src="./imgs/TP1-testebench.JPG"><br>
+    <em>Fig 4. Test Bench en decimal.</em>
+</p>
+
+Tambien dentro del codigo, realizamos una funcion que nos indique por consola, si la operacion fue exitosa, al comparar el resultado esperado con el resultado obtenido. Simplemente con leer las salidas de la consola, sabremos si nuestras operaciones se comportan de la forma deseada.
+
+<p align="center">
+    <img src="./imgs/TP1-testbench-messages.JPG"><br>
+    <em>Fig 5. Mensajes por consola.</em>
+</p>
