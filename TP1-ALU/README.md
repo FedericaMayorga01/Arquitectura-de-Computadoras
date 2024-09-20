@@ -76,4 +76,4 @@ Dentro de nuestro case, tenemos las ocho operaciones diferenciadas por sus codig
 
 En el caso de ingresar en el case, un valor distinto a los codigos operacionales, el resultado de salida (`default`) es poner en cero todos los LEDs.
 
-Por ultimo, asignamos a `o_modALU_data_RES` el valor del registro `tmp`.
+Por ultimo, asignamos a <font color="green">`o_modALU_data_RES`</font> el valor del registro `tmp`.
