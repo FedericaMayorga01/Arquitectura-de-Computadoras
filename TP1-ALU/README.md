@@ -146,7 +146,7 @@ Observamos en la simulacion, los valores de los datos A y B, la operacion, el re
 </p>
 
 <p align="center">
-    <img src="./imgs/TP1-testebench.JPG"><br>
+    <img src="./imgs/TP1-testbench.JPG"><br>
     <em>Fig 4. Test Bench en decimal.</em>
 </p>
 
