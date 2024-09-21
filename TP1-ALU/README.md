@@ -71,7 +71,7 @@ Estos son `signed` para saber si los valores y el resultado son numeros positivo
 Todos los valores de los puertos son parametrizables para que el modulo pueda ser reutilizado en futuros proyectos.
 
 
-Como buscamos que nuestro modulo ALU sea lo mas combinacional posible, pero a la vez, necesitamos mantener cierta informacion sobre las operaciones del modulo, utilizamos una variable `reg`, la cual tambien es `signed` para poder mantener el signo de la operacion. Esta variable o registro, se denomina `tmp` por temporal.
+Como buscamos que nuestro modulo ALU sea combinacional, pero a la vez, necesitamos mantener cierta informacion sobre las operaciones del modulo, utilizamos una variable `reg`, la cual tambien es `signed` para poder mantener el signo de la operacion. Esta variable o registro, se denomina `tmp` por temporal. Este registro al utilizarse en un always(*) no se sintetiza en un flip flop, por lo tanto mantenemos el requisito de alu combinacional.
 
 
 Siendo a que queremos definir cual es la operacion a realizar, en base a los codigos obtenidos (tabla de operaciones), se implemento un case statement (o sentencia case). Para poder utilizar este `case(i_modALU_OP)`, tenemos que utilizarlo dentro de un bloque `always`. Los bloques `always` son construcciones que nos van a permitir declarar sentencias secuenciales, y al estar utilizandolo para una logica combinacional, su lista de sensibilidad es `@(*)`.
@@ -100,7 +100,7 @@ Ya con los parametros y puertos (entradas/salidas), declaramos las señales inte
 Ahora, instanciamos el modulo ALU `mod_ALU_1`, declarando los parametros necesarios y los nombres de los puertos con sus conexiones correspondientes (como `.i_modALU_data_A(i_modtop_data_A)`).
 
 
-Dentro del bloque `always`, observaremos que la lista de sensibilidad en este caso es `@(posedge i_clk)`, ya que dejamos de usar logica puramente combinacional y optamos por utilizar los eventos regulares, como los flancos de subida.
+Dentro del bloque `always`, observamos que la lista de sensibilidad en este caso es `@(posedge i_clk)`, ya que dejamos de usar logica puramente combinacional y optamos por utilizar los eventos regulares, como los flancos de subida.
 
 Utilizamos sentencias condicionales (de control de flujo), como `if(i_modtop_reset)` dado que al inicio de la ejecucion del codigo no sabemos los valores que tienen `i_modtop_data_A`, `i_modtop_data_B` y `i_modtop_OP`, entonces colocamos el boton de reset para inicializar todo a 0.
 
