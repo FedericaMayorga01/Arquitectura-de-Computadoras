@@ -29,24 +29,77 @@ module alu_module
     input wire signed [NB_ALUMODULE_DATA-1:0] i_alumodule_data_A,
     input wire signed [NB_ALUMODULE_DATA-1:0] i_alumodule_data_B,
     input wire [NB_ALUMODULE_OP-1:0] i_alumodule_OP,
-    output wire signed [NB_ALUMODULE_DATA-1:0] o_alumodule_data_RES
+    output wire signed [NB_ALUMODULE_DATA-1:0] o_alumodule_data_RES,
+    output wire o_alumodule_ZERO,
+    output wire o_alumodule_NEGATIVE,
+    output wire o_alumodule_CARRY
 );
-reg signed [NB_ALUMODULE_DATA-1:0] tmp;
+
+reg signed [NB_ALUMODULE_DATA-1:0] alumodule_tmp;
+reg alumodule_carry;
+
 always @(*)
     begin: case_alu
         case(i_alumodule_OP)
-            6'b100000: tmp = i_alumodule_data_A + i_alumodule_data_B;//add
-            6'b100010: tmp = i_alumodule_data_A - i_alumodule_data_B;//sub
-            6'b100100: tmp = i_alumodule_data_A & i_alumodule_data_B;//and
-            6'b100101: tmp = i_alumodule_data_A | i_alumodule_data_B;//or
-            6'b100110: tmp = i_alumodule_data_A ^ i_alumodule_data_B;//xor
-            6'b000011: tmp = i_alumodule_data_A >>> i_alumodule_data_B;//sra
-            6'b000010: tmp = i_alumodule_data_A >> i_alumodule_data_B;//srl
-            6'b100111: tmp = ~(i_alumodule_data_A | i_alumodule_data_B);//nor
-        default: tmp = {NB_ALUMODULE_DATA{1'b0}}; // 00000000... 
-        
+            // Suma con alumodule_carry
+            6'b100000: 
+                {alumodule_carry, alumodule_tmp} = i_alumodule_data_A + i_alumodule_data_B; // alumodule_carry es el bit más significativo de la suma
+            
+            // Resta con borrow
+            6'b100010: 
+                {alumodule_carry, alumodule_tmp} = i_alumodule_data_A - i_alumodule_data_B; // alumodule_carry es 1 si hay borrow
+            
+            // Operaciones lógicas, alumodule_carry no es relevante
+            6'b100100: 
+                begin 
+                    alumodule_tmp = i_alumodule_data_A & i_alumodule_data_B; 
+                    alumodule_carry = 1'b0; // No hay alumodule_carry en AND
+                end
+
+            6'b100101: 
+                begin 
+                    alumodule_tmp = i_alumodule_data_A | i_alumodule_data_B; 
+                    alumodule_carry = 1'b0; // No hay alumodule_carry en OR
+                end
+            
+            6'b100110: 
+                begin 
+                    alumodule_tmp = i_alumodule_data_A ^ i_alumodule_data_B; 
+                    alumodule_carry = 1'b0; // No hay alumodule_carry en XOR
+                end
+
+            // Desplazamientos, sin alumodule_carry relevante
+            6'b000011: 
+                begin 
+                    alumodule_tmp = i_alumodule_data_A >>> i_alumodule_data_B; 
+                    alumodule_carry = 1'b0; // No hay alumodule_carry en SRA
+                end
+            
+            6'b000010: 
+                begin 
+                    alumodule_tmp = i_alumodule_data_A >> i_alumodule_data_B; 
+                    alumodule_carry = 1'b0; // No hay alumodule_carry en SRL
+                end
+            
+            6'b100111: 
+                begin 
+                    alumodule_tmp = ~(i_alumodule_data_A | i_alumodule_data_B); 
+                    alumodule_carry = 1'b0; // No hay alumodule_carry en NOR
+                end
+
+            default: 
+                begin 
+                    alumodule_tmp = {NB_ALUMODULE_DATA{1'b0}}; 
+                    alumodule_carry = 1'b0; // Default sin alumodule_carry
+                end
         endcase
     end
-assign o_alumodule_data_RES = tmp;
+
+assign o_alumodule_data_RES = alumodule_tmp;
+assign o_alumodule_ZERO = (alumodule_tmp == 0) ? 1'b1 : 1'b0;
+assign o_alumodule_CARRY = alumodule_carry;
+assign o_alumodule_NEGATIVE = alumodule_tmp[NB_ALUMODULE_DATA-1];
+// ver si poner el de overflow
+
 endmodule
 
