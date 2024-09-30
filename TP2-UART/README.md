@@ -58,7 +58,7 @@ Entradas:
 - i_clk: Señal de reloj del sistema.
 - i_reset: Señal de reinicio que restablece los registros y estados del módulo(a estado idle).
 - i_rxmodule_RX: Señal de recepción de datos en serie (UART RX).
-- i_rxmodule_BRGTICKS: Señal de los "baud rate generator ticks", que indica cuándo es el momento de leer el siguiente bit.
+- i_rxmodule_BRGTICKS: Señal de los "baud rate generator ticks", recibe un 1 cuando se ha completado un tick desde el generador del baud rate.
 
 Salidas:
 - o_rxmodule_RXDONE: Señal que indica cuando se ha recibido un byte completo.
@@ -69,19 +69,22 @@ El módulo usa una máquina de estados con los siguientes estados:
 - rxmodule_idlestate (00): Estado de espera, esperando el bit de inicio de la trama (que es un 0 en UART).
 - rxmodule_startstate (01): Estado que verifica la duración del bit de inicio.
 - rxmodule_datastate (10): Estado de lectura de los bits de datos.
-- rxmodule_stopstate (11): Estado que verifica el bit de stop.
+- rxmodule_stopstate (11): Estado que verifica el bit de stop(un solo bit de stop).
   
 Registros:
 - rxmodule_regstate y rxmodule_nextstate: Mantienen el estado actual y el próximo estado de la máquina de estados. Esto a traves de los dos bits que identifican a cada uno de los 4 estados.
 - rxmodule_samptickreg y rxmodule_sampticknextreg: Contadores de ticks para medir el tiempo de cada bit.
 - rxmodule_nbrecreg y rxmodule_nbrecnextreg: Contador de bits recibidos.
-- rxmodule_bitsreasreg y rxmodule_bitsreasnextreg: Almacenan los bits recibidos y los van desplazando para reconstruir el byte(ya que los bits llegan de a uno).
+- rxmodule_bitsreasreg y rxmodule_bitsreasnextreg: Almacenan los bits recibidos y los van desplazando para reconstruir el byte(ya que los bits llegan de a uno). Osea ahi observamos cuales son los bits actuales que fueron llegando. Para hacer el desplazamiento se realiza lo siguiente:
+  - Toma el valor actual de la entrada i_rxmodule_RX, que es el bit de datos que está llegando en el momento.
+  - Toma el valor actual del registro rxmodule_bitsreasreg (que contiene los bits ya recibidos hasta ahora) y lo desplaza hacia la derecha una posición, descartando el bit menos significativo ([7:1] significa que se toman los bits del 7 al 1, excluyendo el bit 0).
+  - Coloca el nuevo bit recibido (i_rxmodule_RX) en el bit más significativo de rxmodule_bitsreasnextreg.
   
 Funcionamiento:
 - Estado rxmodule_idlestate: El módulo permanece en este estado hasta que se detecta un 0 en i_rxmodule_RX, lo que indica el bit de inicio de una trama UART. Si se detecta un 0, pasa al estado rxmodule_startstate.
-- Estado rxmodule_startstate: Este estado espera que el contador de ticks llegue a 7 (para sincronizarse con el centro del bit de inicio). Una vez alcanzado el tick 7, pasa al estado rxmodule_datastate para empezar a recibir los bits de datos.
-- Estado rxmodule_datastate: Este estado lee los bits de datos uno por uno en los bordes de i_rxmodule_BRGTICKS. Se construye el byte desplazando los bits hacia la derecha (rxmodule_bitsreasnextreg = {i_rxmodule_RX, rxmodule_bitsreasreg[7:1]}) y se incrementa el contador de bits rxmodule_nbrecreg. Una vez recibidos todos los bits (NB_RXMODULE_DATA), pasa al estado rxmodule_stopstate.
--Estado rxmodule_stopstate: Este estado verifica que se ha recibido correctamente el bit de stop (que debería ser un 1). Cuando se completa el bit de stop (después de SB_RXMODULE_TICKS ticks), el módulo vuelve al estado rxmodule_idlestate y activa o_rxmodule_RXDONE para indicar que se ha recibido un byte completo.
+- Estado rxmodule_startstate: Este estado espera que el contador de ticks llegue a 7 (para sincronizarse con el centro del bit de inicio/start(que es un 0)). Una vez alcanzado el tick 7(osea pasaron 8 ticks), pasa al estado rxmodule_datastate para empezar a recibir los bits de datos.
+- Estado rxmodule_datastate: Este estado espera que el contador de ticks llegue a 15(16 ticks) (para sincronizarse con el centro del primer data bit, y de los demas).Lee los bits de datos uno por uno en los bordes de i_rxmodule_BRGTICKS. Se construye el byte desplazando los bits hacia la derecha (rxmodule_bitsreasnextreg = {i_rxmodule_RX, rxmodule_bitsreasreg[7:1]}) y se incrementa el contador de bits rxmodule_nbrecreg. Una vez recibidos todos los bits (NB_RXMODULE_DATA)(8 bits), pasa al estado rxmodule_stopstate.
+-Estado rxmodule_stopstate: Este estado verifica que se ha recibido correctamente el bit de stop (que debería ser un 1). Cuando se completa el bit de stop (después de SB_RXMODULE_TICKS(16) ticks), el módulo vuelve al estado rxmodule_idlestate y activa o_rxmodule_RXDONE para indicar que se ha recibido un byte completo.
 
 Salida de Datos:
 - La salida o_rxmodule_DOUT contiene el byte completo que ha sido recibido en serie.
