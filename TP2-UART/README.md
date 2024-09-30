@@ -76,6 +76,7 @@ Este código en Verilog implementa un receptor de datos en serie (modulación UA
 
 
 /////////////////////// Ver si se modifica a One hot o One Cold (o a Gray??)
+
 **Estados:**
 El módulo usa una máquina de estados con los siguientes estados:
   - `rxmodule_idlestate` **(00)**: Estado de espera, esperando el bit de inicio de la trama (que es un 0 en UART).
@@ -84,8 +85,9 @@ El módulo usa una máquina de estados con los siguientes estados:
   - `rxmodule_stopstate` **(11)**: Estado que verifica el bit de stop (un solo bit de stop).
 
 
+/////////////////////////////// Modificar bits de estado?????
 **Registros:**
-  - `rxmodule_regstate` y `rxmodule_nextstate`: Mantienen el estado actual y el próximo estado de la máquina de estados. Esto a traves de los dos bits que identifican a cada uno de los 4 estados. /////////////////////////////// Modificar bits de estado?????
+  - `rxmodule_regstate` y `rxmodule_nextstate`: Mantienen el estado actual y el próximo estado de la máquina de estados. Esto a traves de los dos bits que identifican a cada uno de los 4 estados. 
   - `rxmodule_samptickreg` y `rxmodule_sampticknextreg`: Contadores de ticks para medir el tiempo de cada bit.
   - `rxmodule_nbrecreg` y `rxmodule_nbrecnextreg`: Contador de bits recibidos.
   - `rxmodule_bitsreasreg` y `rxmodule_bitsreasnextreg`: Almacenan los bits recibidos y los van desplazando para reconstruir el byte (ya que los bits llegan de a uno). Es decir, ahi observamos cuales son los bits actuales que fueron llegando. Para hacer el desplazamiento se realiza lo siguiente:
