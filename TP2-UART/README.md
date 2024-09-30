@@ -86,6 +86,7 @@ El módulo usa una máquina de estados con los siguientes estados:
 
 
 /////////////////////////////// Modificar bits de estado?????
+
 **Registros:**
   - `rxmodule_regstate` y `rxmodule_nextstate`: Mantienen el estado actual y el próximo estado de la máquina de estados. Esto a traves de los dos bits que identifican a cada uno de los 4 estados. 
   - `rxmodule_samptickreg` y `rxmodule_sampticknextreg`: Contadores de ticks para medir el tiempo de cada bit.
