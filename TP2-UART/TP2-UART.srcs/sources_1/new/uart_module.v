@@ -41,7 +41,8 @@ module uart_module
 );
 
 //--------------- INICIALIZACION DE MODULOS --- start
-rx_module #(
+rx_module 
+#(
     .NB_RXMODULE_DATA(NB_UARTMODULE_DATA),
     .SB_RXMODULE_TICKS(SB_UARTMODULE_TICKS)
 ) rx_module_1 (
@@ -53,10 +54,19 @@ rx_module #(
     .o_rxmodule_DOUT(o_uartmodule_DOUT)
 );
 
-tx_module #(
-
+tx_module 
+#(
+    .NB_TXMODULE_DATA(NB_UARTMODULE_DATA),
+    .SB_TXMODULE_TICKS(SB_UARTMODULE_TICKS)
 ) tx_module_1(
-
+    // DUDA: No se les pone numeritos a las instancias?
+    .i_clk(i_clk),
+    .i_reset(i_reset),
+    .i_txmodule_TXSTART(i_uartmodule_TXSTART),
+    .i_txmodule_BRGTICKS(i_uartmodule_BRGTICKS),
+    .i_txmodule_DIN(i_uartmodule_DIN),
+    .o_txmodule_TXDONE(o_uartmodule_TXDONE),
+    .o_txmodule_TX(o_uartmodule_TX)
 );
 
 baudrg_module #(
