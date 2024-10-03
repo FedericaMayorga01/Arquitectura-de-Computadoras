@@ -96,7 +96,7 @@ always @(*)
                if (rxmodule_samptickreg == 15)  // (16 ticks) mitad del dato.
                   begin
                      rxmodule_nextsamptickreg = 0;
-                     rxmodule_nextbitsreasreg = {i_rxmodule_RX , rxmodule_bitsreasreg [7:1]}; 
+                     rxmodule_nextbitsreasreg = {i_rxmodule_RX , rxmodule_bitsreasreg [7:1]};
                      if (rxmodule_nbrecreg == (NB_RXMODULE_DATA - 1))   // llegaron los 8 bits
                         rxmodule_nextstatereg = rxmodule_stopstate ;    // SIGUIENTE ESTADO
                      else

@@ -37,7 +37,6 @@ baudrg_module #(
     .o_baudrgmodule_RATE()                        // No se usa momentaneamente
 );
 
-
 rx_module
 #(
     .NB_RXMODULE_DATA(NB_UARTMODULE_DATA),

@@ -136,6 +136,6 @@ always @(*)
     end
 
 // output
-// assign o_txmodule_TX = txmodule_reg;
+assign o_txmodule_TX = txmodule_reg;
 
 endmodule
