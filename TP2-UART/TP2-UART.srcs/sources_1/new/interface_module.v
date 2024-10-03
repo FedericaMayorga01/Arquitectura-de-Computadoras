@@ -11,9 +11,7 @@ module interface_module
     input   wire i_fifo_empty,                                          // Indica si la FIFO está vacía
     input   wire [NB_INTERFACEMODULE_DATA - 1:0] i_fifo_data,           // Datos leídos desde la FIFO
     input   wire signed [NB_INTERFACEMODULE_DATA - 1:0] i_alu_result,   // Resultado de la ALU
-    input   wire i_alu_zero,                                            // Flag de cero de la ALU
-    input   wire i_alu_carry,                                           // Flag de carry de la ALU
-    input   wire i_alu_negative,                                        // Flag de negativo de la ALU
+
     output  reg o_fifo_read,                                            // Señal para iniciar lectura de FIFO
     output  wire signed [NB_INTERFACEMODULE_DATA - 1:0] o_alu_data_A,   // Dato A para la ALU
     output  wire signed [NB_INTERFACEMODULE_DATA - 1:0] o_alu_data_B,   // Dato B para la ALU
