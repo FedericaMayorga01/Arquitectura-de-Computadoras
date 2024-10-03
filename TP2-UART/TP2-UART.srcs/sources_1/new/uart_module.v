@@ -22,22 +22,22 @@
 
 module uart_module
 #(
-    parameter NB_UARTMODULE_DATA = 8, 
-              SB_UARTMODULE_TICKS = 16,
+    parameter NB_UARTMODULE_DATA    = 8, 
+              SB_UARTMODULE_TICKS   = 16,
               NB_UARTMODULE_COUNTER = 9,
-              MOD_UARTMODULE_M = 325
+              MOD_UARTMODULE_M      = 325
 )
 (    
-    input wire i_clk,
-    input wire i_reset,
-    input wire i_uartmodule_BRGTICKS,
-    input wire [7:0] i_uartmodule_DIN, // ver si estan bien los bits en este
-    input wire i_uartmodule_TXSTART, // ver si estan bien los bits en este    
-    input wire i_uartmodule_RX,
-    output wire o_uartmodule_TX,    
-    output wire o_uartmodule_RXDONE,
-    output wire o_uartmodule_TXDONE,
-    output wire [7:0] o_uartmodule_DOUT
+    input   wire    i_clk,
+    input   wire    i_reset,
+    input   wire    i_uartmodule_BRGTICKS,
+    input   wire    [7:0] i_uartmodule_DIN,     // ver si estan bien los bits en este
+    input   wire    i_uartmodule_TXSTART,       // ver si estan bien los bits en este    
+    input   wire    i_uartmodule_RX,
+    output  wire    o_uartmodule_TX,    
+    output  wire    o_uartmodule_RXDONE,
+    output  wire    o_uartmodule_TXDONE,
+    output  wire    [7:0] o_uartmodule_DOUT
 );
 
 //--------------- INICIALIZACION DE MODULOS --- start
@@ -58,8 +58,7 @@ tx_module
 #(
     .NB_TXMODULE_DATA(NB_UARTMODULE_DATA),
     .SB_TXMODULE_TICKS(SB_UARTMODULE_TICKS)
-) tx_module_1(
-    // DUDA: No se les pone numeritos a las instancias?
+) tx_module_1 (
     .i_clk(i_clk),
     .i_reset(i_reset),
     .i_txmodule_TXSTART(i_uartmodule_TXSTART),
@@ -81,5 +80,4 @@ baudrg_module #(
 //--------------- INICIALIZACION DE MODULOS --- end
 
 
-endmodule
-    
+endmodule 
