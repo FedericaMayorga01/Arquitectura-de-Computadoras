@@ -1,31 +1,11 @@
 `timescale 1ns / 1ps
-//////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
-// 
-// Create Date: 28.09.2024 18:58:14
-// Design Name: 
-// Module Name: top_module
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: 
-// 
-// Dependencies: 
-// 
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-// 
-//////////////////////////////////////////////////////////////////////////////////
-
 
 module top_module
 #(
     parameter NB_TOPMODULE_DATA = 8,
-              NB_TOPMODULE_OP = 6
+              NB_TOPMODULE_OP   = 6
 )
-(    
+(
     input wire i_clk,
     input wire i_modtop_reset,
     input wire i_topmodule_RX,
