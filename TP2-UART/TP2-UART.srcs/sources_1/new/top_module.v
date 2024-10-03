@@ -7,9 +7,7 @@ module top_module
 )
 (
     input wire i_clk,
-    input wire i_modtop_reset,
-    input wire i_topmodule_RX,
-    output wire i_topmodule_TX
+    input wire i_reset,
 
 );
 
