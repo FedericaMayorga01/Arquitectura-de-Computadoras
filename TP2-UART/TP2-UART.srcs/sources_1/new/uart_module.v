@@ -19,7 +19,7 @@ module uart_module
 
     // FIFO RX ports
     input  wire i_uartmodule_fiforx_READ,
-    output wire i_uartmodule_fiforx_READDATA,
+    output wire o_uartmodule_fiforx_READDATA,
     output wire o_uartmodule_fiforx_fifo_EMPTY,
 
     // FIFO TX ports
@@ -75,7 +75,7 @@ fifo_rx_module #(
     .i_fiforxmodule_writedata(o_uartmodule_dout),
     .o_fiforxmodule_fifo_empty(o_uartmodule_fiforx_fifo_EMPTY),
     .o_fiforxmodule_fifo_full(),
-    .o_fiforxmodule_readdata(i_uartmodule_fiforx_READDATA)
+    .o_fiforxmodule_readdata(o_uartmodule_fiforx_READDATA)
 );
 
 tx_module #(

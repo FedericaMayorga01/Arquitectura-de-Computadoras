@@ -2,9 +2,8 @@
 
 module top_module
 #(
-    parameter NB_TOPMODULE_DATA    = 8,
+    parameter NB_TOPMODULE_DATA    = 8,     // data bits
               NB_TOPMODULE_OP      = 6,
-              NB_TOPMODULE_DATA    = 8,    // data bits
               SB_TOPMODULE_TICKS   = 16,   // stop bits ticks
               NB_TOPMODULE_COUNTER = 9,    // counter bits
               MOD_TOPMODULE_M      = 325   // ms counter bits
