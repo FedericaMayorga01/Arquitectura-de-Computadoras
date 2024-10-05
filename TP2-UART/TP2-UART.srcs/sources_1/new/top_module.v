@@ -6,7 +6,8 @@ module top_module
               NB_TOPMODULE_OP      = 6,
               SB_TOPMODULE_TICKS   = 16,   // stop bits ticks
               NB_TOPMODULE_COUNTER = 9,    // counter bits
-              MOD_TOPMODULE_M      = 325   // ms counter bits
+              MOD_TOPMODULE_M      = 325,  // ms counter bits
+              NB_TOPMODULE_ADDR    = 4
 
 )
 (
@@ -37,7 +38,8 @@ uart_module #(
     .NB_UARTMODULE_DATA(NB_TOPMODULE_DATA),
     .SB_UARTMODULE_TICKS(SB_TOPMODULE_TICKS),
     .NB_UARTMODULE_COUNTER(NB_TOPMODULE_COUNTER),
-    .MOD_UARTMODULE_M(MOD_TOPMODULE_M)
+    .MOD_UARTMODULE_M(MOD_TOPMODULE_M),
+    .NB_UARTMODULE_ADDR(NB_TOPMODULE_ADDR)
 ) uart_module_1 (
     .i_clk(i_clk),
     .i_reset(i_reset),
@@ -56,7 +58,7 @@ uart_module #(
 //--------------- INICIALIZACION DE MODULOS --- end
 
 always @(posedge i_clk)begin
-        if(i_modtop_reset)begin
+        if(i_reset)begin
             o_topmodule_leds[0] <= 1'b1;
         end
         else begin
