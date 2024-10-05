@@ -20,25 +20,25 @@ module uart_module
     // FIFO RX ports
     input  wire i_uartmodule_fiforx_READ,
     output wire o_uartmodule_fiforx_READDATA,
-    output wire o_uartmodule_fiforx_fifo_EMPTY,
+    output wire o_uartmodule_fiforx_EMPTY,
 
     // FIFO TX ports
     input  wire i_uartmodule_fifotx_WRITEDATA,
     input  wire i_uartmodule_fifotx_WRITE,
-    output wire o_uartmodule_fifotx_fifo_FULL
+    output wire o_uartmodule_fifotx_FULL
 
 );
 
 // Señal interna para el baud rate generator
-wire uartmodule_maxtick;
+wire uartmodule_maxtickwire;
 // Señal interna para el UART Rx
-wire  o_uartmodule_rxdone;
-wire  [7:0] o_uartmodule_dout;
+wire  uartmodule_rxdonewire;
+wire  [7:0] uartmodule_doutwire;
 // Señal interna para el UART Tx
-wire  o_uartmodule_txdone;
+wire  uartmodule_txdonewire;
 // Señal interna para el FIFO TX
-wire  o_uartmodule_readdata;
-wire  o_uartmodule_fifo_empty;
+wire  uartmodule_readdatawire;
+wire  uartmodule_emptywire;
 
 //--------------- INICIALIZACION DE MODULOS --- start
 
@@ -48,7 +48,7 @@ baudrg_module #(
 ) baudrg_module_1 (
     .i_clk(i_clk),
     .i_reset(i_reset),
-    .o_baudrgmodule_MAXTICK(uartmodule_maxtick),
+    .o_baudrgmodule_MAXTICK(uartmodule_maxtickwire),
     .o_baudrgmodule_RATE()                        // No se usa momentaneamente
 );
 
@@ -59,23 +59,23 @@ rx_module #(
     .i_clk(i_clk),
     .i_reset(i_reset),
     .i_rxmodule_RX(i_uartmodule_RX),
-    .i_rxmodule_BRGTICKS(uartmodule_maxtick),
-    .o_rxmodule_RXDONE(o_uartmodule_rxdone),
-    .o_rxmodule_DOUT(o_uartmodule_dout)
+    .i_rxmodule_BRGTICKS(uartmodule_maxtickwire),
+    .o_rxmodule_RXDONE(uartmodule_rxdonewire),
+    .o_rxmodule_DOUT(uartmodule_doutwire)
 );
 
-fifo_rx_module #(
+fifo_module #(
     .NB_FIFOMODULE_DATA(NB_UARTMODULE_DATA),
     .NB_FIFOMODULE_ADDR(NB_UARTMODULE_ADDR)
-) fifo_rx_module_1 (
+) fiforx_module (
     .i_clk(i_clk),
     .i_reset(i_reset),
-    .i_fiforxmodule_read(i_uartmodule_fiforx_READ),
-    .i_fiforxmodule_write(o_uartmodule_rxdone),
-    .i_fiforxmodule_writedata(o_uartmodule_dout),
-    .o_fiforxmodule_fifo_empty(o_uartmodule_fiforx_fifo_EMPTY),
-    .o_fiforxmodule_fifo_full(),
-    .o_fiforxmodule_readdata(o_uartmodule_fiforx_READDATA)
+    .i_fifomodule_READ(i_uartmodule_fiforx_READ),
+    .i_fifomodule_WRITE(uartmodule_rxdonewire),
+    .i_fifomodule_WRITEDATA(uartmodule_doutwire),
+    .o_fifomodule_EMPTY(o_uartmodule_fiforx_EMPTY),
+    .o_fifomodule_FULL(),                               //momentaneamente no se usa
+    .o_fifomodule_READATA(o_uartmodule_fiforx_READDATA)
 );
 
 tx_module #(
@@ -84,25 +84,25 @@ tx_module #(
 ) tx_module_1 (
     .i_clk(i_clk),
     .i_reset(i_reset),
-    .i_txmodule_TXSTART(~o_uartmodule_fifo_empty),
-    .i_txmodule_BRGTICKS(uartmodule_maxtick),
-    .i_txmodule_DIN(o_uartmodule_readdata),
-    .o_txmodule_TXDONE(o_uartmodule_txdone),
+    .i_txmodule_TXSTART(~uartmodule_emptywire),
+    .i_txmodule_BRGTICKS(uartmodule_maxtickwire),
+    .i_txmodule_DIN(uartmodule_readdatawire),
+    .o_txmodule_TXDONE(uartmodule_txdonewire),
     .o_txmodule_TX(o_uartmodule_TX)
 );
 
-fifo_tx_module #(
+fifo_module #(
     .NB_FIFOMODULE_DATA(NB_UARTMODULE_DATA),
     .NB_FIFOMODULE_ADDR(NB_UARTMODULE_ADDR)
-) fifo_tx_module_1 (
+) fifotx_module (
     .i_clk(i_clk),
     .i_reset(i_reset),
-    .i_fifotxmodule_read(o_uartmodule_txdone),
-    .i_fifotxmodule_write(i_uartmodule_fifotx_WRITE),
-    .i_fifotxmodule_writedata(i_uartmodule_fifotx_WRITEDATA),
-    .o_fifotxmodule_fifo_empty(o_uartmodule_fifo_empty),
-    .o_fifotxmodule_fifo_full(o_uartmodule_fifotx_fifo_FULL),
-    .o_fifotxmodule_readdata(o_uartmodule_readdata)
+    .i_fifomodule_READ(uartmodule_txdonewire),
+    .i_fifomodule_WRITE(i_uartmodule_fifotx_WRITE),
+    .i_fifomodule_WRITEDATA(i_uartmodule_fifotx_WRITEDATA),
+    .o_fifomodule_EMPTY(uartmodule_emptywire),
+    .o_fifomodule_FULL(o_uartmodule_fifotx_FULL),
+    .o_fifomodule_READATA(uartmodule_readdatawire)
 );
 
 //--------------- INICIALIZACION DE MODULOS --- end

@@ -1,24 +1,4 @@
 `timescale 1ns / 1ps
-//////////////////////////////////////////////////////////////////////////////////
-// Company:
-// Engineer:
-//
-// Create Date: 25.09.2024 17:33:56
-// Design Name:
-// Module Name: tx_module
-// Project Name:
-// Target Devices:
-// Tool Versions:
-// Description:
-//
-// Dependencies:
-//
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-//
-//////////////////////////////////////////////////////////////////////////////////
-
 
 module tx_module
 #(
@@ -93,7 +73,7 @@ always @(*)
                 begin
                     txmodule_nextreg = 1'b0;
                     if (i_txmodule_BRGTICKS)
-                        if (txmodule_samptickreg == 7) // (8 ticks)
+                        if (txmodule_samptickreg == 15) // (8 ticks)
                             begin
                                 txmodule_nextstatereg    = txmodule_datastate;
                                 txmodule_nextsamptickreg = 0;
@@ -107,7 +87,7 @@ always @(*)
                 begin
                     txmodule_nextreg = txmodule_bitsreasreg[0];
                     if (i_txmodule_BRGTICKS)
-                        if (txmodule_samptickreg == 7)
+                        if (txmodule_samptickreg == 15)
                             begin
                                 txmodule_nextsamptickreg = 0;
                                 txmodule_nextbitsreasreg = txmodule_bitsreasreg >> 1;

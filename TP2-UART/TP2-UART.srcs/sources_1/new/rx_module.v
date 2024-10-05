@@ -1,24 +1,4 @@
 `timescale 1ns / 1ps
-//////////////////////////////////////////////////////////////////////////////////
-// Company:
-// Engineer:
-//
-// Create Date: 25.09.2024 17:26:26
-// Design Name:
-// Module Name: rx_module
-// Project Name:
-// Target Devices:
-// Tool Versions:
-// Description:
-//
-// Dependencies:
-//
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-//
-//////////////////////////////////////////////////////////////////////////////////
-
 
 module rx_module
 #(
@@ -47,7 +27,7 @@ reg [7:0] rxmodule_bitsreasreg , rxmodule_nextbitsreasreg ; // 8 bits ya que esa
 
 // body
 // FSMD state & rxmodule_datastate registers
-always @( posedge i_clk , posedge i_reset)
+always @( posedge i_clk)
    if (i_reset)
       begin
          rxmodule_statereg    <= rxmodule_idlestate;

@@ -7,91 +7,91 @@ module fifo_module
 )
 (
     input wire i_clk, i_reset,
-    input wire i_read, i_write,
-    input wire [NB_FIFOMODULE_DATA - 1 : 0] i_writedata,
-    output wire o_fifo_empty, o_fifo_full,
-    output wire [NB_FIFOMODULE_DATA - 1 : 0] o_readdata
+    input wire i_fifomodule_READ, i_fifomodule_WRITE,
+    input wire [NB_FIFOMODULE_DATA - 1 : 0] i_fifomodule_WRITEDATA,
+    output wire o_fifomodule_EMPTY, o_fifomodule_FULL,
+    output wire [NB_FIFOMODULE_DATA - 1 : 0] o_fifomodule_READATA
 );
 
 // signal declaration
-reg [NB_FIFOMODULE_DATA - 1 : 0] array_reg [2**(NB_FIFOMODULE_ADDR - 1) : 0];  // register array
-reg [NB_FIFOMODULE_ADDR - 1 : 0] write_ptr_reg, write_ptr_nextreg, write_ptr_succreg;
-reg [NB_FIFOMODULE_ADDR - 1 : 0] read_ptr_reg, read_ptr_nextreg, read_ptr_succreg;
-reg                              full_reg, empty_reg, full_nextreg, empty_nextreg;
+reg [NB_FIFOMODULE_DATA - 1 : 0] fifomodule_arrayreg [2**(NB_FIFOMODULE_ADDR - 1) : 0];  // register array
+reg [NB_FIFOMODULE_ADDR - 1 : 0] fifomodule_writeptrreg, fifomodule_nexrwriteptrreg, fifomodule_succwriteptrreg;
+reg [NB_FIFOMODULE_ADDR - 1 : 0] fifomodule_readptrreg, fifomodule_nextreadptrreg, fifomodule_succreadptrreg;
+reg                              fifomodule_fullreg, fifomodule_emptyreg, fifomodule_nextfullreg, fifomodule_nextemptyreg;
 
-wire write_enable;
+wire fifomodule_writeenablewire;
 
 // body
 // register file write operation
 always @(posedge clk)
-    if (write_enable)
-        array_reg[write_ptr_reg] <= i_writedata;
+    if (fifomodule_writeenablewire)
+        fifomodule_arrayreg[fifomodule_writeptrreg] <= i_fifomodule_WRITEDATA;
 
 // register file read operation
-assign o_readdata = array_reg[read_ptr_reg];
+assign o_fifomodule_READATA = fifomodule_arrayreg[fifomodule_readptrreg];
 
 // write enabled only when FIFO is not full
-assign write_enable = i_write & (~full_reg);
+assign fifomodule_writeenablewire = i_fifomodule_WRITE & (~fifomodule_fullreg);
 
 // FIFO control logic
 // register for read and write pointers
-always @(posedge i_clk, posedge i_reset)
+always @(posedge i_clk)
     if (i_reset)
         begin
-            write_ptr_reg <= 0;
-            read_ptr_reg  <= 0;
-            full_reg      <= 1'b0;
-            empty_reg     <= 1'b1;
+            fifomodule_writeptrreg <= 0;
+            fifomodule_readptrreg  <= 0;
+            fifomodule_fullreg      <= 1'b0;
+            fifomodule_emptyreg     <= 1'b1;
         end
     else
         begin
-            write_ptr_reg <= write_ptr_nextreg;
-            read_ptr_reg  <= read_ptr_nextreg;
-            full_reg      <= full_nextreg;
-            empty_reg     <= empty_nextreg;
+            fifomodule_writeptrreg <= fifomodule_nexrwriteptrreg;
+            fifomodule_readptrreg  <= fifomodule_nextreadptrreg;
+            fifomodule_fullreg      <= fifomodule_nextfullreg;
+            fifomodule_emptyreg     <= fifomodule_nextemptyreg;
         end
 
 // next-state logic for read and write pointers
 always @(*)
     begin
         // successive pointer values
-        write_ptr_succreg = write_ptr_reg + 1;
-        read_ptr_succreg  = read_ptr_reg + 1;
+        fifomodule_succwriteptrreg = fifomodule_writeptrreg + 1;
+        fifomodule_succreadptrreg  = fifomodule_readptrreg + 1;
 
         // default is to keep old values
-        write_ptr_nextreg = write_ptr_reg;
-        read_ptr_nextreg  = read_ptr_reg;
-        full_nextreg      = full_reg;
-        empty_nextreg     = empty_reg;
+        fifomodule_nexrwriteptrreg = fifomodule_writeptrreg;
+        fifomodule_nextreadptrreg  = fifomodule_readptrreg;
+        fifomodule_nextfullreg      = fifomodule_fullreg;
+        fifomodule_nextemptyreg     = fifomodule_emptyreg;
 
-        case ({i_write, i_read})
+        case ({i_fifomodule_WRITE, i_fifomodule_READ})
             // 2'b00: no op
             2'b01 : // read
-                if (~empty_reg) // not empty
+                if (~fifomodule_emptyreg) // not empty
                     begin
-                        read_ptr_nextreg = read_ptr_succreg;
-                        full_nextreg = 1'b0;
-                        if (read_ptr_succreg == write_ptr_reg)
-                            empty_nextreg = 1'b1;
+                        fifomodule_nextreadptrreg = fifomodule_succreadptrreg;
+                        fifomodule_nextfullreg = 1'b0;
+                        if (fifomodule_succreadptrreg == fifomodule_writeptrreg)
+                            fifomodule_nextemptyreg = 1'b1;
                     end
             2'b10 : // write
-                if (~full_nextreg) // not full
+                if (~fifomodule_fullreg) // not full
                     begin
-                        write_ptr_nextreg = write_ptr_succreg;
-                        empty_nextreg = 1'b0;
-                        if (write_ptr_succreg == read_ptr_reg)
-                            full_nextreg = 1'b1;
+                        fifomodule_nexrwriteptrreg = fifomodule_succwriteptrreg;
+                        fifomodule_nextemptyreg = 1'b0;
+                        if (fifomodule_succwriteptrreg == fifomodule_readptrreg)
+                            fifomodule_nextfullreg = 1'b1;
                     end
             2'b11 : // write and read
                 begin
-                    write_ptr_nextreg = write_ptr_succreg;
-                    read_ptr_nextreg  = read_ptr_succreg;
+                    fifomodule_nexrwriteptrreg = fifomodule_succwriteptrreg;
+                    fifomodule_nextreadptrreg  = fifomodule_succreadptrreg;
                 end
         endcase
     end
 
 // output
-assign o_fifo_full  = full_reg;
-assign o_fifo_empty = empty_reg;
+assign o_fifomodule_FULL  = fifomodule_fullreg;
+assign o_fifomodule_EMPTY = fifomodule_emptyreg;
 
 endmodule

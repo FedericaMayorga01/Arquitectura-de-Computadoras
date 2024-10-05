@@ -1,23 +1,4 @@
 `timescale 1ns / 1ps
-//////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
-// 
-// Create Date: 25.09.2024 17:36:05
-// Design Name: 
-// Module Name: baudrg_module
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: 
-// 
-// Dependencies: 
-// 
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-// 
-//////////////////////////////////////////////////////////////////////////////////
 
 module baudrg_module 
 #(
@@ -31,19 +12,19 @@ module baudrg_module
 );
 
 //signal declaration
-reg [NB_BAUDRGMODULE_COUNTER - 1 : 0] baudrgmodule_cont; // registro que contiene el valor actual del contador
+reg [NB_BAUDRGMODULE_COUNTER - 1 : 0] baudrgmodule_contreg; // registro que contiene el valor actual del contador
 
-always @ (posedge i_clk, posedge i_reset)
+always @ (posedge i_clk)
     if(i_reset)
-        baudrgmodule_cont <= 1'b0;
+        baudrgmodule_contreg <= 1'b0;
     else
-    if(baudrgmodule_cont < MOD_BAUDRGMODULE_M[NB_BAUDRGMODULE_COUNTER - 1 : 0])
-        baudrgmodule_cont <= baudrgmodule_cont + 1'b1;
+    if(baudrgmodule_contreg < MOD_BAUDRGMODULE_M[NB_BAUDRGMODULE_COUNTER - 1 : 0])
+        baudrgmodule_contreg <= baudrgmodule_contreg + 1'b1;
     else
-        baudrgmodule_cont <= 1'b0;
+        baudrgmodule_contreg <= 1'b0;
 
-assign o_baudrgmodule_RATE = baudrgmodule_cont;
-assign o_baudrgmodule_MAXTICK = (baudrgmodule_cont == (MOD_BAUDRGMODULE_M - 1)) ? 1'b1 : 1'b0;
+assign o_baudrgmodule_RATE = baudrgmodule_contreg;
+assign o_baudrgmodule_MAXTICK = (baudrgmodule_contreg == (MOD_BAUDRGMODULE_M - 1)) ? 1'b1 : 1'b0;
 
 endmodule
 

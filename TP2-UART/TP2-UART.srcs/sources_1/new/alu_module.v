@@ -15,70 +15,70 @@ module alu_module
     output  wire o_alumodule_CARRY
 );
 
-reg signed [NB_ALUMODULE_DATA-1:0] alumodule_tmp;
-reg alumodule_carry;
+reg signed [NB_ALUMODULE_DATA-1:0] alumodule_tmpreg;
+reg alumodule_carryreg;
 
 always @(*)
     begin: case_alu
         case(i_alumodule_OP)
-            // Suma con alumodule_carry
+            // Suma con alumodule_carryreg
             6'b100000 :
-                {alumodule_carry, alumodule_tmp} = i_alumodule_data_A + i_alumodule_data_B; // alumodule_carry es el bit m�s significativo de la suma
+                {alumodule_carryreg, alumodule_tmpreg} = i_alumodule_data_A + i_alumodule_data_B; // alumodule_carryreg es el bit m�s significativo de la suma
 
             // Resta con borrow
             6'b100010 :
-                {alumodule_carry, alumodule_tmp} = i_alumodule_data_A - i_alumodule_data_B; // alumodule_carry es 1 si hay borrow
+                {alumodule_carryreg, alumodule_tmpreg} = i_alumodule_data_A - i_alumodule_data_B; // alumodule_carryreg es 1 si hay borrow
 
-            // Operaciones l�gicas, alumodule_carry no es relevante
+            // Operaciones logicas, alumodule_carryreg no es relevante
             6'b100100 :
                 begin
-                    alumodule_tmp = i_alumodule_data_A & i_alumodule_data_B; 
-                    alumodule_carry = 1'b0; // No hay alumodule_carry en AND
+                    alumodule_tmpreg = i_alumodule_data_A & i_alumodule_data_B; 
+                    alumodule_carryreg = 1'b0; // No hay alumodule_carryreg en AND
                 end
 
             6'b100101 :
                 begin
-                    alumodule_tmp = i_alumodule_data_A | i_alumodule_data_B;
-                    alumodule_carry = 1'b0; // No hay alumodule_carry en OR
+                    alumodule_tmpreg = i_alumodule_data_A | i_alumodule_data_B;
+                    alumodule_carryreg = 1'b0; // No hay alumodule_carryreg en OR
                 end
 
             6'b100110 :
                 begin
-                    alumodule_tmp = i_alumodule_data_A ^ i_alumodule_data_B;
-                    alumodule_carry = 1'b0; // No hay alumodule_carry en XOR
+                    alumodule_tmpreg = i_alumodule_data_A ^ i_alumodule_data_B;
+                    alumodule_carryreg = 1'b0; // No hay alumodule_carryreg en XOR
                 end
 
-            // Desplazamientos, sin alumodule_carry relevante
+            // Desplazamientos, sin alumodule_carryreg relevante
             6'b000011 :
                 begin
-                    alumodule_tmp = i_alumodule_data_A >>> i_alumodule_data_B;
-                    alumodule_carry = 1'b0; // No hay alumodule_carry en SRA
+                    alumodule_tmpreg = i_alumodule_data_A >>> i_alumodule_data_B;
+                    alumodule_carryreg = 1'b0; // No hay alumodule_carryreg en SRA
                 end
 
             6'b000010 :
                 begin
-                    alumodule_tmp = i_alumodule_data_A >> i_alumodule_data_B;
-                    alumodule_carry = 1'b0; // No hay alumodule_carry en SRL
+                    alumodule_tmpreg = i_alumodule_data_A >> i_alumodule_data_B;
+                    alumodule_carryreg = 1'b0; // No hay alumodule_carryreg en SRL
                 end
 
             6'b100111 :
                 begin
-                    alumodule_tmp = ~(i_alumodule_data_A | i_alumodule_data_B);
-                    alumodule_carry = 1'b0; // No hay alumodule_carry en NOR
+                    alumodule_tmpreg = ~(i_alumodule_data_A | i_alumodule_data_B);
+                    alumodule_carryreg = 1'b0; // No hay alumodule_carryreg en NOR
                 end
 
             default :
                 begin
-                    alumodule_tmp = {NB_ALUMODULE_DATA{1'b0}};
-                    alumodule_carry = 1'b0; // Default sin alumodule_carry
+                    alumodule_tmpreg = {NB_ALUMODULE_DATA{1'b0}};
+                    alumodule_carryreg = 1'b0; // Default sin alumodule_carryreg
                 end
         endcase
     end
 
-assign o_alumodule_data_RES = alumodule_tmp;
-assign o_alumodule_ZERO     = (alumodule_tmp == 0) ? 1'b1 : 1'b0;
-assign o_alumodule_CARRY    = alumodule_carry;
-assign o_alumodule_NEGATIVE = alumodule_tmp[NB_ALUMODULE_DATA - 1];
+assign o_alumodule_data_RES = alumodule_tmpreg;
+assign o_alumodule_ZERO     = (alumodule_tmpreg == 0) ? 1'b1 : 1'b0;
+assign o_alumodule_CARRY    = alumodule_carryreg;
+assign o_alumodule_NEGATIVE = alumodule_tmpreg[NB_ALUMODULE_DATA - 1];
 // ver si poner el de overflow
 
 endmodule
