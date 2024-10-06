@@ -7,7 +7,7 @@ module baudrg_module
 )
 (
     input   wire    i_clk, i_reset,
-    output  wire    o_baudrgmodule_MAXTICK,                             //indica cu�ndo el contador ha alcanzado su valor m�ximo
+    output  wire    o_baudrgmodule_MAXTICK,                             //indica cuando el contador ha alcanzado su valor maximo
     output  wire    [NB_BAUDRGMODULE_COUNTER - 1 : 0] o_baudrgmodule_RATE   //valor actual del contador
 );
 
