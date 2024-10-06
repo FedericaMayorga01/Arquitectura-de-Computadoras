@@ -19,11 +19,11 @@ module uart_module
 
     // FIFO RX ports
     input  wire i_uartmodule_fiforx_READ,
-    output wire o_uartmodule_fiforx_READDATA,
+    output wire signed [NB_UARTMODULE_DATA-1:0] o_uartmodule_fiforx_READDATA,
     output wire o_uartmodule_fiforx_EMPTY,
 
     // FIFO TX ports
-    input  wire i_uartmodule_fifotx_WRITEDATA,
+    input  wire signed [NB_UARTMODULE_DATA-1:0] i_uartmodule_fifotx_WRITEDATA,
     input  wire i_uartmodule_fifotx_WRITE,
     output wire o_uartmodule_fifotx_FULL
 
@@ -33,11 +33,11 @@ module uart_module
 wire [8:0] uartmodule_maxtickwire;
 // Señal interna para el UART Rx
 wire  uartmodule_rxdonewire;
-wire  [7:0] uartmodule_doutwire;
+wire signed [NB_UARTMODULE_DATA-1:0] uartmodule_doutwire;
 // Señal interna para el UART Tx
 wire  uartmodule_txdonewire;
 // Señal interna para el FIFO TX
-wire  [7:0] uartmodule_readdatawire;
+wire signed [NB_UARTMODULE_DATA-1:0] uartmodule_readdatawire;
 wire  uartmodule_emptywire;
 
 //--------------- INICIALIZACION DE MODULOS --- start

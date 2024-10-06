@@ -9,7 +9,7 @@ module interface_module
     input   wire i_clk, i_reset,                                            // Clk y reset
     input   wire i_interfacemodule_EMPTY,                                   // Indica si la FIFO está vacía
     input   wire i_interfacemodule_FULL,                                    // Indica si la FIFO está llena
-    input  reg i_interfacemodule_READDATA,                                             // Señal para iniciar lectura de FIFO
+    input  reg signed [NB_INTERFACEMODULE_DATA - 1:0] i_interfacemodule_READDATA,                                             // Señal para iniciar lectura de FIFO
     input  reg signed [NB_INTERFACEMODULE_DATA - 1:0] i_interfacemodule_DATARES,                    // Resultado de la ALU procesado
     //input   wire [NB_INTERFACEMODULE_DATA - 1:0] i_interfacemodule_DATA,    // Datos leídos desde la FIFO
     //input   wire signed [NB_INTERFACEMODULE_DATA - 1:0] i_interfacemodule_ALURESULT,       // Resultado de la ALU
@@ -31,7 +31,7 @@ localparam [2:0]
     interfacemodule_resultstate = 3'b100;    // Nuevo estado para manejar el resultado de la ALU
 
 // signal declaration
-reg [NB_INTERFACEMODULE_DATA - 1:0] interfacemodule_dataAreg, interfacemodule_dataBreg, interfacemodule_dataresreg;     // Registros para los datos A y B
+reg signed [NB_INTERFACEMODULE_DATA - 1:0] interfacemodule_dataAreg, interfacemodule_dataBreg, interfacemodule_dataresreg;     // Registros para los datos A y B
 reg [NB_INTERFACEMODULE_OP - 1 :0] interfacemodule_opreg;                      // Registro para el operando de la ALU
 reg [2:0] interfacemodule_statereg ,    interfacemodule_nextstatereg ;    // 3 bits ya que hay 5 estados, de 0 a 3
 
@@ -53,7 +53,7 @@ begin
 
     case (interfacemodule_statereg)
         interfacemodule_idlestate:
-            if (!i_interfacemodule_EMPTY && o_interfacemodule_READ) 
+            if (!(i_interfacemodule_EMPTY && o_interfacemodule_READ)) 
                 begin
                     interfacemodule_dataAreg = i_interfacemodule_READDATA;
                     i_interfacemodule_READ = 1'b1;          // Iniciar lectura de FIFO
@@ -61,7 +61,7 @@ begin
                 end
 
         interfacemodule_dataAstate:
-            if (!i_interfacemodule_EMPTY && o_interfacemodule_READ) 
+            if (!(i_interfacemodule_EMPTY && o_interfacemodule_READ)) 
                 begin
                     interfacemodule_dataBreg = i_interfacemodule_READDATA;
                     i_interfacemodule_READ = 1'b1;          // Iniciar lectura de FIFO
@@ -71,7 +71,7 @@ begin
         interfacemodule_dataBstate:
             if (!(i_interfacemodule_EMPTY && o_interfacemodule_READ)) 
                 begin
-                    interfacemodule_opreg = i_interfacemodule_READDATA;
+                    interfacemodule_opreg = i_interfacemodule_READDATA[NB_INTERFACEMODULE_OP-1:0];  // Se realiza el truncamiento;
                     i_interfacemodule_READ = 1'b1;          // Iniciar lectura de FIFO
                     interfacemodule_nextstatereg = interfacemodule_opstate;                
                 end
@@ -85,12 +85,18 @@ begin
         interfacemodule_resultstate:                                        // Nuevo estado para manejar el resultado
             begin
                 if (!(i_interfacemodule_full && o_interfacemodule_WRITE))                               // Solo escribe si la FIFO Tx no está llena
-                    i_interfacemodule_WRITE = 1'b1;                              
+                    o_interfacemodule_WRITE = 1'b1;                              
                     interfacemodule_nextstatereg = interfacemodule_idlestate;              
             end
 
     endcase
 end
+
+// output
+assign o_interfacemodule_DATAA = interfacemodule_dataAreg;
+assign o_interfacemodule_DATAB = interfacemodule_dataBreg;
+assign o_interfacemodule_ALUOP     = interfacemodule_opreg;
+assign o_interfacemodule_RESULTDATA = interfacemodule_dataresreg;
 
 // Store the FIFO values in the registers
 //always @(posedge i_clk)
@@ -112,11 +118,5 @@ end
 //                interfacemodule_opreg <= i_interfacemodule_DATA[NB_INTERFACEMODULE_OP - 1:0]; // Solo se toman los bits necesarios para el operando
 //        end
 //end
-
-// output
-assign o_interfacemodule_DATAA = interfacemodule_dataAreg;
-assign o_interfacemodule_DATAB = interfacemodule_dataBreg;
-assign o_interfacemodule_ALUOP     = interfacemodule_opreg;
-assign o_interfacemodule_RESULTDATA = interfacemodule_dataresreg;
 
 endmodule

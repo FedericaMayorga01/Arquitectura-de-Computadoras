@@ -21,16 +21,16 @@ module top_module
 
 );
 
-wire [NB_TOPMODULE_DATA-1:0] topmodule_readdatarxwire,
+wire signed [NB_TOPMODULE_DATA-1:0] topmodule_readdatarxwire,
 wire topmodule_emptyrxwire,
 wire topmodule_fulltxwire,
 wire topmodule_readinterfacewire,
-wire [NB_TOPMODULE_DATA-1:0] topmodule_writedatainterfacewire,
+wire signed [NB_TOPMODULE_DATA-1:0] topmodule_writedatainterfacewire,
 wire topmodule_writeinterfacewire,
-wire [NB_TOPMODULE_DATA-1:0] topmodule_dataawire ,
-wire [NB_TOPMODULE_DATA-1:0] topmodule_databwire ,
+wire signed [NB_TOPMODULE_DATA-1:0] topmodule_dataawire ,
+wire signed [NB_TOPMODULE_DATA-1:0] topmodule_databwire ,
 wire [NB_TOPMODULE_OP-1:0] topmodule_opwire ,
-wire [NB_TOPMODULE_DATA-1:0] topmodule_datareswire
+wire signed [NB_TOPMODULE_DATA-1:0] topmodule_datareswire
 
 //--------------- INICIALIZACION DE MODULOS --- start
 alu_module #(

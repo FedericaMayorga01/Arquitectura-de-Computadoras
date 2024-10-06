@@ -9,7 +9,7 @@ module rx_module
    input    wire  i_clk, i_reset,
    input    wire  i_rxmodule_RX, i_rxmodule_BRGTICKS,
    output   reg   o_rxmodule_RXDONE,
-   output   wire  [7:0] o_rxmodule_DOUT
+   output   wire signed  [NB_RXMODULE_DATA-1:0] o_rxmodule_DOUT
 );
 
 // symbolic state declaration

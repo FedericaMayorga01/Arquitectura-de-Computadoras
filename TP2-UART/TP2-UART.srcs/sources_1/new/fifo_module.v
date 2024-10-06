@@ -8,13 +8,13 @@ module fifo_module
 (
     input wire i_clk, i_reset,
     input wire i_fifomodule_READ, i_fifomodule_WRITE,
-    input wire [NB_FIFOMODULE_DATA - 1 : 0] i_fifomodule_WRITEDATA,
+    input wire signed [NB_FIFOMODULE_DATA - 1 : 0] i_fifomodule_WRITEDATA,
     output wire o_fifomodule_EMPTY, o_fifomodule_FULL,
-    output wire [NB_FIFOMODULE_DATA - 1 : 0] o_fifomodule_READATA
+    output wire signed [NB_FIFOMODULE_DATA - 1 : 0] o_fifomodule_READATA
 );
 
 // signal declaration
-reg [NB_FIFOMODULE_DATA - 1 : 0] fifomodule_arrayreg [2**(NB_FIFOMODULE_ADDR - 1) : 0];  // register array
+reg signed [NB_FIFOMODULE_DATA - 1 : 0] fifomodule_arrayreg [2**(NB_FIFOMODULE_ADDR - 1) : 0];  // register array
 reg [NB_FIFOMODULE_ADDR - 1 : 0] fifomodule_writeptrreg, fifomodule_nexrwriteptrreg, fifomodule_succwriteptrreg;
 reg [NB_FIFOMODULE_ADDR - 1 : 0] fifomodule_readptrreg, fifomodule_nextreadptrreg, fifomodule_succreadptrreg;
 reg                              fifomodule_fullreg, fifomodule_emptyreg, fifomodule_nextfullreg, fifomodule_nextemptyreg;
