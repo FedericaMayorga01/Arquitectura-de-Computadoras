@@ -7,10 +7,7 @@ module top_module
               SB_TOPMODULE_TICKS   = 16,   // stop bits ticks
               NB_TOPMODULE_COUNTER = 9,    // counter bits
               MOD_TOPMODULE_M      = 325,  // ms counter bits
-              NB_TOPMODULE_ADDR    = 4,
-              NB_TOPMODULE_DATA = 8,
-              NB_TOPMODULE_OP = 6
-
+              NB_TOPMODULE_ADDR    = 4
 )
 (
     input wire i_clk,
