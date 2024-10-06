@@ -30,7 +30,7 @@ module uart_module
 );
 
 // Señal interna para el baud rate generator
-wire [8:0] uartmodule_maxtickwire;
+wire uartmodule_maxtickwire;
 // Señal interna para el UART Rx
 wire  uartmodule_rxdonewire;
 wire signed [NB_UARTMODULE_DATA-1:0] uartmodule_doutwire;
