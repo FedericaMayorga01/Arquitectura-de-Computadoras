@@ -30,14 +30,14 @@ module uart_module
 );
 
 // Señal interna para el baud rate generator
-wire uartmodule_maxtickwire;
+wire [8:0] uartmodule_maxtickwire;
 // Señal interna para el UART Rx
 wire  uartmodule_rxdonewire;
 wire  [7:0] uartmodule_doutwire;
 // Señal interna para el UART Tx
 wire  uartmodule_txdonewire;
 // Señal interna para el FIFO TX
-wire  uartmodule_readdatawire;
+wire  [7:0] uartmodule_readdatawire;
 wire  uartmodule_emptywire;
 
 //--------------- INICIALIZACION DE MODULOS --- start

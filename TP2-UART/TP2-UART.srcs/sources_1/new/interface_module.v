@@ -96,7 +96,7 @@ begin
 end
 
 // Store the FIFO values in the registers
-always @(posedge i_clk, posedge i_reset)
+always @(posedge i_clk)
 begin
     if (i_reset)
         begin
