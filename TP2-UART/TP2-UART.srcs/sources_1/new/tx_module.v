@@ -73,7 +73,7 @@ always @(*)
                 begin
                     txmodule_nextreg = 1'b0;
                     if (i_txmodule_BRGTICKS)
-                        if (txmodule_samptickreg == 15) // (8 ticks)
+                        if (txmodule_samptickreg == 15) // (16 ticks)
                             begin
                                 txmodule_nextstatereg    = txmodule_datastate;
                                 txmodule_nextsamptickreg = 0;

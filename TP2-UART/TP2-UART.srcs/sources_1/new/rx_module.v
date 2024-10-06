@@ -54,7 +54,7 @@ always @(*)
 
       case (rxmodule_statereg) // estado actual
          rxmodule_idlestate :
-            if (~i_rxmodule_RX) // el bit de start en uart(es un 0)
+            if (i_rxmodule_RX==0) // el bit de start en uart(es un 0)
                begin
                   rxmodule_nextstatereg    = rxmodule_startstate ;   // SIGUIENTE ESTADO
                   rxmodule_nextsamptickreg = 0;

@@ -21,16 +21,16 @@ module top_module
 
 );
 
-wire signed [NB_TOPMODULE_DATA-1:0] topmodule_readdatarxwire,
-wire topmodule_emptyrxwire,
-wire topmodule_fulltxwire,
-wire topmodule_readinterfacewire,
-wire signed [NB_TOPMODULE_DATA-1:0] topmodule_writedatainterfacewire,
-wire topmodule_writeinterfacewire,
-wire signed [NB_TOPMODULE_DATA-1:0] topmodule_dataawire ,
-wire signed [NB_TOPMODULE_DATA-1:0] topmodule_databwire ,
-wire [NB_TOPMODULE_OP-1:0] topmodule_opwire ,
-wire signed [NB_TOPMODULE_DATA-1:0] topmodule_datareswire
+wire signed [NB_TOPMODULE_DATA-1:0] topmodule_readdatarxwire;
+wire topmodule_emptyrxwire;
+wire topmodule_fulltxwire;
+wire topmodule_readinterfacewire;
+wire signed [NB_TOPMODULE_DATA-1:0] topmodule_writedatainterfacewire;
+wire topmodule_writeinterfacewire;
+wire signed [NB_TOPMODULE_DATA-1:0] topmodule_dataawire;
+wire signed [NB_TOPMODULE_DATA-1:0] topmodule_databwire;
+wire [NB_TOPMODULE_OP-1:0] topmodule_opwire;
+wire signed [NB_TOPMODULE_DATA-1:0] topmodule_datareswire;
 
 //--------------- INICIALIZACION DE MODULOS --- start
 alu_module #(
@@ -82,7 +82,7 @@ interface_module #(
     .o_interfacemodule_DATAA(topmodule_dataawire),
     .o_interfacemodule_DATAB(topmodule_databwire),
     .o_interfacemodule_OP(topmodule_opwire)
-)
+);
 
 // --------------- INICIALIZACION DE MODULOS ---end
 

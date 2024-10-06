@@ -14,8 +14,8 @@ module fifo_module
 );
 
 // signal declaration
-reg signed [NB_FIFOMODULE_DATA - 1 : 0] fifomodule_arrayreg [2**(NB_FIFOMODULE_ADDR - 1) : 0];  // register array
-reg [NB_FIFOMODULE_ADDR - 1 : 0] fifomodule_writeptrreg, fifomodule_nexrwriteptrreg, fifomodule_succwriteptrreg;
+reg signed [NB_FIFOMODULE_DATA - 1 : 0] fifomodule_arrayreg [2**NB_FIFOMODULE_ADDR - 1 : 0];  // register array
+reg [NB_FIFOMODULE_ADDR - 1 : 0] fifomodule_writeptrreg, fifomodule_nextwriteptrreg, fifomodule_succwriteptrreg;
 reg [NB_FIFOMODULE_ADDR - 1 : 0] fifomodule_readptrreg, fifomodule_nextreadptrreg, fifomodule_succreadptrreg;
 reg                              fifomodule_fullreg, fifomodule_emptyreg, fifomodule_nextfullreg, fifomodule_nextemptyreg;
 
@@ -23,7 +23,7 @@ wire fifomodule_writeenablewire;
 
 // body
 // register file write operation
-always @(posedge clk)
+always @(posedge i_clk)
     if (fifomodule_writeenablewire)
         fifomodule_arrayreg[fifomodule_writeptrreg] <= i_fifomodule_WRITEDATA;
 
@@ -45,7 +45,7 @@ always @(posedge i_clk)
         end
     else
         begin
-            fifomodule_writeptrreg <= fifomodule_nexrwriteptrreg;
+            fifomodule_writeptrreg <= fifomodule_nextwriteptrreg;
             fifomodule_readptrreg  <= fifomodule_nextreadptrreg;
             fifomodule_fullreg      <= fifomodule_nextfullreg;
             fifomodule_emptyreg     <= fifomodule_nextemptyreg;
@@ -59,7 +59,7 @@ always @(*)
         fifomodule_succreadptrreg  = fifomodule_readptrreg + 1;
 
         // default is to keep old values
-        fifomodule_nexrwriteptrreg = fifomodule_writeptrreg;
+        fifomodule_nextwriteptrreg = fifomodule_writeptrreg;
         fifomodule_nextreadptrreg  = fifomodule_readptrreg;
         fifomodule_nextfullreg      = fifomodule_fullreg;
         fifomodule_nextemptyreg     = fifomodule_emptyreg;
@@ -77,14 +77,14 @@ always @(*)
             2'b10 : // write
                 if (~fifomodule_fullreg) // not full
                     begin
-                        fifomodule_nexrwriteptrreg = fifomodule_succwriteptrreg;
+                        fifomodule_nextwriteptrreg = fifomodule_succwriteptrreg;
                         fifomodule_nextemptyreg = 1'b0;
                         if (fifomodule_succwriteptrreg == fifomodule_readptrreg)
                             fifomodule_nextfullreg = 1'b1;
                     end
             2'b11 : // write and read
                 begin
-                    fifomodule_nexrwriteptrreg = fifomodule_succwriteptrreg;
+                    fifomodule_nextwriteptrreg = fifomodule_succwriteptrreg;
                     fifomodule_nextreadptrreg  = fifomodule_succreadptrreg;
                 end
         endcase
