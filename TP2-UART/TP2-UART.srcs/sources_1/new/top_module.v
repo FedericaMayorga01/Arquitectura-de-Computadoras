@@ -2,94 +2,95 @@
 
 module top_module
 #(
-    parameter NB_TOPMODULE_DATA    = 8,     // data bits
-              NB_TOPMODULE_OP      = 6,
-              SB_TOPMODULE_TICKS   = 16,   // stop bits ticks
-              NB_TOPMODULE_COUNTER = 9,    // counter bits
-              MOD_TOPMODULE_M      = 325,  // ms counter bits
-              NB_TOPMODULE_ADDR    = 4
+    parameter NB_UARTMODULE_DATA    = 8,    // data bits
+              SB_UARTMODULE_TICKS   = 16,   // stop bits ticks
+              NB_UARTMODULE_COUNTER = 9,    // counter bits
+              MOD_UARTMODULE_M      = 325,  // ms counter bits
+              NB_UARTMODULE_ADDR    = 4     // address bits
 )
 (
-    input wire i_clk,
-    input wire i_reset,
-    input wire i_topmodule_RX,
-    output wire o_topmodule_TX
-    //output wire [3:0] o_topmodule_leds // boton 0 para data A, boton 1 para data B, boton 2 para OP, boton 3 para reset
+    input  wire    i_clk, i_reset,
+
+    // receiver port
+    input  wire    i_topmodule_RX,
+
+    // transmitter port
+    output wire    o_topmodule_TX
+
+    // FIFO RX ports
+//    input  wire i_uartmodule_fiforx_READ,
+//    output wire signed [NB_UARTMODULE_DATA-1:0] o_uartmodule_fiforx_READDATA,
+//    output wire o_uartmodule_fiforx_EMPTY,
+
+    // FIFO TX ports
+//    input  wire signed [NB_UARTMODULE_DATA-1:0] i_uartmodule_fifotx_WRITEDATA,
+//    input  wire i_uartmodule_fifotx_WRITE,
+//    output wire o_uartmodule_fifotx_FULL
 
 );
 
-wire signed [NB_TOPMODULE_DATA-1:0] topmodule_readdatarxwire;
-wire topmodule_emptyrxwire;
-wire topmodule_fulltxwire;
-wire topmodule_readinterfacewire;
-wire signed [NB_TOPMODULE_DATA-1:0] topmodule_writedatainterfacewire;
-wire topmodule_writeinterfacewire;
-wire signed [NB_TOPMODULE_DATA-1:0] topmodule_dataawire;
-wire signed [NB_TOPMODULE_DATA-1:0] topmodule_databwire;
-wire [NB_TOPMODULE_OP-1:0] topmodule_opwire;
-wire signed [NB_TOPMODULE_DATA-1:0] topmodule_datareswire;
+// Señal interna para el baud rate generator
+wire uartmodule_maxtickwire;
+// Señal interna para el UART Rx
+wire  uartmodule_rxdonewire;
+wire signed [NB_UARTMODULE_DATA-1:0] uartmodule_doutwire;
+// Señal interna para el UART Tx
+wire  uartmodule_txdonewire;
+// Señal interna para el FIFO TX
+wire signed [NB_UARTMODULE_DATA-1:0] uartmodule_readdatawire;
+wire  uartmodule_emptywire;
 
 //--------------- INICIALIZACION DE MODULOS --- start
-alu_module #(
-    .NB_ALUMODULE_DATA(NB_TOPMODULE_DATA),
-    .NB_ALUMODULE_OP(NB_TOPMODULE_OP)
-) alu_module_1 (
-    .i_alumodule_data_A(topmodule_dataawire),
-    .i_alumodule_data_B(topmodule_databwire),
-    .i_alumodule_OP(topmodule_opwire),
-    .o_alumodule_data_RES(topmodule_datareswire),
-    .o_alumodule_ZERO(),                // no asignar por ahora
-    .o_alumodule_NEGATIVE(),            // no asignar por ahora
-    .o_alumodule_CARRY()                // no asignar por ahora
-);
 
-
-uart_module #(
-    .NB_UARTMODULE_DATA(NB_TOPMODULE_DATA),
-    .SB_UARTMODULE_TICKS(SB_TOPMODULE_TICKS),
-    .NB_UARTMODULE_COUNTER(NB_TOPMODULE_COUNTER),
-    .MOD_UARTMODULE_M(MOD_TOPMODULE_M),
-    .NB_UARTMODULE_ADDR(NB_TOPMODULE_ADDR)
-) uart_module_1 (
+baudrg_module #(
+    .NB_BAUDRGMODULE_COUNTER(NB_UARTMODULE_COUNTER),
+    .MOD_BAUDRGMODULE_M(MOD_UARTMODULE_M)
+) baudrg_module_1 (
     .i_clk(i_clk),
     .i_reset(i_reset),
-    .i_uartmodule_RX(i_topmodule_RX),
-    .i_uartmodule_fiforx_READ(topmodule_readinterfacewire),
-    .i_uartmodule_fifotx_WRITEDATA(topmodule_writedatainterfacewire),
-    .i_uartmodule_fifotx_WRITE(topmodule_writeinterfacewire),
-    .o_uartmodule_TX(o_topmodule_TX),
-    .o_uartmodule_fiforx_READDATA(topmodule_readdatarxwire),
-    .o_uartmodule_fiforx_EMPTY(topmodule_emptyrxwire),
-    .o_uartmodule_fifotx_FULL(topmodule_fulltxwire)
+    .o_baudrgmodule_MAXTICK(uartmodule_maxtickwire),
+    .o_baudrgmodule_RATE()                        // No se usa momentaneamente
 );
 
-interface_module #(
-    .NB_INTERFACEMODULE_DATA(NB_TOPMODULE_DATA),
-    .NB_INTERFACEMODULE_OP(NB_TOPMODULE_OP)
-) interface_module_1(
+rx_module #(
+    .NB_RXMODULE_DATA(NB_UARTMODULE_DATA),
+    .SB_RXMODULE_TICKS(SB_UARTMODULE_TICKS)
+) rx_module_1 (
     .i_clk(i_clk),
     .i_reset(i_reset),
-    .i_interfacemodule_EMPTY(topmodule_emptyrxwire),
-    .i_interfacemodule_FULL(topmodule_fulltxwire),
-    .i_interfacemodule_READDATA(topmodule_readdatarxwire),
-    .i_interfacemodule_DATARES(topmodule_datareswire),
-    .o_interfacemodule_READ(topmodule_readinterfacewire),
-    .o_interfacemodule_WRITE(topmodule_writeinterfacewire),
-    .o_interfacemodule_WRITEDATA(topmodule_writedatainterfacewire),
-    .o_interfacemodule_DATAA(topmodule_dataawire),
-    .o_interfacemodule_DATAB(topmodule_databwire),
-    .o_interfacemodule_OP(topmodule_opwire)
+    .i_rxmodule_RX(i_topmodule_RX),
+    .i_rxmodule_BRGTICKS(uartmodule_maxtickwire),
+    .o_rxmodule_RXDONE(uartmodule_rxdonewire),
+    .o_rxmodule_DOUT(uartmodule_doutwire)
 );
 
-// --------------- INICIALIZACION DE MODULOS ---end
+tx_module #(
+    .NB_TXMODULE_DATA(NB_UARTMODULE_DATA),
+    .SB_TXMODULE_TICKS(SB_UARTMODULE_TICKS)
+) tx_module_1 (
+    .i_clk(i_clk),
+    .i_reset(i_reset),
+    .i_txmodule_TXSTART(~uartmodule_emptywire),
+    .i_txmodule_BRGTICKS(uartmodule_maxtickwire),
+    .i_txmodule_DIN(uartmodule_readdatawire),
+    .o_txmodule_TXDONE(uartmodule_txdonewire),
+    .o_txmodule_TX(o_topmodule_TX)
+);
 
-// always @(posedge i_clk)begin
-//        if(i_reset)begin
-//            o_topmodule_leds[0] <= 1'b1;
-//        end
-//        else begin
-//            o_topmodule_leds[0] <= 1'b0;  // Apaga el LED 0 cuando se suelta el reset
-//        end
-// end
+fifo_module #(
+    .NB_FIFOMODULE_DATA(NB_UARTMODULE_DATA),
+    .NB_FIFOMODULE_ADDR(NB_UARTMODULE_ADDR)
+) fifotx_module (
+    .i_clk(i_clk),
+    .i_reset(i_reset),
+    .i_fifomodule_READ(uartmodule_txdonewire),
+    .i_fifomodule_WRITE(uartmodule_rxdonewire),
+    .i_fifomodule_WRITEDATA(uartmodule_doutwire),
+    .o_fifomodule_EMPTY(uartmodule_emptywire),
+    .o_fifomodule_FULL(),
+    .o_fifomodule_READATA(uartmodule_readdatawire)
+);
+
+//--------------- INICIALIZACION DE MODULOS --- end
 
 endmodule

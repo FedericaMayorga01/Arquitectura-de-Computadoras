@@ -9,7 +9,7 @@ module rx_module
    input    wire  i_clk, i_reset,
    input    wire  i_rxmodule_RX, i_rxmodule_BRGTICKS,
    output   reg   o_rxmodule_RXDONE,
-   output   wire signed  [NB_RXMODULE_DATA-1:0] o_rxmodule_DOUT
+   output   wire   signed  [31:0] o_rxmodule_DOUT // Aumentamos el tamaño para manejar números más grandes
 );
 
 // symbolic state declaration
@@ -22,25 +22,31 @@ localparam [1:0]
 // signal declaration
 reg [1:0] rxmodule_statereg ,    rxmodule_nextstatereg ;    // 2 bits ya que hay 4 estados, de 0 a 3
 reg [3:0] rxmodule_samptickreg , rxmodule_nextsamptickreg ; // 4 bits ya que hay que contar 16 bits, de 0 a 15
-reg [2:0] rxmodule_nbrecreg ,    rxmodule_nextnbrecreg ;    // 3 bits ya que, son maximo 8: de 0 a 7
+reg [2:0] rxmodule_nbrecreg ,    rxmodule_nextnbrecreg ;    // 3 bits ya que, son máximo 8: de 0 a 7
 reg [7:0] rxmodule_bitsreasreg , rxmodule_nextbitsreasreg ; // 8 bits ya que esa es la cantidad de bits que manejamos
+
+// Registros adicionales para la conversión a decimal
+reg [31:0] rxmodule_decimal_accum; // Acumulador para el número decimal
+reg [31:0] rxmodule_next_decimal_accum;
 
 // body
 // FSMD state & rxmodule_datastate registers
 always @( posedge i_clk)
    if (i_reset)
       begin
-         rxmodule_statereg    <= rxmodule_idlestate;
-         rxmodule_samptickreg <= 0;
-         rxmodule_nbrecreg    <= 0;
-         rxmodule_bitsreasreg <= 0;
+         rxmodule_statereg        <= rxmodule_idlestate;
+         rxmodule_samptickreg     <= 0;
+         rxmodule_nbrecreg        <= 0;
+         rxmodule_bitsreasreg     <= 0;
+         rxmodule_decimal_accum   <= 0;
       end
    else
       begin
-         rxmodule_statereg    <= rxmodule_nextstatereg ;
-         rxmodule_samptickreg <= rxmodule_nextsamptickreg;
-         rxmodule_nbrecreg    <= rxmodule_nextnbrecreg;
-         rxmodule_bitsreasreg <= rxmodule_nextbitsreasreg;
+         rxmodule_statereg        <= rxmodule_nextstatereg ;
+         rxmodule_samptickreg     <= rxmodule_nextsamptickreg;
+         rxmodule_nbrecreg        <= rxmodule_nextnbrecreg;
+         rxmodule_bitsreasreg     <= rxmodule_nextbitsreasreg;
+         rxmodule_decimal_accum   <= rxmodule_next_decimal_accum;
       end
 
 // FSMD next-state logic
@@ -51,6 +57,7 @@ always @(*)
       rxmodule_nextsamptickreg = rxmodule_samptickreg;
       rxmodule_nextnbrecreg    = rxmodule_nbrecreg;
       rxmodule_nextbitsreasreg = rxmodule_bitsreasreg;
+      rxmodule_next_decimal_accum = rxmodule_decimal_accum;
 
       case (rxmodule_statereg) // estado actual
          rxmodule_idlestate :
@@ -62,7 +69,7 @@ always @(*)
 
          rxmodule_startstate :
             if (i_rxmodule_BRGTICKS)
-               if (rxmodule_samptickreg == 7)   // (8 ticks) mitad del bit start --|_+_|--
+               if (rxmodule_samptickreg == 7)   // (8 ticks) mitad del bit start --|+|--
                   begin
                      rxmodule_nextstatereg    = rxmodule_datastate;  // SIGUIENTE ESTADO
                      rxmodule_nextsamptickreg = 0;
@@ -76,9 +83,17 @@ always @(*)
                if (rxmodule_samptickreg == 15)  // (16 ticks) mitad del dato.
                   begin
                      rxmodule_nextsamptickreg = 0;
-                     rxmodule_nextbitsreasreg = {i_rxmodule_RX , rxmodule_bitsreasreg [7:1]};
+                     
+                     rxmodule_nextbitsreasreg = {i_rxmodule_RX, rxmodule_bitsreasreg [7:1]};
+                     
                      if (rxmodule_nbrecreg == (NB_RXMODULE_DATA - 1))   // llegaron los 8 bits
-                        rxmodule_nextstatereg = rxmodule_stopstate ;    // SIGUIENTE ESTADO
+                        begin
+                           // Conversión del carácter ASCII a número
+                           if (rxmodule_bitsreasreg >= "0" && rxmodule_bitsreasreg <= "9")
+                              rxmodule_next_decimal_accum = (rxmodule_decimal_accum * 10) + (rxmodule_bitsreasreg - "0");
+                           
+                           rxmodule_nextstatereg = rxmodule_stopstate ;    // SIGUIENTE ESTADO
+                        end
                      else
                         rxmodule_nextnbrecreg = rxmodule_nbrecreg + 1;  // seguimos sumando bits recibidos
                   end
@@ -98,6 +113,6 @@ always @(*)
    end
 
 // output
-assign o_rxmodule_DOUT = rxmodule_bitsreasreg;
+assign o_rxmodule_DOUT = rxmodule_decimal_accum; // Asignamos el valor decimal convertido
 
 endmodule
