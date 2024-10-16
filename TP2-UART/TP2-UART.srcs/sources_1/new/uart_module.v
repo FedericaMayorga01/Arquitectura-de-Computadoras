@@ -5,7 +5,7 @@ module uart_module
     parameter NB_UARTMODULE_DATA    = 8,    // data bits
               SB_UARTMODULE_TICKS   = 16,   // stop bits ticks
               NB_UARTMODULE_COUNTER = 9,    // counter bits
-              MOD_UARTMODULE_M      = 325,  // ms counter bits
+              MOD_UARTMODULE_M      = 326,  // ms counter bits
               NB_UARTMODULE_ADDR    = 4     // address bits
 )
 (

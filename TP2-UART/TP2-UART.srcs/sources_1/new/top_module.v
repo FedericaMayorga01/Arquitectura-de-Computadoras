@@ -6,15 +6,15 @@ module top_module
               NB_TOPMODULE_OP      = 6,
               SB_TOPMODULE_TICKS   = 16,   // stop bits ticks
               NB_TOPMODULE_COUNTER = 9,    // counter bits
-              MOD_TOPMODULE_M      = 325,  // ms counter bits
+              MOD_TOPMODULE_M      = 326,  // ms counter bits
               NB_TOPMODULE_ADDR    = 4
 )
 (
     input wire i_clk,
     input wire i_reset,
     input wire i_topmodule_RX,
-    output wire o_topmodule_TX
-    //output wire [3:0] o_topmodule_leds // boton 0 para data A, boton 1 para data B, boton 2 para OP, boton 3 para reset
+    output wire o_topmodule_TX,
+    output wire [5:0] o_topmodule_LEDS // boton 0 para data A, boton 1 para data B, boton 2 para OP, boton 3 para reset
 
 );
 
@@ -28,6 +28,8 @@ wire signed [NB_TOPMODULE_DATA-1:0] topmodule_dataawire;
 wire signed [NB_TOPMODULE_DATA-1:0] topmodule_databwire;
 wire [NB_TOPMODULE_OP-1:0] topmodule_opwire;
 wire signed [NB_TOPMODULE_DATA-1:0] topmodule_datareswire;
+//wire topmodule_verifinwire;
+//wire topmodule_readywire;
 
 //--------------- INICIALIZACION DE MODULOS --- start
 alu_module #(
@@ -37,6 +39,8 @@ alu_module #(
     .i_alumodule_data_A(topmodule_dataawire),
     .i_alumodule_data_B(topmodule_databwire),
     .i_alumodule_OP(topmodule_opwire),
+//    .i_alumodule_VERIFIN(topmodule_verifinwire),
+//    .o_alumodule_READY(topmodule_readywire),
     .o_alumodule_data_RES(topmodule_datareswire),
     .o_alumodule_ZERO(),                // no asignar por ahora
     .o_alumodule_NEGATIVE(),            // no asignar por ahora
@@ -73,23 +77,26 @@ interface_module #(
     .i_interfacemodule_FULL(topmodule_fulltxwire),
     .i_interfacemodule_READDATA(topmodule_readdatarxwire),
     .i_interfacemodule_DATARES(topmodule_datareswire),
+//    .i_interfacemodule_READY(topmodule_readywire),
     .o_interfacemodule_READ(topmodule_readinterfacewire),
     .o_interfacemodule_WRITE(topmodule_writeinterfacewire),
     .o_interfacemodule_WRITEDATA(topmodule_writedatainterfacewire),
     .o_interfacemodule_DATAA(topmodule_dataawire),
     .o_interfacemodule_DATAB(topmodule_databwire),
-    .o_interfacemodule_OP(topmodule_opwire)
+    .o_interfacemodule_OP(topmodule_opwire),
+    .o_interfacemodule_LEDS(o_topmodule_LEDS)
+//    .o_interfacemodule_VERIFIN(topmodule_verifinwire)
 );
 
 // --------------- INICIALIZACION DE MODULOS ---end
 
-// always @(posedge i_clk)begin
-//        if(i_reset)begin
-//            o_topmodule_leds[0] <= 1'b1;
-//        end
-//        else begin
-//            o_topmodule_leds[0] <= 1'b0;  // Apaga el LED 0 cuando se suelta el reset
-//        end
-// end
+ //always @(posedge i_clk)begin
+ //       if(i_reset)begin
+ //           o_topmodule_LEDS[0] <= 1'b1;
+ //       end
+ //       else begin
+ //           o_topmodule_LEDS[0] <= 1'b0;  // Apaga el LED 0 cuando se suelta el reset
+ //       end
+ //end
 
 endmodule

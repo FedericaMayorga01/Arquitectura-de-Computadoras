@@ -94,6 +94,8 @@ always @(*)
                end
                else
                   rxmodule_nextsamptickreg = rxmodule_samptickreg + 1; // seguimos sumando ticks
+         default:
+            rxmodule_nextstatereg = rxmodule_idlestate;
       endcase
    end
 

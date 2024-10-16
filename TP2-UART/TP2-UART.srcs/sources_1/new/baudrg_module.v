@@ -3,7 +3,7 @@
 module baudrg_module 
 #(
     parameter NB_BAUDRGMODULE_COUNTER = 9,      // number of bits in counter
-    parameter MOD_BAUDRGMODULE_M      = 325     // mod-M . 9600 Baudios
+    parameter MOD_BAUDRGMODULE_M      = 326     // mod-M . 19200 Baudios
 )
 (
     input   wire    i_clk, i_reset,
