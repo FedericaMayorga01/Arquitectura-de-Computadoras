@@ -193,7 +193,8 @@ module interface_module #
     output wire [NB_INTERFACEMODULE_DATA-1:0] o_interfacemodule_WRITEDATA,
     output wire [NB_INTERFACEMODULE_OP-1:0]   o_interfacemodule_OP,
     output wire [NB_INTERFACEMODULE_DATA-1:0] o_interfacemodule_DATAA,
-    output wire [NB_INTERFACEMODULE_DATA-1:0] o_interfacemodule_DATAB
+    output wire [NB_INTERFACEMODULE_DATA-1:0] o_interfacemodule_DATAB,
+    output wire [5:0]                         o_interfacemodule_LEDS
 );
 
 // Symbolic interfacemodule_statereg declaration
@@ -336,5 +337,6 @@ assign o_interfacemodule_OP        = interfacemodule_opreg;
 assign o_interfacemodule_WRITEDATA = interfacemodule_resultstate;
 assign o_interfacemodule_WRITE     = interfacemodule_writereg;
 assign o_interfacemodule_READ      = interfacemodule_readreg;
+assign o_interfacemodule_LEDS      = interfacemodule_ledsreg;
 
 endmodule

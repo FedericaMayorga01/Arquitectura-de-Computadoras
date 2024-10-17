@@ -39,7 +39,8 @@ def recibir_datos_de_fpga(ser):
 def main():
     # Configuración del puerto serial
     ser = serial.Serial(
-        port='COM24',       # Cambia esto al puerto correcto (Ej: 'COM3' en Windows o '/dev/ttyUSB0' en Linux)
+        #port='COM24',       # Cambia esto al puerto correcto (Ej: 'COM3' en Windows o '/dev/ttyUSB0' en Linux)
+        port='COM6',
         baudrate=19200,     # Asegúrate de usar el mismo baudrate que tu UART en la FPGA
         bytesize=serial.EIGHTBITS,
         parity=serial.PARITY_NONE,
