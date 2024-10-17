@@ -224,6 +224,9 @@ always @(posedge i_clk) begin
             interfacemodule_dataBreg    <= {NB_INTERFACEMODULE_DATA{1'b0}};
             interfacemodule_resultstate <= {NB_INTERFACEMODULE_DATA{1'b0}};
             interfacemodule_waitreg     <= 4'b0000;
+
+            interfacemodule_ledsreg <= 7'b0000001;   // led
+
         end
     else
         begin
@@ -251,6 +254,7 @@ always @(*) begin
     case (interfacemodule_statereg)
         interfacemodule_idlestate: begin
             interfacemodule_nextwritereg = 1'b0;
+            interfacemodule_ledsreg <= 7'b0000010;   // led
             if(~i_interfacemodule_EMPTY) begin
                 interfacemodule_nextstatereg = interfacemodule_dataAreg;    // changed
                 interfacemodule_nextreadreg  = 1'b1;
@@ -258,6 +262,7 @@ always @(*) begin
         end
 
         interfacemodule_dataAstate: begin
+            interfacemodule_ledsreg <= 7'b0000100;   // led
             if(i_interfacemodule_EMPTY) begin
                 interfacemodule_nextreadreg  = 1'b0;
                 interfacemodule_nextstatereg = interfacemodule_waitstate;
@@ -271,6 +276,7 @@ always @(*) begin
         end
 
         interfacemodule_dataBstate: begin
+            interfacemodule_ledsreg <= 7'b0001000;   // led
             if(i_interfacemodule_EMPTY) begin
                 interfacemodule_nextreadreg  = 1'b0;
                 interfacemodule_nextstatereg = interfacemodule_waitstate;
@@ -284,6 +290,7 @@ always @(*) begin
         end
 
         interfacemodule_opstate: begin
+            interfacemodule_ledsreg <= 7'b0010000;   // led
             if(i_interfacemodule_EMPTY) begin
                 interfacemodule_nextreadreg  = 1'b0;
                 interfacemodule_nextstatereg = interfacemodule_waitstate;
@@ -297,6 +304,7 @@ always @(*) begin
         end
 
         interfacemodule_resultstate: begin
+            interfacemodule_ledsreg <= 7'b0100000;   // led
             if(~i_interfacemodule_FULL) begin
                 interfacemodule_nextstatereg   = interfacemodule_idlestate;
                 interfacemodule_nextdataresreg = i_interfacemodule_DATARES;
@@ -305,6 +313,7 @@ always @(*) begin
         end
 
         interfacemodule_waitstate: begin
+            interfacemodule_ledsreg <= 7'b1000000;   // led
             if(~i_interfacemodule_EMPTY) begin
                 interfacemodule_nextstatereg = interfacemodule_waitreg;
                 interfacemodule_nextreadreg  = 1'b1;
