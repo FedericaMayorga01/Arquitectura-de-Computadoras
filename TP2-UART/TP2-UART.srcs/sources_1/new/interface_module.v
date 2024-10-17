@@ -194,7 +194,7 @@ module interface_module #
     output wire [NB_INTERFACEMODULE_OP-1:0]   o_interfacemodule_OP,
     output wire [NB_INTERFACEMODULE_DATA-1:0] o_interfacemodule_DATAA,
     output wire [NB_INTERFACEMODULE_DATA-1:0] o_interfacemodule_DATAB,
-    output wire [5:0]                         o_interfacemodule_LEDS
+    output wire [6:0]                         o_interfacemodule_LEDS
 );
 
 // Symbolic interfacemodule_statereg declaration
@@ -227,7 +227,8 @@ always @(posedge i_clk) begin
             interfacemodule_dataresreg  <= {NB_INTERFACEMODULE_DATA{1'b0}};
             interfacemodule_waitreg     <= 4'b0000;
 
-            interfacemodule_ledsreg <= 7'b0000001;   // led
+            //interfacemodule_ledsreg <= 7'b0000001;   // led
+            // No se puede tener dos bloques always que asignen la misma senial
 
         end
     else
