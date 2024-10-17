@@ -212,6 +212,7 @@ reg [NB_INTERFACEMODULE_DATA-1:0] interfacemodule_dataAreg,   interfacemodule_ne
 reg [NB_INTERFACEMODULE_DATA-1:0] interfacemodule_dataBreg,   interfacemodule_nextdataBreg;     // new next
 reg [NB_INTERFACEMODULE_DATA-1:0] interfacemodule_dataresreg, interfacemodule_nextdataresreg;   // new next
 reg [3:0]                         interfacemodule_waitreg,    interfacemodule_nextwaitreg;      // new wait, new next
+reg [6:0]                         interfacemodule_ledsreg;                                      // leds
 
 always @(posedge i_clk) begin
     if(i_reset)
@@ -222,7 +223,7 @@ always @(posedge i_clk) begin
             interfacemodule_opreg       <= {NB_INTERFACEMODULE_OP{1'b0}};
             interfacemodule_dataAreg    <= {NB_INTERFACEMODULE_DATA{1'b0}};
             interfacemodule_dataBreg    <= {NB_INTERFACEMODULE_DATA{1'b0}};
-            interfacemodule_resultstate <= {NB_INTERFACEMODULE_DATA{1'b0}};
+            interfacemodule_dataresreg  <= {NB_INTERFACEMODULE_DATA{1'b0}};
             interfacemodule_waitreg     <= 4'b0000;
 
             interfacemodule_ledsreg <= 7'b0000001;   // led
@@ -236,7 +237,7 @@ always @(posedge i_clk) begin
             interfacemodule_opreg       <= interfacemodule_nextopreg;
             interfacemodule_dataAreg    <= interfacemodule_nextdataAreg;
             interfacemodule_dataBreg    <= interfacemodule_nextdataBreg;
-            interfacemodule_resultstate <= interfacemodule_nextdataresreg;
+            interfacemodule_dataresreg  <= interfacemodule_nextdataresreg;
             interfacemodule_waitreg     <= interfacemodule_nextwaitreg;
         end
 end
