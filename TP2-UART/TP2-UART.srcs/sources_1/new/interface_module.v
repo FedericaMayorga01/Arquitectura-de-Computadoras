@@ -178,151 +178,153 @@
 module interface_module #
 (
     parameter NB_INTERFACEMODULE_DATA = 8,
-    parameter NB_INTERFACEMODULE_OP = 6     
+    parameter NB_INTERFACEMODULE_OP   = 6
 )
 (
     input wire i_clk,
     input wire i_reset,
     input wire [NB_INTERFACEMODULE_DATA-1:0] i_interfacemodule_DATARES,
     input wire [NB_INTERFACEMODULE_DATA-1:0] i_interfacemodule_READDATA,
-    input wire i_interfacemodule_EMPTY,
-    input wire i_interfacemodule_FULL,
+    input wire                               i_interfacemodule_EMPTY,
+    input wire                               i_interfacemodule_FULL,
 
-    output wire o_interfacemodule_READ,
-    output wire o_interfacemodule_WRITE,
+    output wire                               o_interfacemodule_READ,
+    output wire                               o_interfacemodule_WRITE,
     output wire [NB_INTERFACEMODULE_DATA-1:0] o_interfacemodule_WRITEDATA,
-    output wire [NB_INTERFACEMODULE_OP-1:0] o_interfacemodule_OP,
+    output wire [NB_INTERFACEMODULE_OP-1:0]   o_interfacemodule_OP,
     output wire [NB_INTERFACEMODULE_DATA-1:0] o_interfacemodule_DATAA,
     output wire [NB_INTERFACEMODULE_DATA-1:0] o_interfacemodule_DATAB
 );
 
-// STM Interface
-localparam [3:0] interfacemodule_idlestate = 4'b0000;
-localparam [3:0] interfacemodule_dataAstate = 4'b0001;
-localparam [3:0] interfacemodule_dataBstate = 4'b0010;
-localparam [3:0] interfacemodule_opstate = 4'b0011;
+// Symbolic interfacemodule_statereg declaration
+localparam [3:0] interfacemodule_idlestate   = 4'b0000;
+localparam [3:0] interfacemodule_dataAstate  = 4'b0001;
+localparam [3:0] interfacemodule_dataBstate  = 4'b0010;
+localparam [3:0] interfacemodule_opstate     = 4'b0011;
 localparam [3:0] interfacemodule_resultstate = 4'b0100;
-localparam [3:0] interfacemodule_waitstate = 4'b0101; // new
+localparam [3:0] interfacemodule_waitstate   = 4'b0101; // new
 
-reg [3:0] interfacemodule_statereg, interfacemodule_nextstatereg;
-reg interfacemodule_readreg, interfacemodule_nextreadreg; // new nextreadreg
-reg interfacemodule_writereg, interfacemodule_nextwritereg; // new nextwritereg
-reg [NB_INTERFACEMODULE_OP-1:0] interfacemodule_opreg, interfacemodule_nextopreg; // new next
-reg [NB_INTERFACEMODULE_DATA-1:0] interfacemodule_dataAreg, interfacemodule_nextdataAreg; // new next
-reg [NB_INTERFACEMODULE_DATA-1:0] interfacemodule_dataBreg, interfacemodule_nextdataBreg; // new next
-reg [NB_INTERFACEMODULE_DATA-1:0] interfacemodule_dataresreg, interfacemodule_nextdataresreg; // new next
-reg [3:0] interfacemodule_waitreg, interfacemodule_nextwaitreg; // new wait, new next
+reg [3:0]                         interfacemodule_statereg,   interfacemodule_nextstatereg;
+reg                               interfacemodule_readreg,    interfacemodule_nextreadreg;      // new nextreadreg
+reg                               interfacemodule_writereg,   interfacemodule_nextwritereg;     // new nextwritereg
+reg [NB_INTERFACEMODULE_OP-1:0]   interfacemodule_opreg,      interfacemodule_nextopreg;        // new next
+reg [NB_INTERFACEMODULE_DATA-1:0] interfacemodule_dataAreg,   interfacemodule_nextdataAreg;     // new next
+reg [NB_INTERFACEMODULE_DATA-1:0] interfacemodule_dataBreg,   interfacemodule_nextdataBreg;     // new next
+reg [NB_INTERFACEMODULE_DATA-1:0] interfacemodule_dataresreg, interfacemodule_nextdataresreg;   // new next
+reg [3:0]                         interfacemodule_waitreg,    interfacemodule_nextwaitreg;      // new wait, new next
 
 always @(posedge i_clk) begin
-    if(i_reset) begin
-        interfacemodule_statereg <= interfacemodule_idlestate;
-        interfacemodule_readreg <= 1'b0;
-        interfacemodule_writereg <= 1'b0;
-        interfacemodule_opreg <= {NB_INTERFACEMODULE_OP{1'b0}};
-        interfacemodule_dataAreg <= {NB_INTERFACEMODULE_DATA{1'b0}};
-        interfacemodule_dataBreg <= {NB_INTERFACEMODULE_DATA{1'b0}};
-        interfacemodule_resultstate <= {NB_INTERFACEMODULE_DATA{1'b0}};
-        interfacemodule_waitreg <= 4'b0000;
-    end
-    else begin
-        interfacemodule_statereg    <= interfacemodule_nextstatereg;
-        interfacemodule_readreg     <= interfacemodule_nextreadreg;
-        interfacemodule_writereg    <= interfacemodule_nextwritereg;
-        interfacemodule_opreg       <= interfacemodule_nextopreg;
-        interfacemodule_dataAreg    <= interfacemodule_nextdataAreg;
-        interfacemodule_dataBreg    <= interfacemodule_nextdataBreg;
-        interfacemodule_resultstate <= interfacemodule_nextdataresreg;
-        interfacemodule_waitreg     <= interfacemodule_nextwaitreg;
-    end
+    if(i_reset)
+        begin
+            interfacemodule_statereg    <= interfacemodule_idlestate;
+            interfacemodule_readreg     <= 1'b0;
+            interfacemodule_writereg    <= 1'b0;
+            interfacemodule_opreg       <= {NB_INTERFACEMODULE_OP{1'b0}};
+            interfacemodule_dataAreg    <= {NB_INTERFACEMODULE_DATA{1'b0}};
+            interfacemodule_dataBreg    <= {NB_INTERFACEMODULE_DATA{1'b0}};
+            interfacemodule_resultstate <= {NB_INTERFACEMODULE_DATA{1'b0}};
+            interfacemodule_waitreg     <= 4'b0000;
+        end
+    else
+        begin
+            interfacemodule_statereg    <= interfacemodule_nextstatereg;
+            interfacemodule_readreg     <= interfacemodule_nextreadreg;
+            interfacemodule_writereg    <= interfacemodule_nextwritereg;
+            interfacemodule_opreg       <= interfacemodule_nextopreg;
+            interfacemodule_dataAreg    <= interfacemodule_nextdataAreg;
+            interfacemodule_dataBreg    <= interfacemodule_nextdataBreg;
+            interfacemodule_resultstate <= interfacemodule_nextdataresreg;
+            interfacemodule_waitreg     <= interfacemodule_nextwaitreg;
+        end
 end
 
 always @(*) begin
-    interfacemodule_nextstatereg = interfacemodule_statereg;
-    interfacemodule_nextreadreg = interfacemodule_readreg;
-    interfacemodule_nextwritereg = interfacemodule_writereg;
-    interfacemodule_nextopreg = interfacemodule_opreg;
-    interfacemodule_nextdataAreg = interfacemodule_dataAreg;
-    interfacemodule_nextdataBreg = interfacemodule_dataBreg;
+    interfacemodule_nextstatereg   = interfacemodule_statereg;
+    interfacemodule_nextreadreg    = interfacemodule_readreg;
+    interfacemodule_nextwritereg   = interfacemodule_writereg;
+    interfacemodule_nextopreg      = interfacemodule_opreg;
+    interfacemodule_nextdataAreg   = interfacemodule_dataAreg;
+    interfacemodule_nextdataBreg   = interfacemodule_dataBreg;
     interfacemodule_nextdataresreg = interfacemodule_resultstate;
-    interfacemodule_nextwaitreg = interfacemodule_waitreg;
+    interfacemodule_nextwaitreg    = interfacemodule_waitreg;
 
     case (interfacemodule_statereg)
         interfacemodule_idlestate: begin
-            interfacemodule_nextwritereg = 1'b0;    
+            interfacemodule_nextwritereg = 1'b0;
             if(~i_interfacemodule_EMPTY) begin
-                interfacemodule_nextstatereg = interfacemodule_dataAreg;// changed
-                interfacemodule_nextreadreg = 1'b1;
+                interfacemodule_nextstatereg = interfacemodule_dataAreg;    // changed
+                interfacemodule_nextreadreg  = 1'b1;
             end
         end
-        
-        interfacemodule_waitstate: begin
-            if(~i_interfacemodule_EMPTY) begin
-                interfacemodule_nextstatereg = interfacemodule_waitreg;
-                interfacemodule_nextreadreg = 1'b1;
-            end
-        end
-        
-        interfacemodule_opstate: begin
-            if(i_interfacemodule_EMPTY) begin
-                interfacemodule_nextreadreg = 1'b0;
-                interfacemodule_nextstatereg = interfacemodule_waitstate;
-                interfacemodule_nextwaitreg = interfacemodule_opstate;
-            end
-            else begin
-                interfacemodule_nextstatereg = interfacemodule_dataAstate;
-                interfacemodule_nextopreg = i_interfacemodule_READDATA[NB_INTERFACEMODULE_OP-1:0];
-                interfacemodule_nextreadreg = 1'b1;
-            end
-        end 
 
         interfacemodule_dataAstate: begin
             if(i_interfacemodule_EMPTY) begin
-                interfacemodule_nextreadreg = 1'b0;
+                interfacemodule_nextreadreg  = 1'b0;
                 interfacemodule_nextstatereg = interfacemodule_waitstate;
-                interfacemodule_nextwaitreg = interfacemodule_dataAstate;
+                interfacemodule_nextwaitreg  = interfacemodule_dataAstate;
             end
             else begin
                 interfacemodule_nextstatereg = interfacemodule_dataBstate;
                 interfacemodule_nextdataAreg = i_interfacemodule_READDATA;
-                interfacemodule_nextreadreg = 1'b1;
+                interfacemodule_nextreadreg  = 1'b1;
             end
         end
 
         interfacemodule_dataBstate: begin
             if(i_interfacemodule_EMPTY) begin
-                interfacemodule_nextreadreg = 1'b0;
+                interfacemodule_nextreadreg  = 1'b0;
                 interfacemodule_nextstatereg = interfacemodule_waitstate;
-                interfacemodule_nextwaitreg = interfacemodule_dataBstate;
+                interfacemodule_nextwaitreg  = interfacemodule_dataBstate;
             end
             else begin
                 interfacemodule_nextstatereg = interfacemodule_opstate;
-                interfacemodule_nextdataBreg = i_interfacemodule_READDATA; // ver logica completa
-                interfacemodule_nextreadreg = 1'b0;
+                interfacemodule_nextdataBreg = i_interfacemodule_READDATA;
+                interfacemodule_nextreadreg  = 1'b0;
+            end
+        end
+
+        interfacemodule_opstate: begin
+            if(i_interfacemodule_EMPTY) begin
+                interfacemodule_nextreadreg  = 1'b0;
+                interfacemodule_nextstatereg = interfacemodule_waitstate;
+                interfacemodule_nextwaitreg  = interfacemodule_opstate;
+            end
+            else begin
+                interfacemodule_nextstatereg = interfacemodule_dataAstate;
+                interfacemodule_nextopreg    = i_interfacemodule_READDATA[NB_INTERFACEMODULE_OP-1:0];
+                interfacemodule_nextreadreg  = 1'b1;
             end
         end
 
         interfacemodule_resultstate: begin
             if(~i_interfacemodule_FULL) begin
-                interfacemodule_nextstatereg = interfacemodule_idlestate;
+                interfacemodule_nextstatereg   = interfacemodule_idlestate;
                 interfacemodule_nextdataresreg = i_interfacemodule_DATARES;
-                interfacemodule_nextwritereg = 1'b1;
+                interfacemodule_nextwritereg   = 1'b1;
+            end
+        end
+
+        interfacemodule_waitstate: begin
+            if(~i_interfacemodule_EMPTY) begin
+                interfacemodule_nextstatereg = interfacemodule_waitreg;
+                interfacemodule_nextreadreg  = 1'b1;
             end
         end
 
         default: begin
             interfacemodule_nextstatereg = interfacemodule_idlestate;
-            interfacemodule_nextreadreg = 1'b0;
+            interfacemodule_nextreadreg  = 1'b0;
             interfacemodule_nextwritereg = 1'b0;
         end
 
     endcase
 end
 
-assign o_interfacemodule_DATAA = interfacemodule_dataAreg;
-assign o_interfacemodule_DATAB = interfacemodule_dataBreg;
-assign o_interfacemodule_OP = interfacemodule_opreg;
+assign o_interfacemodule_DATAA     = interfacemodule_dataAreg;
+assign o_interfacemodule_DATAB     = interfacemodule_dataBreg;
+assign o_interfacemodule_OP        = interfacemodule_opreg;
 assign o_interfacemodule_WRITEDATA = interfacemodule_resultstate;
-assign o_interfacemodule_WRITE = interfacemodule_writereg;
-assign o_interfacemodule_READ = interfacemodule_readreg;
+assign o_interfacemodule_WRITE     = interfacemodule_writereg;
+assign o_interfacemodule_READ      = interfacemodule_readreg;
 
 endmodule
