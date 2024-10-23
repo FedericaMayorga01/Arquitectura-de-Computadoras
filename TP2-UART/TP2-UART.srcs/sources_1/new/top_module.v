@@ -13,8 +13,8 @@ module top_module
     input wire i_clk,
     input wire i_reset,
     input wire i_topmodule_RX,
-    output wire o_topmodule_TX,
-    output wire [6:0] o_topmodule_LEDS // boton 0 para data A, boton 1 para data B, boton 2 para OP, boton 3 para reset
+    output wire o_topmodule_TX
+    //output wire [6:0] o_topmodule_LEDS // boton 0 para data A, boton 1 para data B, boton 2 para OP, boton 3 para reset
 
 );
 
@@ -84,7 +84,8 @@ interface_module #(
     .o_interfacemodule_DATAA(topmodule_dataawire),
     .o_interfacemodule_DATAB(topmodule_databwire),
     .o_interfacemodule_OP(topmodule_opwire),
-    .o_interfacemodule_LEDS(o_topmodule_LEDS)
+    //.o_interfacemodule_LEDS(o_topmodule_LEDS)
+    .o_interfacemodule_LEDS()
 //    .o_interfacemodule_VERIFIN(topmodule_verifinwire)
 );
 
