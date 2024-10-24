@@ -40,15 +40,15 @@ always @(posedge i_clk)
         begin
             fifomodule_writeptrreg <= 0;
             fifomodule_readptrreg  <= 0;
-            fifomodule_fullreg      <= 1'b0;
-            fifomodule_emptyreg     <= 1'b1;
+            fifomodule_fullreg     <= 1'b0;
+            fifomodule_emptyreg    <= 1'b1;
         end
     else
         begin
             fifomodule_writeptrreg <= fifomodule_nextwriteptrreg;
             fifomodule_readptrreg  <= fifomodule_nextreadptrreg;
-            fifomodule_fullreg      <= fifomodule_nextfullreg;
-            fifomodule_emptyreg     <= fifomodule_nextemptyreg;
+            fifomodule_fullreg     <= fifomodule_nextfullreg;
+            fifomodule_emptyreg    <= fifomodule_nextemptyreg;
         end
 
 // next-state logic for read and write pointers
@@ -61,8 +61,8 @@ always @(*)
         // default is to keep old values
         fifomodule_nextwriteptrreg = fifomodule_writeptrreg;
         fifomodule_nextreadptrreg  = fifomodule_readptrreg;
-        fifomodule_nextfullreg      = fifomodule_fullreg;
-        fifomodule_nextemptyreg     = fifomodule_emptyreg;
+        fifomodule_nextfullreg     = fifomodule_fullreg;
+        fifomodule_nextemptyreg    = fifomodule_emptyreg;
 
         case ({i_fifomodule_WRITE, i_fifomodule_READ})
             // 2'b00: no op

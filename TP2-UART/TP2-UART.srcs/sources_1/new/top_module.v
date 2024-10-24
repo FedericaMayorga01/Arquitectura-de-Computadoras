@@ -18,16 +18,16 @@ module top_module
 
 );
 
-wire signed [NB_TOPMODULE_DATA-1:0] topmodule_readdatarxwire;
-wire                                topmodule_emptyrxwire;
-wire                                topmodule_fulltxwire;
-wire                                topmodule_readinterfacewire;
-wire signed [NB_TOPMODULE_DATA-1:0] topmodule_writedatainterfacewire;
+wire signed [NB_TOPMODULE_DATA-1:0] topmodule_readdatarxwire;         //
+wire                                topmodule_emptyrxwire;            //
+wire                                topmodule_fulltxwire;             //
+wire                                topmodule_readinterfacewire;      //
+wire signed [NB_TOPMODULE_DATA-1:0] topmodule_writedatainterfacewire; //
 wire                                topmodule_writeinterfacewire;
-wire signed [NB_TOPMODULE_DATA-1:0] topmodule_dataawire;
-wire signed [NB_TOPMODULE_DATA-1:0] topmodule_databwire;
-wire        [NB_TOPMODULE_OP-1:0]   topmodule_opwire;
-wire signed [NB_TOPMODULE_DATA-1:0] topmodule_datareswire;
+wire signed [NB_TOPMODULE_DATA-1:0] topmodule_dataawire;              //
+wire signed [NB_TOPMODULE_DATA-1:0] topmodule_databwire;              //
+wire        [NB_TOPMODULE_OP-1:0]   topmodule_opwire;                 //
+wire signed [NB_TOPMODULE_DATA-1:0] topmodule_datareswire;            //
 //wire topmodule_verifinwire;
 //wire topmodule_readywire;
 
