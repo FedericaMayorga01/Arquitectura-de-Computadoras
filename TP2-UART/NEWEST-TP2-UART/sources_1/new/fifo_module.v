@@ -64,10 +64,10 @@ end
 
 // Next-state logic for read and write pointers
 always @(*) begin
-    //Successive pointer values
+    // Successive pointer values
     fifomodule_succwriteptrreg = fifomodule_writeptrreg + 1;
     fifomodule_succreadptrreg  = fifomodule_readptrreg + 1;
-    //Default: keep old values
+    // Default: keep old values
     fifomodule_nextwriteptrreg = fifomodule_writeptrreg;
     fifomodule_nextreadptrreg  = fifomodule_readptrreg;
     fifomodule_nextfullreg     = fifomodule_fullreg;
@@ -78,7 +78,7 @@ always @(*) begin
             if (~fifomodule_emptyreg) begin
                 fifomodule_nextreadptrreg = fifomodule_succreadptrreg;   // desplazar puntero
                 fifomodule_nextfullreg = 1'b0;
-                if (fifomodule_succreadptrreg == fifomodule_writeptrreg) begin // fifo esta vacia
+                if (fifomodule_succreadptrreg == fifomodule_writeptrreg) begin  // fifo esta vacia
                     fifomodule_nextemptyreg = 1'b1;
                 end
             end
@@ -86,7 +86,7 @@ always @(*) begin
             if (~fifomodule_fullreg) begin
                 fifomodule_nextwriteptrreg = fifomodule_succwriteptrreg;
                 fifomodule_nextemptyreg = 1'b0;
-                if (fifomodule_succwriteptrreg == fifomodule_readptrreg) begin // fifo esta llena
+                if (fifomodule_succwriteptrreg == fifomodule_readptrreg) begin  // fifo esta llena
                     fifomodule_nextfullreg = 1'b1;
                 end
             end
@@ -105,7 +105,7 @@ always @(*) begin
 end
 
 // Output
-assign o_fifomodule_FULL = fifomodule_fullreg;
+assign o_fifomodule_FULL  = fifomodule_fullreg;
 assign o_fifomodule_EMPTY = fifomodule_emptyreg;
 
 endmodule

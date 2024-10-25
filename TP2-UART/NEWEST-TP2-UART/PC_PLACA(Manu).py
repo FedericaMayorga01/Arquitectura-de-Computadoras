@@ -18,7 +18,6 @@ OPCODES = {
 
 EXIT_COMMANDS = {'q', 'quit', 'e', 'exit'}
 
-
 class SerialPortControl:
     def __init__(self, port: str) -> None:
         try:

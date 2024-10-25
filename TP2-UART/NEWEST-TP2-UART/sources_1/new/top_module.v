@@ -15,7 +15,6 @@ module top_module #
     //output wire [NB_DATA-1:0] result_leds
 );
 
-
 wire                         topmodule_fulltxwire;
 wire                         topmodule_emptyrxwire;
 

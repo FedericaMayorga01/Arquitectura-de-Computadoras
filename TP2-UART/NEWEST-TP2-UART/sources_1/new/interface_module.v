@@ -26,6 +26,7 @@ localparam [3:0] INTERM_DATA_B_STATE = 4'b0011;
 localparam [3:0] INTERM_RESULT_STATE = 4'b0100;
 localparam [3:0] INTERM_WAIT_STATE   = 4'b1000;
 
+// Registers
 reg [3:0]                         interfacemodule_statereg,   interfacemodule_nextstatereg;
 reg                               interfacemodule_readreg,    interfacemodule_nextreadreg;
 reg                               interfacemodule_writereg,   interfacemodule_nextwritereg;

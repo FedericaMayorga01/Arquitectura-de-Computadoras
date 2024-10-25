@@ -19,7 +19,7 @@ module uart_module #
     output wire [NB_UARTMODULE_DATA-1 : 0] o_uartmodule_fiforx_READDATA
 );
 
-//Signal declaration
+// Signal declaration
 wire                            uartmodule_maxtickwire;
 wire                            uartmodule_txdonewire;
 wire                            uartmodule_emptywire;

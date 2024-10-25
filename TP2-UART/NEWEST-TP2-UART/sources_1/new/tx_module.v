@@ -9,8 +9,8 @@ module tx_module #
     input wire                          i_txmodule_BRGTICKS,
     input wire [NB_TXMODULE_DATA-1 : 0] i_txmodule_DIN,
 
-    output reg  o_txmodule_TXDONE,
-    output wire o_txmodule_TX
+    output reg                          o_txmodule_TXDONE,
+    output wire                         o_txmodule_TX
 );
 
 // FSM stages

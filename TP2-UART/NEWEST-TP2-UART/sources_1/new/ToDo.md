@@ -30,3 +30,4 @@ IMPORTANTE:
 20. Todavia no se agregan los signed en los lugares donde no estaban (rx_module.v, uart_module.v, top_module.v).
 21. En uart_module.v, ya se modifico el nombre del parameter PTR_LEN a NB_UARTMODULE_ADDR, se saco de la signal declaration el tx_not_empty() y se mantuvo nuestra logica anterior (negando _emptywire).
 22. En top_module.v, ya se modifico el nombre del parameter PTR_LEN a NB_UARTMODULE_ADDR.
+23. CONFIRMAMOS: Todo funciona joya.

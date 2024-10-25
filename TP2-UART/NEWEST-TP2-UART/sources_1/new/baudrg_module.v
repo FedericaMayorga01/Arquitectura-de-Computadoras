@@ -1,6 +1,6 @@
-// //CLK_FREQ / (BAUD_RATE * 16);
-//COUNTER_MOD = 326 for f = 100MHz and  Baudrate = 19200
-//COUNTER_MOD = 651 for f = 100MHz and Baudrate = 9600
+// CLK_FREQ / (BAUD_RATE * 16);
+// COUNTER_MOD = 326 for f = 100MHz and  Baudrate = 19200
+// COUNTER_MOD = 651 for f = 100MHz and Baudrate = 9600
 
 module baudrg_module #
 (
@@ -14,7 +14,7 @@ module baudrg_module #
 );
 
 reg [NB_BAUDRGMODULE_COUNTER-1 : 0] baudrgmodule_contreg;
-wire [NB_BAUDRGMODULE_COUNTER-1 : 0] baudrgmodule_nextcontreg; // <-- MODIFICAR Y TODOS DONDE DIGA
+wire [NB_BAUDRGMODULE_COUNTER-1 : 0] baudrgmodule_nextcontreg;
 
 always @(posedge i_clk) begin
     if (i_reset) begin
@@ -27,6 +27,6 @@ end
 
 //Next-state control
 assign baudrgmodule_nextcontreg = (baudrgmodule_contreg == (MOD_BAUDRGMODULE_M-1)) ? 0 : baudrgmodule_contreg + 1;
-assign o_baudrgmodule_MAXTICK = (baudrgmodule_contreg == (MOD_BAUDRGMODULE_M - 1)) ? 1'b1 : 1'b0;
+assign o_baudrgmodule_MAXTICK   = (baudrgmodule_contreg == (MOD_BAUDRGMODULE_M-1)) ? 1'b1 : 1'b0;
 
 endmodule

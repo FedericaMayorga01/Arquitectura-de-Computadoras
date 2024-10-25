@@ -11,7 +11,7 @@ module alu_module #(
     output wire signed [NB_ALUMODULE_DATA-1:0] o_alumodule_data_RES
 );
 
-//operations opcodes
+// Operations opcodes
 localparam  ALUM_ADD = 6'b100000;
 localparam  ALUM_SUB = 6'b100010;
 localparam  ALUM_AND = 6'b100100;
@@ -21,11 +21,11 @@ localparam  ALUM_SRA = 6'b000011;
 localparam  ALUM_SRL = 6'b000010;
 localparam  ALUM_NOR = 6'b100111;
 
-reg signed [NB_ALUMODULE_DATA-1 : 0] alumodule_tmpreg; //register for storing alumodule_tmpreg
+reg signed [NB_ALUMODULE_DATA-1 : 0] alumodule_tmpreg;  //register for storing alumodule_tmpreg
 //assign o_alumodule_data_RES = alumodule_tmpreg; // Posicion original del assign
 
 
-//combinational logic bock
+// Combinational logic bock
 always @(*)
 begin
     case (i_alumodule_OP)
