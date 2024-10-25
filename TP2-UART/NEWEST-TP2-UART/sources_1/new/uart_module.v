@@ -29,10 +29,10 @@ wire [NB_UARTMODULE_DATA-1 : 0] uartmodule_doutwire;
 
 //--------------- INICIALIZACION DE MODULOS ---------------
 
-baudrg_module #
+baudrg_module#
 (
-    .MOD_UARTMODULE_M(MOD_UARTMODULE_M),
-    .NB_UARTMODULE_COUNTER(NB_UARTMODULE_COUNTER)
+    .MOD_BAUDRGMODULE_M(MOD_UARTMODULE_M),
+    .NB_BAUDRGMODULE_COUNTER(NB_UARTMODULE_COUNTER)
 ) baudrg_module_1 (
     .i_clk(i_clk),
     .i_reset(i_reset),
@@ -41,12 +41,12 @@ baudrg_module #
 
 rx_module #
 (
-    .NB_UARTMODULE_DATA(NB_UARTMODULE_DATA),
-    .SB_UARTMODULE_TICKS(SB_UARTMODULE_TICKS)
+    .NB_RXMODULE_DATA(NB_UARTMODULE_DATA),
+    .SB_RXMODULE_TICKS(SB_UARTMODULE_TICKS)
 ) rx_module_1 (
     .i_clk(i_clk),
     .i_reset(i_reset),
-    .i_uartmodule_RX(i_uartmodule_RX),
+    .i_rxmodule_RX(i_uartmodule_RX),
     .i_rxmodule_BRGTICKS(uartmodule_maxtickwire),
     .o_rxmodule_RXDONE(uartmodule_rxdonewire),
     .o_rxmodule_DOUT(uartmodule_doutwire)
@@ -54,8 +54,8 @@ rx_module #
 
 fifo_module #
 (
-    .NB_UARTMODULE_DATA(NB_UARTMODULE_DATA),
-    .NB_UARTMODULE_ADDR(NB_UARTMODULE_ADDR)
+    .NB_FIFOMODULE_DATA(NB_UARTMODULE_DATA),
+    .NB_FIFOMODULE_ADDR(NB_UARTMODULE_ADDR)
 ) fiforx_module (
     .i_clk(i_clk),
     .i_reset(i_reset),
@@ -69,8 +69,8 @@ fifo_module #
 
 fifo_module #
 (
-    .NB_UARTMODULE_DATA(NB_UARTMODULE_DATA),
-    .NB_UARTMODULE_ADDR(NB_UARTMODULE_ADDR)
+    .NB_FIFOMODULE_DATA(NB_UARTMODULE_DATA),
+    .NB_FIFOMODULE_ADDR(NB_UARTMODULE_ADDR)
 ) fifotx_module (
     .i_clk(i_clk),
     .i_reset(i_reset),
@@ -84,12 +84,12 @@ fifo_module #
 
 tx_module #
 (
-    .NB_UARTMODULE_DATA(NB_UARTMODULE_DATA),
-    .SB_UARTMODULE_TICKS(SB_UARTMODULE_TICKS)
+    .NB_TXMODULE_DATA(NB_UARTMODULE_DATA),
+    .SB_TXMODULE_TICKS(SB_UARTMODULE_TICKS)
 ) tx_module_1 (
     .i_clk(i_clk),
     .i_reset(i_reset),
-    .i_tx_ready(~uartmodule_emptywire),
+    .i_txmodule_TXSTART(~uartmodule_emptywire),
     .i_txmodule_BRGTICKS(uartmodule_maxtickwire),
     .i_txmodule_DIN(uartmodule_readdatawire),
     .o_txmodule_TXDONE(uartmodule_txdonewire),
