@@ -1,9 +1,11 @@
 NOMBRE DE LAS VARIABLES:  
-En todas las variables(excepto en clock y reset) va el nombre del modulo(es el mismo nombre que le asignamos pero sin el guion bajo)
+En todas las variables (excepto en clock y reset) va el nombre del modulo (es el mismo nombre que le asignamos pero sin el guion bajo)
   
 PARÁMETROS:  
-todo en mayúscula, el nombre del modulo que quede en el medio preferentemente
+Todo en mayúscula, el nombre del modulo que quede en el medio preferentemente.
 - Ejemplo: NB_FIFOMODULE_DATA
+Esto tambien incluye a los localparam, el nombre del modulo seguido de la letra m, nombre del parametro y termina en state.
+- Ejemplo: INTERM_IDLE_STATE
   
 PUERTOS:  
 1. input(i) u output(o) ← minuscula
@@ -12,12 +14,6 @@ PUERTOS:
 4. un guion bajo
 5. nombre descriptivo de la variable ← MAYUSCULA
 - Ejemplo: i_fifomodule_WRITEDATA
-  
-ESTADOS:  
-1. nombre del modulo, todo junto ← minuscula
-2. guion bajo
-3. nombre del estado, seguido de la palabra “state”. todo junto ← minuscula
-- Ej: rxmodule_stopstate
   
 REGISTROS O WIRES QUE NO SON PUERTOS:  
 Para registros:  
