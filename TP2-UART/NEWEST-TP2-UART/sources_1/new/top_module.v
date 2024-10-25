@@ -5,7 +5,7 @@ module top_module #
     parameter MOD_TOPMODULE_M      = 326,
     parameter NB_TOPMODULE_COUNTER = 9,
     parameter NB_TOPMODULE_OP      = 6,
-    parameter PTR_LEN = 2 // <-- REVISAR
+    parameter NB_TOPMODULE_ADDR    = 2
 )(
     input wire i_clk,
     input wire i_reset,
@@ -18,19 +18,19 @@ module top_module #
 
 wire                         topmodule_fulltxwire;
 wire                         topmodule_emptyrxwire;
+
 wire [NB_TOPMODULE_DATA-1:0] topmodule_readdatarxwire;
-
-
-wire topmodule_readinterfacewire;
-wire topmodule_writeinterfacewire;
+wire                         topmodule_readinterfacewire;
+wire                         topmodule_writeinterfacewire;
 wire [NB_TOPMODULE_DATA-1:0] topmodule_writedatainterfacewire;
+
 wire [NB_TOPMODULE_OP-1:0]   topmodule_opwire;
 wire [NB_TOPMODULE_DATA-1:0] topmodule_dataawire;
 wire [NB_TOPMODULE_DATA-1:0] topmodule_databwire;
 
 wire [NB_TOPMODULE_DATA-1:0] topmodule_datareswire;
 
-assign result_leds = topmodule_datareswire;
+//assign result_leds = topmodule_datareswire;
 
 //--------------- INICIALIZACION DE MODULOS ---------------
 
@@ -40,7 +40,7 @@ uart_module #
     .SB_UARTMODULE_TICKS(SB_TOPMODULE_TICKS),
     .MOD_UARTMODULE_M(MOD_TOPMODULE_M),
     .NNB_UARTMODULE_COUNTER(NB_TOPMODULE_COUNTER),
-    .PTR_LEN(PTR_LEN) // <-- REVISAR
+    .NB_UARTMODULE_ADDR(NB_TOPMODULE_ADDR)
 ) uart_module_1 (
     .i_clk(i_clk),
     .i_reset(i_reset),
@@ -72,8 +72,7 @@ interface_module #
     .o_interfacemodule_WRITEDATA(topmodule_writedatainterfacewire),
     .o_interfacemodule_OP(topmodule_opwire),
     .o_interfacemodule_DATAA(topmodule_dataawire),
-    .o_interfacemodule_DATAB(topmodule_databwire),
-    .o_is_valid() // <-- REVISAR
+    .o_interfacemodule_DATAB(topmodule_databwire)
 );
 
 alu_module #

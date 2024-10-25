@@ -4,8 +4,7 @@ module uart_module #
     parameter SB_UARTMODULE_TICKS   = 16,
     parameter MOD_UARTMODULE_M      = 326,
     parameter NB_UARTMODULE_COUNTER = 9,
-
-    parameter PTR_LEN = 2 // <-- REVISAR
+    parameter NB_UARTMODULE_ADDR    = 2
 )(
     input wire                            i_clk,
     input wire                            i_reset,
@@ -24,7 +23,6 @@ module uart_module #
 wire                            uartmodule_maxtickwire;
 wire                            uartmodule_txdonewire;
 wire                            uartmodule_emptywire;
-wire tx_not_empty; // <-- REVISAR
 wire                            uartmodule_rxdonewire;
 wire [NB_UARTMODULE_DATA-1 : 0] uartmodule_readdatawire;
 wire [NB_UARTMODULE_DATA-1 : 0] uartmodule_doutwire;
@@ -57,7 +55,7 @@ rx_module #
 fifo_module #
 (
     .NB_UARTMODULE_DATA(NB_UARTMODULE_DATA),
-    .PTR_LEN(PTR_LEN) // <-- REVISAR
+    .NB_UARTMODULE_ADDR(NB_UARTMODULE_ADDR)
 ) fiforx_module (
     .i_clk(i_clk),
     .i_reset(i_reset),
@@ -72,7 +70,7 @@ fifo_module #
 fifo_module #
 (
     .NB_UARTMODULE_DATA(NB_UARTMODULE_DATA),
-    .PTR_LEN(PTR_LEN) // <-- REVISAR
+    .NB_UARTMODULE_ADDR(NB_UARTMODULE_ADDR)
 ) fifotx_module (
     .i_clk(i_clk),
     .i_reset(i_reset),
@@ -91,13 +89,11 @@ tx_module #
 ) tx_module_1 (
     .i_clk(i_clk),
     .i_reset(i_reset),
-    .i_tx_ready(tx_not_empty), // <-- REVISAR
+    .i_tx_ready(~uartmodule_emptywire),
     .i_txmodule_BRGTICKS(uartmodule_maxtickwire),
     .i_txmodule_DIN(uartmodule_readdatawire),
     .o_txmodule_TXDONE(uartmodule_txdonewire),
     .o_txmodule_TX(o_uartmodule_TX)
 );
-
-assign tx_not_empty = ~uartmodule_emptywire; // <-- REVISAR
 
 endmodule
