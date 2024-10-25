@@ -1,4 +1,4 @@
-module interface_module#
+module interface_module #
 (
     parameter NB_INTERFACEMODULE_DATA = 8,
     parameter NB_INTERFACEMODULE_OP   = 6
@@ -16,16 +16,15 @@ module interface_module#
     output wire [NB_INTERFACEMODULE_OP-1:0]   o_interfacemodule_OP,
     output wire [NB_INTERFACEMODULE_DATA-1:0] o_interfacemodule_DATAA,
     output wire [NB_INTERFACEMODULE_DATA-1:0] o_interfacemodule_DATAB
-    // output wire                               o_is_valid // <-- REVISAR
 );
 
 // STM Interface
-localparam [3:0] IDLE      = 4'b0000;
-localparam [3:0] OPCODE    = 4'b0001;
-localparam [3:0] OPERAND_A = 4'b0010;
-localparam [3:0] OPERAND_B = 4'b0011;
-localparam [3:0] RESULT    = 4'b0100;
-localparam [3:0] WAIT      = 4'b1000;
+localparam [3:0] INTERM_IDLE_STATE   = 4'b0000;
+localparam [3:0] INTERM_OPCODE_STATE = 4'b0001;
+localparam [3:0] INTERM_DATA_A_STATE = 4'b0010;
+localparam [3:0] INTERM_DATA_B_STATE = 4'b0011;
+localparam [3:0] INTERM_RESULT_STATE = 4'b0100;
+localparam [3:0] INTERM_WAIT_STATE   = 4'b1000;
 
 reg [3:0]                         interfacemodule_statereg,   interfacemodule_nextstatereg;
 reg                               interfacemodule_readreg,    interfacemodule_nextreadreg;
@@ -38,7 +37,7 @@ reg [3:0]                         interfacemodule_waitreg,    interfacemodule_ne
 
 always @(posedge i_clk) begin
     if(i_reset) begin
-        interfacemodule_statereg   <= IDLE;
+        interfacemodule_statereg   <= INTERM_IDLE_STATE;
         interfacemodule_readreg    <= 1'b0;
         interfacemodule_writereg   <= 1'b0;
         interfacemodule_opreg      <= {NB_INTERFACEMODULE_OP{1'b0}};
@@ -70,70 +69,70 @@ always @(*) begin
     interfacemodule_nextwaitreg    = interfacemodule_waitreg;
 
     case (interfacemodule_statereg)
-        IDLE: begin
+        INTERM_IDLE_STATE: begin
             interfacemodule_nextwritereg = 1'b0;
             if(~i_interfacemodule_EMPTY) begin
-                interfacemodule_nextstatereg = OPCODE;
+                interfacemodule_nextstatereg = INTERM_OPCODE_STATE;
                 interfacemodule_nextreadreg  = 1'b1;
             end
         end
 
-        WAIT: begin
+        INTERM_WAIT_STATE: begin
             if(~i_interfacemodule_EMPTY) begin
                 interfacemodule_nextstatereg = interfacemodule_waitreg;
                 interfacemodule_nextreadreg  = 1'b1;
             end
         end
 
-        OPCODE: begin
+        INTERM_OPCODE_STATE: begin
             if(i_interfacemodule_EMPTY) begin
                 interfacemodule_nextreadreg  = 1'b0;
-                interfacemodule_nextstatereg = WAIT;
-                interfacemodule_nextwaitreg  = OPCODE;
+                interfacemodule_nextstatereg = INTERM_WAIT_STATE;
+                interfacemodule_nextwaitreg  = INTERM_OPCODE_STATE;
             end
             else begin
-                interfacemodule_nextstatereg = OPERAND_A;
+                interfacemodule_nextstatereg = INTERM_DATA_A_STATE;
                 interfacemodule_nextopreg    = i_interfacemodule_READDATA[NB_INTERFACEMODULE_OP-1:0];
                 interfacemodule_nextreadreg  = 1'b1;
             end
         end
 
-        OPERAND_A: begin
+        INTERM_DATA_A_STATE: begin
             if(i_interfacemodule_EMPTY) begin
                 interfacemodule_nextreadreg  = 1'b0;
-                interfacemodule_nextstatereg = WAIT;
-                interfacemodule_nextwaitreg  = OPERAND_A;
+                interfacemodule_nextstatereg = INTERM_WAIT_STATE;
+                interfacemodule_nextwaitreg  = INTERM_DATA_A_STATE;
             end
             else begin
-                interfacemodule_nextstatereg = OPERAND_B;
+                interfacemodule_nextstatereg = INTERM_DATA_B_STATE;
                 interfacemodule_nextdataAreg = i_interfacemodule_READDATA;
                 interfacemodule_nextreadreg  = 1'b1;
             end
         end
 
-        OPERAND_B: begin
+        INTERM_DATA_B_STATE: begin
             if(i_interfacemodule_EMPTY) begin
                 interfacemodule_nextreadreg  = 1'b0;
-                interfacemodule_nextstatereg = WAIT;
-                interfacemodule_nextwaitreg  = OPERAND_B;
+                interfacemodule_nextstatereg = INTERM_WAIT_STATE;
+                interfacemodule_nextwaitreg  = INTERM_DATA_B_STATE;
             end
             else begin
-                interfacemodule_nextstatereg = RESULT;
+                interfacemodule_nextstatereg = INTERM_RESULT_STATE;
                 interfacemodule_nextdataBreg = i_interfacemodule_READDATA;
                 interfacemodule_nextreadreg  = 1'b0;
             end
         end
 
-        RESULT: begin
+        INTERM_RESULT_STATE: begin
             if(~i_interfacemodule_FULL) begin
-                interfacemodule_nextstatereg   = IDLE;
+                interfacemodule_nextstatereg   = INTERM_IDLE_STATE;
                 interfacemodule_nextdataresreg = i_interfacemodule_DATARES;
                 interfacemodule_nextwritereg   = 1'b1;
             end
         end
 
         default: begin
-            interfacemodule_nextstatereg = IDLE;
+            interfacemodule_nextstatereg = INTERM_IDLE_STATE;
             interfacemodule_nextreadreg  = 1'b0;
             interfacemodule_nextwritereg = 1'b0;
         end

@@ -13,23 +13,23 @@ module tx_module #
     output wire o_txmodule_TX
 );
 
-//FSM stages
-localparam [1:0] IDLE  = 2'b00;
-localparam [1:0] START = 2'b01;
-localparam [1:0] DATA  = 2'b10;
-localparam [1:0] STOP  = 2'b11;
+// FSM stages
+localparam [1:0] TXM_IDLE_STATE  = 2'b00;
+localparam [1:0] TXM_START_STATE = 2'b01;
+localparam [1:0] TXM_DATA_STATE  = 2'b10;
+localparam [1:0] TXM_STOP_STATE  = 2'b11;
 
-//signal declaration
+// Signal declaration
 reg [1:0]                  txmodule_statereg,    txmodule_nextstatereg;
 reg [3:0]                  txmodule_samptickreg, txmodule_nextsamptickreg;
 reg [2:0]                  txmodule_nbrecreg,    txmodule_nextnbrecreg;
 reg [NB_TXMODULE_DATA-1:0] txmodule_bitsreasreg, txmodule_nextbitsreasreg;
 reg                        txmodule_reg,         txmodule_nextreg;
 
-//Finite State Machine with Data (state and DATA registers)
+// Finite State Machine with Data (state and DATA registers)
 always @(posedge i_clk) begin
     if(i_reset) begin
-        txmodule_statereg    <= IDLE;
+        txmodule_statereg    <= TXM_IDLE_STATE;
         txmodule_samptickreg <= 0;
         txmodule_nbrecreg    <= 0;
         txmodule_bitsreasreg <= 0;
@@ -44,7 +44,7 @@ always @(posedge i_clk) begin
     end
 end
 
-//Finite State Machine with Data (next state logic and functional units)
+// Finite State Machine with Data (next state logic and functional units)
 always @(*) begin
     txmodule_nextstatereg    = txmodule_statereg;
     o_txmodule_TXDONE        = 1'b0;
@@ -54,20 +54,20 @@ always @(*) begin
     txmodule_nextreg         = txmodule_reg;
 
     case (txmodule_statereg)
-        IDLE: begin
+        TXM_IDLE_STATE: begin
             txmodule_nextreg = 1'b1;
             if(i_txmodule_TXSTART) begin
-                txmodule_nextstatereg    = START;
+                txmodule_nextstatereg    = TXM_START_STATE;
                 txmodule_nextsamptickreg = 0;
                 txmodule_nextbitsreasreg = i_txmodule_DIN;
             end
         end
 
-        START: begin
+        TXM_START_STATE: begin
             txmodule_nextreg = 1'b0;
             if (i_txmodule_BRGTICKS) begin
                 if (txmodule_samptickreg == 15) begin
-                    txmodule_nextstatereg    = DATA;
+                    txmodule_nextstatereg    = TXM_DATA_STATE;
                     txmodule_nextsamptickreg = 0;
                     txmodule_nextnbrecreg    = 0;
                 end
@@ -77,14 +77,14 @@ always @(*) begin
             end
         end
 
-        DATA: begin
+        TXM_DATA_STATE: begin
             txmodule_nextreg = txmodule_bitsreasreg[0];
             if (i_txmodule_BRGTICKS) begin
                 if(txmodule_samptickreg == 15) begin
                     txmodule_nextsamptickreg = 0;
                     txmodule_nextbitsreasreg = txmodule_bitsreasreg >> 1;
                     if (txmodule_nbrecreg == (NB_TXMODULE_DATA-1)) begin
-                    txmodule_nextstatereg = STOP;
+                    txmodule_nextstatereg = TXM_STOP_STATE;
                     end
                     else begin
                         txmodule_nextnbrecreg = txmodule_nbrecreg + 1;
@@ -96,11 +96,11 @@ always @(*) begin
             end
         end
 
-        STOP: begin
+        TXM_STOP_STATE: begin
             txmodule_nextreg = 1'b1;
             if (i_txmodule_BRGTICKS) begin
                 if (txmodule_samptickreg == (SB_TXMODULE_TICKS-1)) begin
-                    txmodule_nextstatereg = IDLE;
+                    txmodule_nextstatereg = TXM_IDLE_STATE;
                     o_txmodule_TXDONE     = 1'b1;
                 end
                 else begin
@@ -109,7 +109,7 @@ always @(*) begin
             end
         end
         default: begin
-            txmodule_nextstatereg = IDLE;
+            txmodule_nextstatereg = TXM_IDLE_STATE;
         end
     endcase
 end

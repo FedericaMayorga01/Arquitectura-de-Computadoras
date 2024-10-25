@@ -15,9 +15,9 @@ module fifo_module #
 );
 
 // FIFO operations
-localparam READ      = 2'b01;
-localparam WRITE     = 2'b10;
-localparam READWRITE = 2'b11;
+localparam FIFOM_READ_STATE      = 2'b01;
+localparam FIFOM_WRITE_STATE     = 2'b10;
+localparam FIFOM_READWRITE_STATE = 2'b11;
 
 
 // Signal declaration
@@ -74,7 +74,7 @@ always @(*) begin
     fifomodule_nextemptyreg    = fifomodule_emptyreg;
 
     case ({i_fifomodule_WRITE, i_fifomodule_READ})
-        READ:
+        FIFOM_READ_STATE:
             if (~fifomodule_emptyreg) begin
                 fifomodule_nextreadptrreg = fifomodule_succreadptrreg;   // desplazar puntero
                 fifomodule_nextfullreg = 1'b0;
@@ -82,7 +82,7 @@ always @(*) begin
                     fifomodule_nextemptyreg = 1'b1;
                 end
             end
-        WRITE:
+        FIFOM_WRITE_STATE:
             if (~fifomodule_fullreg) begin
                 fifomodule_nextwriteptrreg = fifomodule_succwriteptrreg;
                 fifomodule_nextemptyreg = 1'b0;
@@ -90,7 +90,7 @@ always @(*) begin
                     fifomodule_nextfullreg = 1'b1;
                 end
             end
-        READWRITE:
+        FIFOM_READWRITE_STATE:
             begin
                 fifomodule_nextwriteptrreg = fifomodule_succwriteptrreg;
                 fifomodule_nextreadptrreg  = fifomodule_succreadptrreg;

@@ -1,2 +1,4 @@
 # Ignore the virtual environment folder
 venv/
+# Ignore the ToDo list
+ToDo.txt

@@ -3,8 +3,7 @@
 module rx_module #(
     parameter NB_RXMODULE_DATA = 8,
     parameter SB_RXMODULE_TICKS = 16
-)
-(
+)(
     input wire                         i_clk,
     input wire                         i_reset,
     input wire                         i_rxmodule_RX,
@@ -14,22 +13,22 @@ module rx_module #(
     output wire [NB_RXMODULE_DATA-1:0] o_rxmodule_DOUT
 );
 
-//FSM stages
-localparam [1:0] IDLE  = 2'b00;
-localparam [1:0] START = 2'b01;
-localparam [1:0] DATA  = 2'b10;
-localparam [1:0] STOP  = 2'b11;
+// FSM stages
+localparam [1:0] RXM_IDLE_STATE  = 2'b00;
+localparam [1:0] RXM_START_STATE = 2'b01;
+localparam [1:0] RXM_DATA_STATE  = 2'b10;
+localparam [1:0] RXM_STOP_STATE  = 2'b11;
 
-//Signal declaration
+// Signal declaration
 reg [1:0]                  rxmodule_statereg,    rxmodule_nextstatereg;
-reg [3:0]                  rxmodule_samptickreg, rxmodule_nextsamptickreg;                                    //ticks count
-reg [2:0]                  rxmodule_nbrecreg,    rxmodule_nextnbrecreg;                                    //bits count
+reg [3:0]                  rxmodule_samptickreg, rxmodule_nextsamptickreg;  // ticks count
+reg [2:0]                  rxmodule_nbrecreg,    rxmodule_nextnbrecreg;     // bits count
 reg [NB_RXMODULE_DATA-1:0] rxmodule_bitsreasreg, rxmodule_nextbitsreasreg;
 
-//Finite State Machine with DATA (state and DATA registers)
+// Finite State Machine with DATA (state and DATA registers)
 always @(posedge i_clk) begin
     if (i_reset) begin
-        rxmodule_statereg    <= IDLE;
+        rxmodule_statereg    <= RXM_IDLE_STATE;
         rxmodule_samptickreg <= 0;
         rxmodule_nbrecreg    <= 0;
         rxmodule_bitsreasreg <= 0;
@@ -42,7 +41,7 @@ always @(posedge i_clk) begin
     end
 end
 
-//Finite State Machine with DATA (next state logic)
+// Finite State Machine with DATA (next state logic)
 always @(*) begin
     rxmodule_nextstatereg    = rxmodule_statereg;
     o_rxmodule_RXDONE        = 1'b0;
@@ -51,18 +50,18 @@ always @(*) begin
     rxmodule_nextbitsreasreg = rxmodule_bitsreasreg;
 
     case (rxmodule_statereg)
-        IDLE:
+        RXM_IDLE_STATE:
             if (~i_rxmodule_RX)
             begin
-               rxmodule_nextstatereg    = START;
+               rxmodule_nextstatereg    = RXM_START_STATE;
                rxmodule_nextsamptickreg = 0;
             end
 
-        START:
+        RXM_START_STATE:
             if (i_rxmodule_BRGTICKS)
             begin
                 if (rxmodule_samptickreg == 7) begin
-                    rxmodule_nextstatereg    = DATA;
+                    rxmodule_nextstatereg    = RXM_DATA_STATE;
                     rxmodule_nextsamptickreg = 0;
                     rxmodule_nextnbrecreg    = 0;
                 end
@@ -72,13 +71,13 @@ always @(*) begin
 
             end
 
-        DATA:
+        RXM_DATA_STATE:
             if (i_rxmodule_BRGTICKS) begin
                 if (rxmodule_samptickreg == 15) begin
                     rxmodule_nextsamptickreg = 0;
                     rxmodule_nextbitsreasreg = {i_rxmodule_RX, rxmodule_bitsreasreg[NB_RXMODULE_DATA-1:1]};
                     if (rxmodule_nbrecreg == (NB_RXMODULE_DATA-1)) begin
-                        rxmodule_nextstatereg = STOP;
+                        rxmodule_nextstatereg = RXM_STOP_STATE;
                     end
                     else begin
                         rxmodule_nextnbrecreg = rxmodule_nbrecreg + 1;
@@ -91,10 +90,10 @@ always @(*) begin
 
             end
 
-        STOP:
+        RXM_STOP_STATE:
             if (i_rxmodule_BRGTICKS) begin
                 if (rxmodule_samptickreg == (SB_RXMODULE_TICKS-1)) begin
-                    rxmodule_nextstatereg = IDLE;
+                    rxmodule_nextstatereg = RXM_IDLE_STATE;
                     if(i_rxmodule_RX) begin
                         o_rxmodule_RXDONE = 1'b1;
                     end
@@ -105,7 +104,7 @@ always @(*) begin
             end
 
         default:
-            rxmodule_nextstatereg = IDLE;
+            rxmodule_nextstatereg = RXM_IDLE_STATE;
     endcase
 end
 
