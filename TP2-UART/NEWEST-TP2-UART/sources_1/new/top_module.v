@@ -82,7 +82,10 @@ alu_module #
     .i_alumodule_data_A(topmodule_dataawire),
     .i_alumodule_data_B(topmodule_databwire),
     .i_alumodule_OP(topmodule_opwire),
-    .o_alumodule_data_RES(topmodule_datareswire)
+    .o_alumodule_data_RES(topmodule_datareswire),
+    .o_alumodule_ZERO(),
+    .o_alumodule_NEGATIVE(),
+    .o_alumodule_CARRY()
 );
 
 endmodule
