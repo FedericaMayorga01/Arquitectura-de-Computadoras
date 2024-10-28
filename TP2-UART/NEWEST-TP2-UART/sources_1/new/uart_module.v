@@ -4,14 +4,14 @@ module uart_module #
     parameter SB_UARTMODULE_TICKS   = 16,
     parameter MOD_UARTMODULE_M      = 326,
     parameter NB_UARTMODULE_COUNTER = 9,
-    parameter NB_UARTMODULE_ADDR    = 2
+    parameter NB_UARTMODULE_ADDR    = 4
 )(
-    input wire                            i_clk,
-    input wire                            i_reset,
-    input wire                            i_uartmodule_fiforx_READ,
-    input wire                            i_uartmodule_fifotx_WRITE,
-    input wire                            i_uartmodule_RX,
-    input wire [NB_UARTMODULE_DATA-1 : 0] i_uartmodule_fifotx_WRITEDATA,
+    input  wire                            i_clk,
+    input  wire                            i_reset,
+    input  wire                            i_uartmodule_fiforx_READ,
+    input  wire                            i_uartmodule_fifotx_WRITE,
+    input  wire                            i_uartmodule_RX,
+    input  wire [NB_UARTMODULE_DATA-1 : 0] i_uartmodule_fifotx_WRITEDATA,
 
     output wire                            o_uartmodule_fifotx_FULL,
     output wire                            o_uartmodule_fiforx_EMPTY,
@@ -19,7 +19,6 @@ module uart_module #
     output wire [NB_UARTMODULE_DATA-1 : 0] o_uartmodule_fiforx_READDATA
 );
 
-// Signal declaration
 wire                            uartmodule_maxtickwire;
 wire                            uartmodule_txdonewire;
 wire                            uartmodule_emptywire;
@@ -27,7 +26,6 @@ wire                            uartmodule_rxdonewire;
 wire [NB_UARTMODULE_DATA-1 : 0] uartmodule_readdatawire;
 wire [NB_UARTMODULE_DATA-1 : 0] uartmodule_doutwire;
 
-//--------------- INICIALIZACION DE MODULOS ---------------
 
 baudrg_module#
 (

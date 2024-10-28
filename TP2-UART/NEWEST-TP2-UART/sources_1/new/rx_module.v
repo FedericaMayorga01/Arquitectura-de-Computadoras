@@ -1,7 +1,7 @@
 `timescale 1ns / 1ps
 
 module rx_module #(
-    parameter NB_RXMODULE_DATA = 8,
+    parameter NB_RXMODULE_DATA  = 8,
     parameter SB_RXMODULE_TICKS = 16
 )(
     input wire                         i_clk,
@@ -13,19 +13,16 @@ module rx_module #(
     output wire [NB_RXMODULE_DATA-1:0] o_rxmodule_DOUT
 );
 
-// FSM stages
 localparam [1:0] RXM_IDLE_STATE  = 2'b00;
 localparam [1:0] RXM_START_STATE = 2'b01;
 localparam [1:0] RXM_DATA_STATE  = 2'b10;
 localparam [1:0] RXM_STOP_STATE  = 2'b11;
 
-// Signal declaration
 reg [1:0]                  rxmodule_statereg,    rxmodule_nextstatereg;
 reg [3:0]                  rxmodule_samptickreg, rxmodule_nextsamptickreg;  // ticks count
-reg [2:0]                  rxmodule_nbrecreg,    rxmodule_nextnbrecreg;     // bits count
+reg [2:0]                  rxmodule_nbrecreg,    rxmodule_nextnbrecreg;     // num bits count
 reg [NB_RXMODULE_DATA-1:0] rxmodule_bitsreasreg, rxmodule_nextbitsreasreg;
 
-// Finite State Machine with DATA (state and DATA registers)
 always @(posedge i_clk) begin
     if (i_reset) begin
         rxmodule_statereg    <= RXM_IDLE_STATE;
@@ -41,7 +38,6 @@ always @(posedge i_clk) begin
     end
 end
 
-// Finite State Machine with DATA (next state logic)
 always @(*) begin
     rxmodule_nextstatereg    = rxmodule_statereg;
     o_rxmodule_RXDONE        = 1'b0;
@@ -108,7 +104,6 @@ always @(*) begin
     endcase
 end
 
-// Output
 assign o_rxmodule_DOUT = rxmodule_bitsreasreg;
 
 endmodule

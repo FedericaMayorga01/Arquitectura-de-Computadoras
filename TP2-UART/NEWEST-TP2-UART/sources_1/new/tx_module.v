@@ -1,6 +1,6 @@
 module tx_module #
 (
-    parameter NB_TXMODULE_DATA = 8,
+    parameter NB_TXMODULE_DATA  = 8,
     parameter SB_TXMODULE_TICKS = 16
 )(
     input wire                          i_clk,
@@ -13,20 +13,17 @@ module tx_module #
     output wire                         o_txmodule_TX
 );
 
-// FSM stages
 localparam [1:0] TXM_IDLE_STATE  = 2'b00;
 localparam [1:0] TXM_START_STATE = 2'b01;
 localparam [1:0] TXM_DATA_STATE  = 2'b10;
 localparam [1:0] TXM_STOP_STATE  = 2'b11;
 
-// Signal declaration
 reg [1:0]                  txmodule_statereg,    txmodule_nextstatereg;
 reg [3:0]                  txmodule_samptickreg, txmodule_nextsamptickreg;
 reg [2:0]                  txmodule_nbrecreg,    txmodule_nextnbrecreg;
 reg [NB_TXMODULE_DATA-1:0] txmodule_bitsreasreg, txmodule_nextbitsreasreg;
 reg                        txmodule_reg,         txmodule_nextreg;
 
-// Finite State Machine with Data (state and DATA registers)
 always @(posedge i_clk) begin
     if(i_reset) begin
         txmodule_statereg    <= TXM_IDLE_STATE;
@@ -44,7 +41,6 @@ always @(posedge i_clk) begin
     end
 end
 
-// Finite State Machine with Data (next state logic and functional units)
 always @(*) begin
     txmodule_nextstatereg    = txmodule_statereg;
     o_txmodule_TXDONE        = 1'b0;
@@ -114,7 +110,6 @@ always @(*) begin
     endcase
 end
 
-// Output
 assign o_txmodule_TX = txmodule_reg;
 
 endmodule

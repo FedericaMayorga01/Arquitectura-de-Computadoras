@@ -5,11 +5,11 @@ module top_module #
     parameter MOD_TOPMODULE_M      = 326,
     parameter NB_TOPMODULE_COUNTER = 9,
     parameter NB_TOPMODULE_OP      = 6,
-    parameter NB_TOPMODULE_ADDR    = 2
+    parameter NB_TOPMODULE_ADDR    = 4
 )(
-    input wire i_clk,
-    input wire i_reset,
-    input wire i_topmodule_RX,
+    input  wire i_clk,
+    input  wire i_reset,
+    input  wire i_topmodule_RX,
 
     output wire o_topmodule_TX,
     output wire o_topmodule_LED
@@ -29,7 +29,6 @@ wire [NB_TOPMODULE_DATA-1:0] topmodule_databwire;
 
 wire [NB_TOPMODULE_DATA-1:0] topmodule_datareswire;
 
-//--------------- INICIALIZACION DE MODULOS ---------------
 
 uart_module #
 (

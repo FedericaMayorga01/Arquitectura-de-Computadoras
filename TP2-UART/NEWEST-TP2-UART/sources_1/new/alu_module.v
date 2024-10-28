@@ -8,69 +8,72 @@ module alu_module
 (
     input   wire signed [NB_ALUMODULE_DATA-1:0] i_alumodule_data_A,
     input   wire signed [NB_ALUMODULE_DATA-1:0] i_alumodule_data_B,
-    input   wire [NB_ALUMODULE_OP-1:0] i_alumodule_OP,
+    input   wire        [NB_ALUMODULE_OP-1:0]   i_alumodule_OP,
     output  wire signed [NB_ALUMODULE_DATA-1:0] o_alumodule_data_RES,
-    output  wire o_alumodule_ZERO,
-    output  wire o_alumodule_NEGATIVE,
-    output  wire o_alumodule_CARRY
+    output  wire                                o_alumodule_ZERO,
+    output  wire                                o_alumodule_NEGATIVE,
+    output  wire                                o_alumodule_CARRY
 );
 
 reg signed [NB_ALUMODULE_DATA-1:0] alumodule_tmpreg;
-reg alumodule_carryreg;
+reg                                alumodule_carryreg;
 
 always @(*)
     begin: case_alu
         case(i_alumodule_OP)
-            // Suma con alumodule_carryreg
+            // Suma con carry
             6'b100000 :
-                {alumodule_carryreg, alumodule_tmpreg} = i_alumodule_data_A + i_alumodule_data_B; // alumodule_carryreg es el bit m?s significativo de la suma
+                {alumodule_carryreg, alumodule_tmpreg} = i_alumodule_data_A + i_alumodule_data_B; 
 
             // Resta con borrow
             6'b100010 :
-                {alumodule_carryreg, alumodule_tmpreg} = i_alumodule_data_A - i_alumodule_data_B; // alumodule_carryreg es 1 si hay borrow
+                {alumodule_carryreg, alumodule_tmpreg} = i_alumodule_data_A - i_alumodule_data_B; 
 
-            // Operaciones logicas, alumodule_carryreg no es relevante
+            // AND
             6'b100100 :
                 begin
-                    alumodule_tmpreg = i_alumodule_data_A & i_alumodule_data_B; 
-                    alumodule_carryreg = 1'b0; // No hay alumodule_carryreg en AND
+                    alumodule_tmpreg   = i_alumodule_data_A & i_alumodule_data_B; 
+                    alumodule_carryreg = 1'b0; 
                 end
-
+            
+            // OR
             6'b100101 :
                 begin
-                    alumodule_tmpreg = i_alumodule_data_A | i_alumodule_data_B;
-                    alumodule_carryreg = 1'b0; // No hay alumodule_carryreg en OR
+                    alumodule_tmpreg   = i_alumodule_data_A | i_alumodule_data_B;
+                    alumodule_carryreg = 1'b0; 
                 end
 
+            // XOR
             6'b100110 :
                 begin
-                    alumodule_tmpreg = i_alumodule_data_A ^ i_alumodule_data_B;
-                    alumodule_carryreg = 1'b0; // No hay alumodule_carryreg en XOR
+                    alumodule_tmpreg   = i_alumodule_data_A ^ i_alumodule_data_B;
+                    alumodule_carryreg = 1'b0; 
                 end
 
-            // Desplazamientos, sin alumodule_carryreg relevante
+            // SRA
             6'b000011 :
                 begin
-                    alumodule_tmpreg = i_alumodule_data_A >>> i_alumodule_data_B;
-                    alumodule_carryreg = 1'b0; // No hay alumodule_carryreg en SRA
+                    alumodule_tmpreg   = i_alumodule_data_A >>> i_alumodule_data_B;
+                    alumodule_carryreg = 1'b0; 
                 end
 
+            // SRL
             6'b000010 :
                 begin
-                    alumodule_tmpreg = i_alumodule_data_A >> i_alumodule_data_B;
-                    alumodule_carryreg = 1'b0; // No hay alumodule_carryreg en SRL
+                    alumodule_tmpreg   = i_alumodule_data_A >> i_alumodule_data_B;
+                    alumodule_carryreg = 1'b0;
                 end
 
             6'b100111 :
                 begin
-                    alumodule_tmpreg = ~(i_alumodule_data_A | i_alumodule_data_B);
-                    alumodule_carryreg = 1'b0; // No hay alumodule_carryreg en NOR
+                    alumodule_tmpreg   = ~(i_alumodule_data_A | i_alumodule_data_B);
+                    alumodule_carryreg = 1'b0; 
                 end
 
             default :
                 begin
-                    alumodule_tmpreg = {NB_ALUMODULE_DATA{1'b0}};
-                    alumodule_carryreg = 1'b0; // Default sin alumodule_carryreg
+                    alumodule_tmpreg   = {NB_ALUMODULE_DATA{1'b0}};
+                    alumodule_carryreg = 1'b0; 
                 end
         endcase
     end

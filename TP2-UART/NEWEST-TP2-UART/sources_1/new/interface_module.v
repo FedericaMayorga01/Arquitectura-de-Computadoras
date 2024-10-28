@@ -1,25 +1,24 @@
 module interface_module #
 (
-    parameter NB_INTERFACEMODULE_DATA       = 8,
-    parameter NB_INTERFACEMODULE_OP         = 6
+    parameter NB_INTERFACEMODULE_DATA  = 8,
+    parameter NB_INTERFACEMODULE_OP    = 6
 )(
-    input wire                               i_clk,
-    input wire                               i_reset,
-    input wire [NB_INTERFACEMODULE_DATA-1:0] i_interfacemodule_DATARES,
-    input wire [NB_INTERFACEMODULE_DATA-1:0] i_interfacemodule_READDATA,
-    input wire                               i_interfacemodule_EMPTY,
-    input wire                               i_interfacemodule_FULL,
+    input wire                                i_clk,
+    input wire                                i_reset,
+    input wire [NB_INTERFACEMODULE_DATA-1:0]  i_interfacemodule_DATARES,
+    input wire [NB_INTERFACEMODULE_DATA-1:0]  i_interfacemodule_READDATA,
+    input wire                                i_interfacemodule_EMPTY,
+    input wire                                i_interfacemodule_FULL,
 
-    output wire                                     o_interfacemodule_READ,
-    output wire                                     o_interfacemodule_WRITE,
-    output wire [NB_INTERFACEMODULE_DATA-1:0]       o_interfacemodule_WRITEDATA,
-    output wire [NB_INTERFACEMODULE_OP-1:0]         o_interfacemodule_OP,
-    output wire [NB_INTERFACEMODULE_DATA-1:0]       o_interfacemodule_DATAA,
-    output wire [NB_INTERFACEMODULE_DATA-1:0]       o_interfacemodule_DATAB,
-    output wire                                     o_interfacemodule_LED
+    output wire                               o_interfacemodule_READ,
+    output wire                               o_interfacemodule_WRITE,
+    output wire [NB_INTERFACEMODULE_DATA-1:0] o_interfacemodule_WRITEDATA,
+    output wire [NB_INTERFACEMODULE_OP-1:0]   o_interfacemodule_OP,
+    output wire [NB_INTERFACEMODULE_DATA-1:0] o_interfacemodule_DATAA,
+    output wire [NB_INTERFACEMODULE_DATA-1:0] o_interfacemodule_DATAB,
+    output wire                               o_interfacemodule_LED
 );
 
-// STM Interface
 localparam [3:0] INTERM_IDLE_STATE   = 4'b0000;
 localparam [3:0] INTERM_OPCODE_STATE = 4'b0001;
 localparam [3:0] INTERM_DATA_A_STATE = 4'b0010;
@@ -27,7 +26,6 @@ localparam [3:0] INTERM_DATA_B_STATE = 4'b0011;
 localparam [3:0] INTERM_RESULT_STATE = 4'b0100;
 localparam [3:0] INTERM_WAIT_STATE   = 4'b1000;
 
-// Registers
 reg [3:0]                               interfacemodule_statereg,      interfacemodule_nextstatereg;
 reg                                     interfacemodule_readreg,       interfacemodule_nextreadreg;
 reg                                     interfacemodule_writereg,      interfacemodule_nextwritereg;
@@ -145,7 +143,6 @@ always @(*) begin
     endcase
 end
 
-// Output
 assign o_interfacemodule_DATAA      = interfacemodule_dataAreg;
 assign o_interfacemodule_DATAB      = interfacemodule_dataBreg;
 assign o_interfacemodule_OP         = interfacemodule_opreg;
