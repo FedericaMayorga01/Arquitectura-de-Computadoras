@@ -4,7 +4,7 @@ from typing import Optional
 
 # Configuración prefijada
 BAUDRATE = 19200  # Set baud rate for communication
-SERIAL_PORT = "COM3"  # Establece el puerto COM directamente aquí
+SERIAL_PORT = "COM6"  # Establece el puerto COM directamente aquí
 
 OPCODES = {
     'ADD': 0x20,
@@ -65,14 +65,14 @@ class SerialPortControl:
             return None
 
     def get_operation(self) -> Optional[int]:
-        operation: str = input('Seleccionar la operacion ... ADD, SUB, AND, OR, XOR, NOR, SRA, SRL : ').lower()
+        operation: str = input('Ingrese la operacion ... ADD, SUB, AND, OR, XOR, NOR, SRA, SRL : ').lower()
         if operation in EXIT_COMMANDS:
             self.exit_program()
 
         if operation.upper() in OPCODES:
             return OPCODES[operation.upper()]
         else:
-            print('Operation invalida')
+            print('Operacion invalida')
             return None
 
     def send_data(self, operation: int, operand1: int, operand2: int) -> None:
