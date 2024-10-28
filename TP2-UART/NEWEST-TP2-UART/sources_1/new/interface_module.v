@@ -36,7 +36,7 @@ reg [NB_INTERFACEMODULE_DATA-1:0]       interfacemodule_dataAreg,      interface
 reg [NB_INTERFACEMODULE_DATA-1:0]       interfacemodule_dataBreg,      interfacemodule_nextdataBreg;
 reg [NB_INTERFACEMODULE_DATA-1:0]       interfacemodule_dataresreg,    interfacemodule_nextdataresreg;
 reg [3:0]                               interfacemodule_waitreg,       interfacemodule_nextwaitreg;
-reg                                     interfacemodule_ledreg,        interfacemodule_nextledreg;
+reg                                     interfacemodule_ledreg;
 
 always @(posedge i_clk) begin
     if(i_reset) begin
@@ -59,7 +59,7 @@ always @(posedge i_clk) begin
         interfacemodule_dataBreg      <= interfacemodule_nextdataBreg;
         interfacemodule_dataresreg    <= interfacemodule_nextdataresreg;
         interfacemodule_waitreg       <= interfacemodule_nextwaitreg;
-        interfacemodule_ledreg <= interfacemodule_nextledreg;
+        interfacemodule_ledreg        <= 1'b0;
     end
 end
 
@@ -72,7 +72,6 @@ always @(*) begin
     interfacemodule_nextdataBreg      = interfacemodule_dataBreg;
     interfacemodule_nextdataresreg    = interfacemodule_dataresreg;
     interfacemodule_nextwaitreg       = interfacemodule_waitreg;
-    interfacemodule_nextledreg = interfacemodule_ledreg;
 
     case (interfacemodule_statereg)
         INTERM_IDLE_STATE: begin
