@@ -5,15 +5,14 @@ module top_module #
     parameter MOD_TOPMODULE_M      = 326,
     parameter NB_TOPMODULE_COUNTER = 9,
     parameter NB_TOPMODULE_OP      = 6,
-    parameter NB_TOPMODULE_ADDR    = 2,
-    parameter NB_TOPMODULE_STATES  = 7
+    parameter NB_TOPMODULE_ADDR    = 2
 )(
     input wire i_clk,
     input wire i_reset,
     input wire i_topmodule_RX,
 
     output wire o_topmodule_TX,
-    output wire [NB_TOPMODULE_STATES-1:0] o_topmodule_LEDSSTATES
+    output wire o_topmodule_LED
 );
 
 wire                         topmodule_fulltxwire;
@@ -71,7 +70,7 @@ interface_module #
     .o_interfacemodule_OP(topmodule_opwire),
     .o_interfacemodule_DATAA(topmodule_dataawire),
     .o_interfacemodule_DATAB(topmodule_databwire),
-    .o_interfacemodule_LEDSSTATES(o_topmodule_LEDSSTATES)
+    .o_interfacemodule_LED(o_topmodule_LED)
 );
 
 alu_module #

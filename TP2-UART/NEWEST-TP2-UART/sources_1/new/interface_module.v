@@ -1,8 +1,7 @@
 module interface_module #
 (
     parameter NB_INTERFACEMODULE_DATA       = 8,
-    parameter NB_INTERFACEMODULE_OP         = 6,
-    parameter NB_INTERFACEMODULE_LEDSSTATES = 7
+    parameter NB_INTERFACEMODULE_OP         = 6
 )(
     input wire                               i_clk,
     input wire                               i_reset,
@@ -17,7 +16,7 @@ module interface_module #
     output wire [NB_INTERFACEMODULE_OP-1:0]         o_interfacemodule_OP,
     output wire [NB_INTERFACEMODULE_DATA-1:0]       o_interfacemodule_DATAA,
     output wire [NB_INTERFACEMODULE_DATA-1:0]       o_interfacemodule_DATAB,
-    output wire [NB_INTERFACEMODULE_LEDSSTATES-1:0] o_interfacemodule_LEDSSTATES
+    output wire                                     o_interfacemodule_LED
 );
 
 // STM Interface
@@ -37,7 +36,7 @@ reg [NB_INTERFACEMODULE_DATA-1:0]       interfacemodule_dataAreg,      interface
 reg [NB_INTERFACEMODULE_DATA-1:0]       interfacemodule_dataBreg,      interfacemodule_nextdataBreg;
 reg [NB_INTERFACEMODULE_DATA-1:0]       interfacemodule_dataresreg,    interfacemodule_nextdataresreg;
 reg [3:0]                               interfacemodule_waitreg,       interfacemodule_nextwaitreg;
-reg [NB_INTERFACEMODULE_LEDSSTATES-1:0] interfacemodule_ledsstatesreg, interfacemodule_nextledsstatesreg;
+reg                                     interfacemodule_ledreg,        interfacemodule_nextledreg;
 
 always @(posedge i_clk) begin
     if(i_reset) begin
@@ -49,7 +48,7 @@ always @(posedge i_clk) begin
         interfacemodule_dataBreg      <= {NB_INTERFACEMODULE_DATA{1'b0}};
         interfacemodule_dataresreg    <= {NB_INTERFACEMODULE_DATA{1'b0}};
         interfacemodule_waitreg       <= 4'b0000;
-        interfacemodule_ledsstatesreg <= (1'b1 << (NB_INTERFACEMODULE_LEDSSTATES - 1));
+        interfacemodule_ledreg        <= 1'b1;
     end
     else begin
         interfacemodule_statereg      <= interfacemodule_nextstatereg;
@@ -60,7 +59,7 @@ always @(posedge i_clk) begin
         interfacemodule_dataBreg      <= interfacemodule_nextdataBreg;
         interfacemodule_dataresreg    <= interfacemodule_nextdataresreg;
         interfacemodule_waitreg       <= interfacemodule_nextwaitreg;
-        interfacemodule_ledsstatesreg <= interfacemodule_nextledsstatesreg;
+        interfacemodule_ledreg <= interfacemodule_nextledreg;
     end
 end
 
@@ -73,11 +72,10 @@ always @(*) begin
     interfacemodule_nextdataBreg      = interfacemodule_dataBreg;
     interfacemodule_nextdataresreg    = interfacemodule_dataresreg;
     interfacemodule_nextwaitreg       = interfacemodule_waitreg;
-    interfacemodule_nextledsstatesreg = interfacemodule_ledsstatesreg;
+    interfacemodule_nextledreg = interfacemodule_ledreg;
 
     case (interfacemodule_statereg)
         INTERM_IDLE_STATE: begin
-            interfacemodule_nextledsstatesreg = 6'b000001;
             interfacemodule_nextwritereg = 1'b0;
             if(~i_interfacemodule_EMPTY) begin
                 interfacemodule_nextstatereg  = INTERM_OPCODE_STATE;
@@ -86,7 +84,6 @@ always @(*) begin
         end
 
         INTERM_WAIT_STATE: begin
-            interfacemodule_nextledsstatesreg = 6'b000010;
             if(~i_interfacemodule_EMPTY) begin
                 interfacemodule_nextstatereg  = interfacemodule_waitreg;
                 interfacemodule_nextreadreg   = 1'b1;
@@ -94,7 +91,6 @@ always @(*) begin
         end
 
         INTERM_OPCODE_STATE: begin
-            interfacemodule_nextledsstatesreg = 6'b000100;
             if(i_interfacemodule_EMPTY) begin
                 interfacemodule_nextreadreg   = 1'b0;
                 interfacemodule_nextstatereg  = INTERM_WAIT_STATE;
@@ -108,7 +104,6 @@ always @(*) begin
         end
 
         INTERM_DATA_A_STATE: begin
-            interfacemodule_nextledsstatesreg = 6'b001000;
             if(i_interfacemodule_EMPTY) begin
                 interfacemodule_nextreadreg   = 1'b0;
                 interfacemodule_nextstatereg  = INTERM_WAIT_STATE;
@@ -122,7 +117,6 @@ always @(*) begin
         end
 
         INTERM_DATA_B_STATE: begin
-            interfacemodule_nextledsstatesreg = 6'b010000;
             if(i_interfacemodule_EMPTY) begin
                 interfacemodule_nextreadreg   = 1'b0;
                 interfacemodule_nextstatereg  = INTERM_WAIT_STATE;
@@ -136,7 +130,6 @@ always @(*) begin
         end
 
         INTERM_RESULT_STATE: begin
-            interfacemodule_nextledsstatesreg  = 6'b100000;
             if(~i_interfacemodule_FULL) begin
                 interfacemodule_nextstatereg   = INTERM_IDLE_STATE;
                 interfacemodule_nextdataresreg = i_interfacemodule_DATARES;
@@ -148,7 +141,6 @@ always @(*) begin
             interfacemodule_nextstatereg      = INTERM_IDLE_STATE;
             interfacemodule_nextreadreg       = 1'b0;
             interfacemodule_nextwritereg      = 1'b0;
-            interfacemodule_nextledsstatesreg = 6'b000001;
         end
 
     endcase
@@ -161,6 +153,6 @@ assign o_interfacemodule_OP         = interfacemodule_opreg;
 assign o_interfacemodule_WRITEDATA  = interfacemodule_dataresreg;
 assign o_interfacemodule_WRITE      = interfacemodule_writereg;
 assign o_interfacemodule_READ       = interfacemodule_readreg;
-assign o_interfacemodule_LEDSSTATES = interfacemodule_ledsstatesreg;
+assign o_interfacemodule_LED        = interfacemodule_ledreg;
 
 endmodule
