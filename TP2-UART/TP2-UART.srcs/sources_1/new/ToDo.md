@@ -37,3 +37,8 @@ IMPORTANTE:
     - top_module.v -> el parameter MOD_TOPMODULE_M = 326 por parameter MOD_TOPMODULE_M = 163.
     - uart_module.v -> el parameter MOD_UARTMODULE_M = 326 por parameter MOD_UARTMODULE_M = 163.
     - baudrg_module.v -> el parameter MOD_BAUDRGMODULE_M = 326 por parameter MOD_BAUDRGMODULE_M = 163.
+
+### Quinta review
+25. Ya atacado el README.md:
+    - Flashee e hice algo del Tx, la parte de funcionamiento esta copypasteada mal, revisala plz.
+    - 
