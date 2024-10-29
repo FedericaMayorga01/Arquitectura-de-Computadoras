@@ -1,58 +1,44 @@
-`timescale 1ns / 1ps
-
-module uart_module
-#(
-    parameter NB_UARTMODULE_DATA    = 8,    // data bits
-              SB_UARTMODULE_TICKS   = 16,   // stop bits ticks
-              NB_UARTMODULE_COUNTER = 9,    // counter bits
-              MOD_UARTMODULE_M      = 326,  // ms counter bits
-              NB_UARTMODULE_ADDR    = 4     // address bits
-)
+module uart_module #
 (
-    input  wire    i_clk, i_reset,
+    parameter NB_UARTMODULE_DATA    = 8,
+    parameter SB_UARTMODULE_TICKS   = 16,
+    parameter MOD_UARTMODULE_M      = 163,
+    parameter NB_UARTMODULE_COUNTER = 9,
+    parameter NB_UARTMODULE_ADDR    = 4
+)(
+    input  wire                            i_clk,
+    input  wire                            i_reset,
+    input  wire                            i_uartmodule_fiforx_READ,
+    input  wire                            i_uartmodule_fifotx_WRITE,
+    input  wire                            i_uartmodule_RX,
+    input  wire [NB_UARTMODULE_DATA-1 : 0] i_uartmodule_fifotx_WRITEDATA,
 
-    // receiver port
-    input  wire    i_uartmodule_RX,
-
-    // transmitter port
-    output wire    o_uartmodule_TX,
-
-    // FIFO RX ports
-    input  wire i_uartmodule_fiforx_READ,
-    output wire signed [NB_UARTMODULE_DATA-1:0] o_uartmodule_fiforx_READDATA,
-    output wire o_uartmodule_fiforx_EMPTY,
-
-    // FIFO TX ports
-    input  wire signed [NB_UARTMODULE_DATA-1:0] i_uartmodule_fifotx_WRITEDATA,
-    input  wire i_uartmodule_fifotx_WRITE,
-    output wire o_uartmodule_fifotx_FULL
-
+    output wire                            o_uartmodule_fifotx_FULL,
+    output wire                            o_uartmodule_fiforx_EMPTY,
+    output wire                            o_uartmodule_TX,
+    output wire [NB_UARTMODULE_DATA-1 : 0] o_uartmodule_fiforx_READDATA
 );
 
-// Señal interna para el baud rate generator
-wire uartmodule_maxtickwire;
-// Señal interna para el UART Rx
-wire  uartmodule_rxdonewire;
-wire signed [NB_UARTMODULE_DATA-1:0] uartmodule_doutwire;
-// Señal interna para el UART Tx
-wire  uartmodule_txdonewire;
-// Señal interna para el FIFO TX
-wire signed [NB_UARTMODULE_DATA-1:0] uartmodule_readdatawire;
-wire  uartmodule_emptywire;
+wire                            uartmodule_maxtickwire;
+wire                            uartmodule_txdonewire;
+wire                            uartmodule_emptywire;
+wire                            uartmodule_rxdonewire;
+wire [NB_UARTMODULE_DATA-1 : 0] uartmodule_readdatawire;
+wire [NB_UARTMODULE_DATA-1 : 0] uartmodule_doutwire;
 
-//--------------- INICIALIZACION DE MODULOS --- start
 
-baudrg_module #(
-    .NB_BAUDRGMODULE_COUNTER(NB_UARTMODULE_COUNTER),
-    .MOD_BAUDRGMODULE_M(MOD_UARTMODULE_M)
+baudrg_module#
+(
+    .MOD_BAUDRGMODULE_M(MOD_UARTMODULE_M),
+    .NB_BAUDRGMODULE_COUNTER(NB_UARTMODULE_COUNTER)
 ) baudrg_module_1 (
     .i_clk(i_clk),
     .i_reset(i_reset),
-    .o_baudrgmodule_MAXTICK(uartmodule_maxtickwire),
-    .o_baudrgmodule_RATE()                        // No se usa momentaneamente
+    .o_baudrgmodule_MAXTICK(uartmodule_maxtickwire)
 );
 
-rx_module #(
+rx_module #
+(
     .NB_RXMODULE_DATA(NB_UARTMODULE_DATA),
     .SB_RXMODULE_TICKS(SB_UARTMODULE_TICKS)
 ) rx_module_1 (
@@ -64,7 +50,8 @@ rx_module #(
     .o_rxmodule_DOUT(uartmodule_doutwire)
 );
 
-fifo_module #(
+fifo_module #
+(
     .NB_FIFOMODULE_DATA(NB_UARTMODULE_DATA),
     .NB_FIFOMODULE_ADDR(NB_UARTMODULE_ADDR)
 ) fiforx_module (
@@ -74,24 +61,12 @@ fifo_module #(
     .i_fifomodule_WRITE(uartmodule_rxdonewire),
     .i_fifomodule_WRITEDATA(uartmodule_doutwire),
     .o_fifomodule_EMPTY(o_uartmodule_fiforx_EMPTY),
-    .o_fifomodule_FULL(),                               //momentaneamente no se usa
+    .o_fifomodule_FULL(),
     .o_fifomodule_READATA(o_uartmodule_fiforx_READDATA)
 );
 
-tx_module #(
-    .NB_TXMODULE_DATA(NB_UARTMODULE_DATA),
-    .SB_TXMODULE_TICKS(SB_UARTMODULE_TICKS)
-) tx_module_1 (
-    .i_clk(i_clk),
-    .i_reset(i_reset),
-    .i_txmodule_TXSTART(~uartmodule_emptywire),
-    .i_txmodule_BRGTICKS(uartmodule_maxtickwire),
-    .i_txmodule_DIN(uartmodule_readdatawire),
-    .o_txmodule_TXDONE(uartmodule_txdonewire),
-    .o_txmodule_TX(o_uartmodule_TX)
-);
-
-fifo_module #(
+fifo_module #
+(
     .NB_FIFOMODULE_DATA(NB_UARTMODULE_DATA),
     .NB_FIFOMODULE_ADDR(NB_UARTMODULE_ADDR)
 ) fifotx_module (
@@ -105,6 +80,18 @@ fifo_module #(
     .o_fifomodule_READATA(uartmodule_readdatawire)
 );
 
-//--------------- INICIALIZACION DE MODULOS --- end
+tx_module #
+(
+    .NB_TXMODULE_DATA(NB_UARTMODULE_DATA),
+    .SB_TXMODULE_TICKS(SB_UARTMODULE_TICKS)
+) tx_module_1 (
+    .i_clk(i_clk),
+    .i_reset(i_reset),
+    .i_txmodule_TXSTART(~uartmodule_emptywire),
+    .i_txmodule_BRGTICKS(uartmodule_maxtickwire),
+    .i_txmodule_DIN(uartmodule_readdatawire),
+    .o_txmodule_TXDONE(uartmodule_txdonewire),
+    .o_txmodule_TX(o_uartmodule_TX)
+);
 
 endmodule

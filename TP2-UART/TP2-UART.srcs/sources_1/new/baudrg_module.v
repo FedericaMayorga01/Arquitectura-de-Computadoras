@@ -1,31 +1,29 @@
 `timescale 1ns / 1ps
 
-module baudrg_module 
-#(
-    parameter NB_BAUDRGMODULE_COUNTER = 9,      // number of bits in counter
-    parameter MOD_BAUDRGMODULE_M      = 326     // mod-M . 19200 Baudios
-)
+module baudrg_module #
 (
-    input   wire    i_clk, i_reset,
-    output  wire    o_baudrgmodule_MAXTICK,                             //indica cuando el contador ha alcanzado su valor maximo
-    output  wire    [NB_BAUDRGMODULE_COUNTER - 1 : 0] o_baudrgmodule_RATE   //valor actual del contador
+    parameter NB_BAUDRGMODULE_COUNTER = 9,
+    parameter MOD_BAUDRGMODULE_M      = 163
+)(
+    input wire i_clk,
+    input wire i_reset,
+
+    output wire o_baudrgmodule_MAXTICK
 );
 
-//signal declaration
-reg [NB_BAUDRGMODULE_COUNTER - 1 : 0] baudrgmodule_contreg; // registro que contiene el valor actual del contador
+reg  [NB_BAUDRGMODULE_COUNTER-1 : 0] baudrgmodule_contreg;
+wire [NB_BAUDRGMODULE_COUNTER-1 : 0] baudrgmodule_nextcontreg;
 
-always @ (posedge i_clk)
-    if(i_reset)
-        baudrgmodule_contreg <= 1'b0;
-    else
-    if(baudrgmodule_contreg < MOD_BAUDRGMODULE_M[NB_BAUDRGMODULE_COUNTER - 1 : 0])
-        baudrgmodule_contreg <= baudrgmodule_contreg + 1'b1;
-    else
-        baudrgmodule_contreg <= 1'b0;
+always @(posedge i_clk) begin
+    if (i_reset) begin
+        baudrgmodule_contreg <= 0;
+    end
+    else begin
+        baudrgmodule_contreg <= baudrgmodule_nextcontreg;
+    end
+end
 
-assign o_baudrgmodule_RATE = baudrgmodule_contreg;
-assign o_baudrgmodule_MAXTICK = (baudrgmodule_contreg == (MOD_BAUDRGMODULE_M - 1)) ? 1'b1 : 1'b0;
+assign baudrgmodule_nextcontreg = (baudrgmodule_contreg == (MOD_BAUDRGMODULE_M-1)) ? 0 : baudrgmodule_contreg + 1;
+assign o_baudrgmodule_MAXTICK   = (baudrgmodule_contreg == (MOD_BAUDRGMODULE_M-1)) ? 1'b1 : 1'b0;
 
 endmodule
-
-

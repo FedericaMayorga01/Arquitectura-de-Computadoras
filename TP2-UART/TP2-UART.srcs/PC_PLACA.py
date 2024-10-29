@@ -1,66 +1,98 @@
+import sys
 import serial
+from typing import Optional
 
-def enviar_decimal_a_fpga(ser, numero):
-    """
-    Envía un número decimal de 8 bits (con signo) a la FPGA a través de UART.
-    
-    :param ser: Objeto serial
-    :param numero: Número decimal con signo de 8 bits a enviar (-128 a 127)
-    """
-    # Verificar que el número esté dentro del rango de 8 bits con signo
-    if -128 <= numero <= 127:
-        # Convertir el número decimal (con signo) a un byte en complemento a dos
-        data = numero.to_bytes(1, byteorder='big', signed=True)
-        
-        # Enviar los bytes a través del puerto serial
-        ser.write(data)
-        # Mostrar el valor del byte como un número entero para evitar representaciones como '\t'
-        byte_value = int.from_bytes(data, byteorder='big', signed=True)
-        print(f"Enviado: {numero} como byte (valor): {byte_value}")
-    else:
-        print("Error: El número debe estar entre -128 y 127.")
+# Configuración prefijada
+BAUDRATE = 19200  # Set baud rate for communication
+SERIAL_PORT = "COM6"  # Establece el puerto COM directamente aquí
 
-def recibir_datos_de_fpga(ser):
-    """
-    Recibe los datos enviados desde la FPGA a través de UART.
-    
-    :param ser: Objeto serial
-    :return: Número decimal de 8 bits recibido (con signo)
-    """
-    # Leer 1 byte (porque estamos manejando números de 8 bits)
-    recibido = ser.read(1)
-    if recibido:
-        # Convertir los bytes recibidos a un número decimal con signo
-        numero = int.from_bytes(recibido, byteorder='big', signed=True)
-        return numero
-    else:
-        return None
+OPCODES = {
+    'ADD': 0x20,
+    'SUB': 0x22,
+    'AND': 0x24,
+    'OR':  0x25,
+    'XOR': 0x26,
+    'NOR': 0x27,
+    'SRA': 0x03,
+    'SRL': 0x020
+}
 
-def main():
-    # Configuración del puerto serial
-    ser = serial.Serial(
-        #port='COM24',       # Cambia esto al puerto correcto (Ej: 'COM3' en Windows o '/dev/ttyUSB0' en Linux)
-        port='COM6',
-        baudrate=19200,     # Asegúrate de usar el mismo baudrate que tu UART en la FPGA
-        bytesize=serial.EIGHTBITS,
-        parity=serial.PARITY_NONE,
-        stopbits=serial.STOPBITS_ONE,
-        timeout=1          # Timeout de 1 segundo
-    )
+EXIT_COMMANDS = {'q', 'e'}
 
-  #  for i in range(3):
-    while True:
-        numero = input("Ingresa un número decimal (-128 a 127) para enviar a la FPGA (o 'q' para salir): ")
-        numero_decimal = int(numero)
-        enviar_decimal_a_fpga(ser, numero_decimal)
+class SerialPortControl:
+    def __init__(self) -> None:
+        try:
+            self.serial_port = serial.Serial(SERIAL_PORT, BAUDRATE, timeout=1)
+        except serial.SerialException as e:
+            print(f"Error opening serial port: {e}")
+            sys.exit(1)
 
-        # Esperar y recibir respuesta desde la FPGA
-        print("Esperando respuesta de la FPGA...")
-        respuesta = recibir_datos_de_fpga(ser)
-        if respuesta is not None:
-            print(f"Recibido de la FPGA: {respuesta}")
+    def send_serial_data(self) -> None:
+        # Mostrar mensajes de advertencia al usuario
+        print("----------------------------------------------")
+        print("Recordar presionar el botón de reset en placa antes de comenzar.")
+        print("Revisar el puerto COM colocado.")
+        print("----------------------------------------------")
+
+        while True:
+            operand1 = self.get_operand("Ingrese el primer byte de datos: ")
+            if operand1 is None:
+                break
+
+            operand2 = self.get_operand("Ingrese el segundo byte de datos: ")
+            if operand2 is None:
+                break
+
+            operation = self.get_operation()
+            if operation is None:
+                break
+
+            self.send_data(operation, operand1, operand2)
+            self.receive_result()
+
+    def get_operand(self, prompt: str) -> Optional[int]:
+        operand_str: str = input(f'{prompt}').lower()
+        if operand_str in EXIT_COMMANDS:
+            self.exit_program()
+
+        if len(operand_str) == 8 and all(c in '01' for c in operand_str):
+            operand = int(operand_str, 2)
+            if operand & 0x80:
+                operand -= 256
+            return operand & 0xFF
         else:
-            print("No se recibió respuesta.")
+            print('Error: por favor ingrese un numero binario de 8 bits.')
+            return None
+
+    def get_operation(self) -> Optional[int]:
+        operation: str = input('Ingrese la operacion ... ADD, SUB, AND, OR, XOR, NOR, SRA, SRL : ').lower()
+        if operation in EXIT_COMMANDS:
+            self.exit_program()
+
+        if operation.upper() in OPCODES:
+            return OPCODES[operation.upper()]
+        else:
+            print('Operacion invalida')
+            return None
+
+    def send_data(self, operation: int, operand1: int, operand2: int) -> None:
+        data_to_send: bytes = bytes([operation, operand1, operand2])
+        self.serial_port.write(data_to_send)
+
+    def receive_result(self) -> None:
+        received_data: bytes = self.serial_port.read(1)
+        if len(received_data) == 1:
+            result: int = int.from_bytes(received_data, byteorder='big', signed=True)
+            binary_result: str = f'{result & 0xFF:08b}'
+            print(f'Resultado: {binary_result} ({result})')
+        else:
+            print('Error de recepcion: ningun dato recibido')
+
+    def exit_program(self) -> None:
+        print('Saliendo...')
+        self.serial_port.close()
+        sys.exit()
 
 if __name__ == "__main__":
-    main()
+    app = SerialPortControl()
+    app.send_serial_data()  # Continuously send operations until exit command is entered

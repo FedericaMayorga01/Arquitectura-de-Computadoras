@@ -1,5 +1,8 @@
 # Trabajo Practico #2 - UART
-![imagen tp2](./NEWEST-TP2-UART/image_tp2.webp){width='1000px'}
+<p align="center">
+    <img src=""><br>
+</p>
+
 ## Objetivo
 El objetivo es implementar un módulo transmisor-receptor del tipo UART en una FPGA. Para lograrlo, se desarrollarán módulos auxiliares como un generador de velocidad en baudios (Baud Rate Generator), interfaces y demas. El módulo UART desempeña un papel fundamental, su función consiste en tomar bytes de datos y transmitir los bits individualmente de forma secuencial. En el extremo receptor, otro UART reensambla los bits en bytes completos.
 
@@ -12,8 +15,9 @@ Consta de cuatro modulos principales:
   - **Un circuito de interfaz:** Contiene una maquina de estados para poder administrar los datos que llegan desde el receptor uart, enviarlos a la alu, recibir el resultado de la alu, y enviarlo al transmisor uart.
   - **Una unidad aritmetica logica:** es la encargada de realizar las operaciones con los datos que recibe, y enviar el resultado de ella.
 
+
 ### Baud Rate Generator
-Para una velocidad de 19200 baudios, la frecuencia de muestreo debe ser de 307200  ticks por segundo (es decir, 19200*16). Dado que la frecuencia de reloj del sistema es de 50 MHz, el generador de velocidad de baudios necesita un contador mod-163[(50*10^6)/(307200) = 162.76], en el que se activa un tick de un ciclo de reloj una vez cada 163 ciclos de reloj.
+Para una velocidad de 19200 baudios, la frecuencia de muestreo debe ser de 307200 ticks por segundo (es decir, 19200 * 16). Dado que la frecuencia de reloj del sistema es de 50 MHz, el generador de velocidad de baudios necesita un contador mod-163[(50 * 10^6)/(307200) = 162.76], en el que se activa un tick de un ciclo de reloj una vez cada 163 ciclos de reloj.
 Se utiliza esta velocidad ya que permite una comunicación más rápida y reduce el tiempo necesario para transmitir grandes cantidades de datos. Ademas reduce la congestión en los buffers.
 
 
@@ -22,10 +26,13 @@ Este módulo genera un pulso de “tick” a intervalos específicos que determi
 **Parámetros**
 - `NB_BAUDRGMODULE_COUNTER`: ancho del contador en bits.
 - `MOD_BAUDRGMODULE_M`: valor máximo al que cuenta el contador antes de reiniciarse (en este caso, 163).
+
+
 **Funcionalidad**
 - Contador (`baudrgmodule_contreg`): aumenta en cada ciclo de reloj (i_clk) hasta alcanzar el valor MOD_BAUDRGMODULE_M-1. Al llegar a este valor, el contador se reinicia.
 - `o_baudrgmodule_MAXTICK`: se activa cuando el contador alcanza su valor máximo, generando el “tick” de sincronización.  
 Este “tick” se usa para indicar el momento de muestreo en los módulos de recepción y transmisión UART.
+
 
 ### Rx - UART
 Este código en Verilog implementa un receptor de datos en serie (modulación UART), donde se recibe un bit a la vez desde la entrada `i_rxmodule_RX` y se reconstruye el byte completo. Está estructurado como una máquina de estados finitos (FSM), que cambia de estado a medida que avanza el proceso de recepción de un byte.
