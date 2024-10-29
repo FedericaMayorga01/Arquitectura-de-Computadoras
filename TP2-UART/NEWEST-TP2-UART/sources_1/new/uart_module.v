@@ -2,7 +2,7 @@ module uart_module #
 (
     parameter NB_UARTMODULE_DATA    = 8,
     parameter SB_UARTMODULE_TICKS   = 16,
-    parameter MOD_UARTMODULE_M      = 326,
+    parameter MOD_UARTMODULE_M      = 163,
     parameter NB_UARTMODULE_COUNTER = 9,
     parameter NB_UARTMODULE_ADDR    = 4
 )(

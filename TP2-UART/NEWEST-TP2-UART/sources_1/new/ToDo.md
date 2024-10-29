@@ -31,3 +31,9 @@ IMPORTANTE:
 21. En uart_module.v, ya se modifico el nombre del parameter PTR_LEN a NB_UARTMODULE_ADDR, se saco de la signal declaration el tx_not_empty() y se mantuvo nuestra logica anterior (negando _emptywire).
 22. En top_module.v, ya se modifico el nombre del parameter PTR_LEN a NB_UARTMODULE_ADDR.
 23. CONFIRMAMOS: Todo funciona joya.
+
+### Cuarta review
+24. Para poner en funcionamiento el Clock Wizard se modifico:
+    - top_module.v -> el parameter MOD_TOPMODULE_M = 326 por parameter MOD_TOPMODULE_M = 163.
+    - uart_module.v -> el parameter MOD_UARTMODULE_M = 326 por parameter MOD_UARTMODULE_M = 163.
+    - baudrg_module.v -> el parameter MOD_BAUDRGMODULE_M = 326 por parameter MOD_BAUDRGMODULE_M = 163.

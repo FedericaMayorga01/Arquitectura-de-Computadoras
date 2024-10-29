@@ -2,7 +2,7 @@ module top_module #
 (
     parameter NB_TOPMODULE_DATA    = 8,
     parameter SB_TOPMODULE_TICKS   = 16,
-    parameter MOD_TOPMODULE_M      = 326,
+    parameter MOD_TOPMODULE_M      = 163,
     parameter NB_TOPMODULE_COUNTER = 9,
     parameter NB_TOPMODULE_OP      = 6,
     parameter NB_TOPMODULE_ADDR    = 4
@@ -15,6 +15,7 @@ module top_module #
     output wire o_topmodule_LED
 );
 
+// Signals
 wire                         topmodule_fulltxwire;
 wire                         topmodule_emptyrxwire;
 
@@ -29,6 +30,18 @@ wire [NB_TOPMODULE_DATA-1:0] topmodule_databwire;
 
 wire [NB_TOPMODULE_DATA-1:0] topmodule_datareswire;
 
+// Instances
+clk_wiz_0 clkwiz_50M
+(
+    // Clock out ports
+    .clk_out50MHz(clk_out50MHz),     // output clk_out50MHz
+    // Status and control signals
+    .reset(i_reset),                  // input reset
+    .locked(locked),                // output locked
+   // Clock in ports
+    .clk_in1(i_clk)               // input clk_in1
+);
+
 
 uart_module #
 (
@@ -38,7 +51,7 @@ uart_module #
     .NB_UARTMODULE_COUNTER(NB_TOPMODULE_COUNTER),
     .NB_UARTMODULE_ADDR(NB_TOPMODULE_ADDR)
 ) uart_module_1 (
-    .i_clk(i_clk),
+    .i_clk(clk_out50MHz),
     .i_reset(i_reset),
     .i_uartmodule_fiforx_READ(topmodule_readinterfacewire),
     .i_uartmodule_fifotx_WRITE(topmodule_writeinterfacewire),
@@ -56,7 +69,7 @@ interface_module #
     .NB_INTERFACEMODULE_DATA(NB_TOPMODULE_DATA),
     .NB_INTERFACEMODULE_OP(NB_TOPMODULE_OP)
 ) interface_module_1 (
-    .i_clk(i_clk),
+    .i_clk(clk_out50MHz),
     .i_reset(i_reset),
     .i_interfacemodule_DATARES(topmodule_datareswire),
     .i_interfacemodule_READDATA(topmodule_readdatarxwire),

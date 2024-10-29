@@ -2,8 +2,8 @@
 
 module baudrg_module #
 (
-    parameter NB_BAUDRGMODULE_COUNTER = 9,       
-    parameter MOD_BAUDRGMODULE_M      = 326      
+    parameter NB_BAUDRGMODULE_COUNTER = 9,
+    parameter MOD_BAUDRGMODULE_M      = 163
 )(
     input wire i_clk,
     input wire i_reset,
