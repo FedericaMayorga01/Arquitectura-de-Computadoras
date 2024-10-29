@@ -12,7 +12,7 @@ Consta de cinco modulos principales:
   - **Un generador de velocidad en baudios:** el circuito para generar los ticks de muestreo.
   - **Un receptor UART:** el circuito para obtener la palabra de datos mediante sobremuestreo, con una fifo.
   - **Un tranmisor UART:** el encargado de enviar datos en serie desde la placa hacia la pc, con una fifo.
-  - **Un circuito de interfaz:** Contiene una maquina de estados para poder administrar los datos que llegan desde el receptor uart, enviarlos a la alu, recibir el resultado de la alu, y enviarlo al transmisor uart.
+  - **Un circuito de interfaz:** contiene una maquina de estados para poder administrar los datos que llegan desde el receptor uart, enviarlos a la alu, recibir el resultado de la alu, y enviarlo al transmisor uart.
   - **Una unidad aritmetica logica:** es la encargada de realizar las operaciones con los datos que recibe, y enviar el resultado de ella.
 
 
@@ -43,14 +43,13 @@ Este código en Verilog implementa un receptor de datos en serie (modulación UA
   - `SB_RXMODULE_TICKS = 16`: Define la cantidad de ticks que debe durar el bit de stop. Como se utiliza un solo bit de stop, la cantidad de tick es solamente 16.
 
 
-**Entradas:**
+**Entradas y salidas:**
   - `i_clk`: Señal de reloj del sistema.
   - `i_reset`: Señal de reinicio que restablece los registros y estados del módulo(a estado idle/inactivo).
   - `i_rxmodule_RX`: Señal de recepción de datos en serie (UART RX).
   - `i_rxmodule_BRGTICKS`: Señal de los "baud rate generator ticks", recibe un 1 cuando se ha completado un tick desde el generador del baud rate.
 
 
-**Salidas:**
   - `o_rxmodule_RXDONE`: Señal que indica cuando se ha recibido un byte completo.
   - `o_rxmodule_DOUT`: El byte recibido en paralelo.
 
@@ -86,7 +85,6 @@ El módulo usa una máquina de estados con los siguientes estados:
 
 
 **Resumen:**
-
 Este módulo implementa la recepción de datos en serie (UART) mediante una máquina de estados que detecta el bit de inicio, lee los bits de datos y finaliza con el bit de stop. Los datos recibidos se almacenan en `o_rxmodule_DOUT`, y una señal `o_rxmodule_RXDONE` indica cuando se ha recibido un byte completo.
 
 
@@ -100,14 +98,13 @@ Este código implementa un módulo de transmisión en serie (de forma similar al
 `SB_TXMODULE_TICKS`: Define la cantidad de ticks de reloj necesarios para cada bit de parada.
 
 
-**Entradas:**
+**Entradas y salidas:**
 `i_clk` y `i_reset`: De la misma forma, ya presentada anterioremente.
 `i_txmodule_TXSTART`: Señal que indica el inicio de la transmisión.
 `i_txmodule_BRGTICKS`: De la misma forma, ya presentada anterioremente, sirve para mantener el tiempo de cada bit transmitido.
 `i_txmodule_DIN`: Dato paralelo de entrada a ser transmitido.
 
 
-**Salidas:**
 `o_txmodule_TXDONE`: Señal que indica la finalización de la transmisión.
 `o_txmodule_TX`: Salida de datos en serie, donde se envían los bits uno a uno.
 
@@ -134,13 +131,13 @@ En el Bloque Combinacional (*`always @(*)`*) se calcula el siguiente estado (`tx
 
 
 ### Funcionamiento
-1. En `TXM_IDLE_STATE`: La línea de transmisión (o_txmodule_TX) permanece en alto. Si i_txmodule_TXSTART es alta, el estado cambia a TXM_START_STATE para comenzar la transmisión y carga el dato de entrada (i_txmodule_DIN) en txmodule_bitsreasreg.
+1. **Estado `TXM_IDLE_STATE`**: La línea de transmisión (`o_txmodule_TX`) permanece inactiva mientras el módulo espera una señal de inicio. Si `i_txmodule_TXSTART` está en alto, el módulo carga el dato de entrada (`i_txmodule_DIN`) en `txmodule_bitsreasreg` y cambia al estado `TXM_START_STATE` para iniciar la transmisión.
 
-2. En `TXM_START_STATE`: Se envía un bit de inicio (bajo) en o_txmodule_TX. Se incrementa txmodule_samptickreg con cada tick de baud rate (i_txmodule_BRGTICKS). Una vez que txmodule_samptickreg alcanza 15 ticks, el estado cambia a TXM_DATA_STATE y se reinicia txmodule_samptickreg.
+2. **Estado `TXM_START_STATE`**: Envía un bit de inicio en `o_txmodule_TX`. Aumenta `txmodule_samptickreg` en cada tick de baud rate (`i_txmodule_BRGTICKS`). Cuando `txmodule_samptickreg` llega a 15, el estado cambia a `TXM_DATA_STATE`, y `txmodule_samptickreg` se reinicia.
 
-3. En `TXM_DATA_STATE`: Envía los bits de datos uno a uno desde txmodule_bitsreasreg. Con cada tick de baud rate (i_txmodule_BRGTICKS), txmodule_samptickreg se incrementa. Después de 15 ticks, el siguiente bit de txmodule_bitsreasreg se desplaza a o_txmodule_TX. Cuando todos los bits se han transmitido, el estado cambia a TXM_STOP_STATE.
+3. **Estado `TXM_DATA_STATE`**: Envía los bits de datos uno a uno desde `txmodule_bitsreasreg`, empezando por el bit menos significativo. Cada tick de baud rate incrementa `txmodule_samptickreg`. Cuando alcanza 15, `txmodule_bitsreasreg` se desplaza, actualizando `o_txmodule_TX` con el siguiente bit de datos. Después de enviar los 8 bits, el estado cambia a `TXM_STOP_STATE`.
 
-4. En `TXM_STOP_STATE`: Envía un bit de parada (alto) en o_txmodule_TX. Incrementa txmodule_samptickreg en cada tick de baud rate. Cuando txmodule_samptickreg alcanza SB_TXMODULE_TICKS - 1, se genera o_txmodule_TXDONE, indicando que la transmisión ha finalizado, y se retorna a TXM_IDLE_STATE.
+4. **Estado `TXM_STOP_STATE`**: Envía un bit de stop en `o_txmodule_TX`. Incrementa `txmodule_samptickreg` con cada tick de baud rate. Al llegar a `SB_TXMODULE_TICKS - 1`, se activa `o_txmodule_TXDONE` indicando que la transmisión ha finalizado y el estado vuelve a `TXM_IDLE_STATE`.
 
 
 **Salida de Datos**
@@ -156,14 +153,13 @@ Este módulo fifo_module es una implementación de una FIFO (First In, First Out
 - `NB_FIFOMODULE_ADDR`: Cantidad de bits en las direcciones, define el tamaño de la FIFO. Por ejemplo, con 4 bits de dirección, se puede tener hasta 2^4=16 posiciones.
 
 
-**Entradas:**
+**Entradas y salidas:**
 - `i_clk` y `i_reset`: De la misma forma, ya presentada anterioremente.
 - `i_fifomodule_READ`:  Señal que indica cuando se debe leer un dato del FIFO.
 - `i_fifomodule_WRITE`: Señal que indica cuando se debe escribir un dato en el FIFO.
 - `i_fifomodule_WRITEDATA`: El dato que se escribe en la FIFO, cuando se active la señal de escritura.
 
 
-**Salidas:**
 - `o_fifomodule_EMPTY`: Indica si la FIFO está vacía.
 - `o_fifomodule_FULL`: Indica si la FIFO está llena.
 - `o_fifomodule_READATA`: El dato leído de la FIFO.
@@ -192,6 +188,70 @@ En el Bloque Combinacional (*`always @(*)`*) se evalúa el siguiente estado en f
 
 ### Funcionamiento
 El módulo FIFO funciona en tres estados principales: lectura, escritura, o ambas (lectura y escritura simultáneas). Los punteros de lectura y escritura permiten gestionar el flujo de datos secuencialmente. Durante una operación de escritura, el dato se almacena en la posición indicada por el puntero de escritura y luego se incrementa dicho puntero. Similarmente, en una operación de lectura, el puntero de lectura se incrementa después de acceder al dato. Las señales de control (`o_fifomodule_FULL` y `o_fifomodule_EMPTY`) se actualizan para reflejar el estado del FIFO, protegiendo el almacenamiento de condiciones de sobreescritura y sublectura.
+
+
+## Interfaz
+Este módulo implementa una interfaz, llamado `interface_module` en Verilog, diseñado para coordinar la transferencia de datos en un sistema FIFO. Lee comandos e instrucciones en etapas, extrae códigos de operación (opcodes) y operandos (data A, data B), y finalmente escribe los resultados de la operación en la cola de FIFO de salida. Este flujo se organiza mediante una FSM que asegura una correcta sincronización de lectura y escritura entre la interfaz y otros componentes del sistema.
+
+
+**Parámetros:**
+- `NB_INTERFACEMODULE_DATA`: Especifica el ancho de los datos de entrada y salida.
+- `NB_INTERFACEMODULE_OP`: Define el ancho del código de operación.
+
+
+**Entradas y salidas:**
+- `i_clk` y `i_reset`: De la misma forma, ya presentada anterioremente.
+- `i_interfacemodule_DATARES`: Dato resultante que el módulo procesa.
+- `i_interfacemodule_READDATA`: Datos leídos del modulo FIFO.
+- `i_interfacemodule_EMPTY` y `i_interfacemodule_FULL`: Indicadores del estado de la FIFO (vacío o lleno).
+
+
+- `o_interfacemodule_READ` y `o_interfacemodule_WRITE`: Señales de lectura y escritura para controlar el acceso al FIFO.
+- `o_interfacemodule_WRITEDATA`: Dato que se escribe en la FIFO.
+- `o_interfacemodule_OP`, `o_interfacemodule_DATAA`, `o_interfacemodule_DATAB`: Código de operación y operandos extraídos.
+- `o_interfacemodule_LED`: Indicador LED que refleja el estado de actividad del módulo (en este caso, el de reset).
+
+
+### Máquina de Estados (FSM)
+Los estados son definidos como parámetros locales de 4 bits (`localparam`), que permiten manejar la secuencia de operaciones del módulo. Estos son:
+- `INTERM_IDLE_STATE` **(0000)**: Estado inactivo, donde el módulo espera datos.
+- `INTERM_OPCODE_STATE` **(0001)**: Estado para leer el opcode.
+- `INTERM_DATA_A_STATE` **(0010)** y `INTERM_DATA_B_STATE` **(0011)**: Estados para leer los operandos A y B, respectivamente.
+- `INTERM_RESULT_STATE` **(0100)**: Estado para escribir el resultado en la FIFO.
+- `INTERM_WAIT_STATE` **(1000)**: Estado de espera cuando la FIFO está vacía.
+
+
+**Registros de Estado y Variables de Control**
+El módulo emplea registros (`reg`) para almacenar el estado actual y el siguiente (por ejemplo: `interfacemodule_statereg` y `interfacemodule_nextstatereg`), así como los datos y las señales de control. Esta estructura permite sincronizar el cambio de estados y actualizar los datos en función de las señales de entrada.
+- `interfacemodule_statereg`,      `interfacemodule_nextstatereg`;
+- `interfacemodule_readreg`,       `interfacemodule_nextreadreg`;
+- `interfacemodule_writereg`,      `interfacemodule_nextwritereg`;
+- `interfacemodule_opreg`,         `interfacemodule_nextopreg`;
+- `interfacemodule_dataAreg`,      `interfacemodule_nextdataAreg`;
+- `interfacemodule_dataBreg`,      `interfacemodule_nextdataBreg`;
+- `interfacemodule_dataresreg`,    `interfacemodule_nextdataresreg`;
+- `interfacemodule_waitreg`,       `interfacemodule_nextwaitreg`;
+- `interfacemodule_ledreg`;
+
+
+En el Bloque Secuencial (*`always @(posedge i_clk)`*) se encuentra que esta controlado por el reloj `i_clk`, este bloque actualiza el estado del módulo y los registros cuando `i_reset` no está activado.
+
+En el Bloque Combinacional (*`always @(*)`*) se calcula el siguiente estado (`interfacemodule_nextstatereg`) y las actualizaciones de los registros de acuerdo con el estado actual.
+
+
+### Funcionamiento
+- `INTERM_IDLE_STATE`: Espera datos en la FIFO. Si la FIFO no está vacía (`~i_interfacemodule_EMPTY`), se pasa al estado `INTERM_OPCODE_STATE` para leer el código de operación.
+- `INTERM_OPCODE_STATE`: Lee el opcode desde `i_interfacemodule_READDATA`. Si la FIFO está vacía, pasa al estado `INTERM_WAIT_STATE`.
+- `INTERM_DATA_A_STATE` y `INTERM_DATA_B_STATE`: Se utilizan para leer los operandos A y B, respectivamente. En cada estado, si la FIFO está vacío, se activa `INTERM_WAIT_STATE`.
+- `INTERM_RESULT_STATE`: Si la FIFO de salida no está llena, se escribe el resultado (`i_interfacemodule_DATARES`) y se regresa a `INTERM_IDLE_STATE`.
+
+**Salida de Datos:**
+Se asignan valores a las señales de salida en función de los registros, facilitando la comunicación de los operandos, código de operación, y la señal de resultado hacia el FIFO y otros módulos.
+Por ejemplo, entre `o_interfacemodule_DATAA` y `interfacemodule_dataAreg`.
+
+
+## ALU
+Este módulo ya fue implementado en el [Trabajo Practico 1](https://github.com/FedericaMayorga01/Arquitectura-de-Computadoras/tree/ramasorpresa/TP1-ALU) de la materia. No se ampliara su explicacion por este motivo, pero se trata del mismo módulo.
 
 
 ## Clock Wizard
