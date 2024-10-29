@@ -77,7 +77,7 @@ El módulo usa una máquina de estados con los siguientes estados:
   - **Estado `RXM_IDLE_STATE`**: El módulo permanece en este estado hasta que se detecta un 0 en `i_rxmodule_RX`, lo que indica el bit de inicio de una trama UART. Si se detecta un 0, pasa al estado `RXM_START_STATE`.
   - **Estado `RXM_START_STATE`**: Este estado espera que el contador de ticks llegue a 7 (para sincronizarse con el centro del bit de inicio/start (que es un 0)). Una vez alcanzado el tick 7 (es decir, pasaron 8 ticks), pasa al estado `RXM_DATA_STATE` para empezar a recibir los bits de datos.
   - **Estado `RXM_DATA_STATE`**: Este estado espera que el contador de ticks llegue a 15 (16 ticks) (para sincronizarse con el centro del primer data bit, y de los demas), y luego lee los bits de datos uno por uno en los bordes de `i_rxmodule_BRGTICKS`. Se construye el byte desplazando los bits hacia la derecha (`rxmodule_bitsreasnextreg = {i_rxmodule_RX, rxmodule_bitsreasreg[7:1]}`) y se incrementa el contador de bits `rxmodule_nbrecreg`. Una vez recibidos todos los bits (`NB_RXMODULE_DATA`) (8 bits), pasa al estado `RXM_STOP_STATE`.
-  - **- Estado `RXM_STOP_STATE`**: Este estado verifica que se ha recibido correctamente el bit de stop (que debería ser un 1). Cuando se completa el bit de stop (después de `SB_RXMODULE_TICKS` ticks (en este caso, son 16 ticks)), el módulo vuelve al estado `RXM_IDLE_STATE` y activa `o_rxmodule_RXDONE` para indicar que se ha recibido un byte completo.
+  - **Estado `RXM_STOP_STATE`**: Este estado verifica que se ha recibido correctamente el bit de stop (que debería ser un 1). Cuando se completa el bit de stop (después de `SB_RXMODULE_TICKS` ticks (en este caso, son 16 ticks)), el módulo vuelve al estado `RXM_IDLE_STATE` y activa `o_rxmodule_RXDONE` para indicar que se ha recibido un byte completo.
 
 
 **Salida de Datos:**
@@ -169,33 +169,31 @@ Este módulo fifo_module es una implementación de una FIFO (First In, First Out
 - `o_fifomodule_READATA`: El dato leído de la FIFO.
 
   
-**Señales internas:**
-- fifomodule_arrayreg: Es el registro donde se almacenan los datos. Tiene un tamaño de 2^(NB_FIFOMODULE_ADDR) palabras de NB_FIFOMODULE_DATA bits.
-- fifomodule_writeptrreg y fifomodule_readptrreg: Son los punteros de escritura y lectura. Se utilizan para rastrear las posiciones de escritura y lectura dentro de la FIFO.
-- fifomodule_fullreg y fifomodule_emptyreg: Bandera para indicar si la FIFO está llena o vacía.
+**Registros de Estado y Variables de Control**
+- `fifomodule_arrayreg`: Es el registro donde se almacenan los datos. Tiene un tamaño de 2^(`NB_FIFOMODULE_ADDR`) palabras de `NB_FIFOMODULE_DATA` bits.
+- `fifomodule_writeptrreg` y `fifomodule_readptrreg`: Son los punteros de escritura y lectura. Se utilizan para rastrear las posiciones de escritura y lectura dentro de la FIFO.
+- `fifomodule_fullreg` y `fifomodule_emptyreg`: Flags para indicar si la FIFO está llena o vacía.
 
 
-**Funcionalidad del módulo:**
-1. Escritura en la FIFO:
-La operación de escritura solo ocurre si la FIFO no está llena, controlada por la señal fifomodule_writeenablewire, que es el resultado de la operación i_fifomodule_WRITE & (~fifomodule_fullreg). Si la FIFO no está llena y se recibe una señal de escritura (i_fifomodule_WRITE), el dato de i_fifomodule_WRITEDATA se almacena en la posición señalada por el puntero de escritura fifomodule_writeptrreg.
-1. Lectura desde la FIFO:
-El dato que se lee de la FIFO se encuentra en la posición indicada por el puntero de lectura fifomodule_readptrreg. Este dato se asigna a o_fifomodule_READATA.
-La lectura solo ocurre si la FIFO no está vacía, y el puntero de lectura se incrementa después de cada operación de lectura.
-1. Lógica de control:
-Los punteros de escritura y lectura (fifomodule_writeptrreg y fifomodule_readptrreg) son actualizados en cada ciclo de reloj en función de las señales de lectura (i_fifomodule_READ) y escritura (i_fifomodule_WRITE).
-Cada puntero se incrementa por separado utilizando las variables fifomodule_succwriteptrreg (para escritura) y fifomodule_succreadptrreg (para lectura), las cuales calculan la siguiente posición para las operaciones de lectura y escritura.
+En el Bloque Secuencial (*`always @(posedge i_clk)`*) se implementa de forma similar al `rx_module.v`, ya planteado.
+
+
+En el Bloque Combinacional (*`always @(*)`*) se evalúa el siguiente estado en función de las señales de escritura y lectura.
+- Si solo se realiza una operación de lectura (`2'b01`), se incrementa el puntero de lectura y se ajustan las banderas de `fifomodule_fullreg` y `fifomodule_emptyreg`.
+- Si solo se realiza una operación de escritura (`2'b10`), se incrementa el puntero de escritura y se ajustan las banderas de `fifomodule_fullreg` y `fifomodule_emptyreg`.
+- Si se realizan ambas operaciones simultáneamente (`2'b11`), se incrementan ambos punteros de lectura y escritura.
+
+
 **Condiciones de FIFO llena o vacía:**
-La FIFO se considera llena cuando el siguiente puntero de escritura coincide con el puntero de lectura (fifomodule_succwriteptrreg == fifomodule_readptrreg).
-La FIFO se considera vacía cuando el siguiente puntero de lectura coincide con el puntero de escritura (fifomodule_succreadptrreg == fifomodule_writeptrreg).
-1. Máquina de estados combinacional:
-La lógica combinacional que se encuentra dentro de always @(*) evalúa el siguiente estado en función de las señales de escritura y lectura.
-Si solo se realiza una operación de lectura (2'b01), se incrementa el puntero de lectura y se ajustan las banderas de vacío y lleno.
-Si solo se realiza una operación de escritura (2'b10), se incrementa el puntero de escritura y se ajustan las banderas de vacío y lleno.
-Si se realizan ambas operaciones simultáneamente (2'b11), se incrementan ambos punteros de lectura y escritura.
-1. Banderas de estado:
-- o_fifomodule_EMPTY: Indica si la FIFO está vacía, basada en el registro fifomodule_emptyreg.
-- o_fifomodule_FULL: Indica si la FIFO está llena, basada en el registro fifomodule_fullreg.
-**Comportamiento general:**
-Cuando se escribe un dato en la FIFO (si no está llena), el puntero de escritura avanza y la FIFO se llena progresivamente.
-Cuando se lee un dato (si no está vacía), el puntero de lectura avanza y los datos se extraen en el mismo orden en el que fueron insertados (primero en entrar, primero en salir).
-La FIFO utiliza las banderas full y empty para gestionar adecuadamente las condiciones límite, asegurando que no se escriban datos si está llena y no se lean datos si está vacía.
+- El FIFO se considera lleno (fifomodule_fullreg = 1) cuando el puntero de escritura es igual al siguiente puntero de lectura.
+
+- El FIFO se considera vacío (fifomodule_emptyreg = 1) cuando el puntero de lectura alcanza el puntero de escritura.
+
+
+### Funcionamiento
+El módulo FIFO funciona en tres estados principales: lectura, escritura, o ambas (lectura y escritura simultáneas). Los punteros de lectura y escritura permiten gestionar el flujo de datos secuencialmente. Durante una operación de escritura, el dato se almacena en la posición indicada por el puntero de escritura y luego se incrementa dicho puntero. Similarmente, en una operación de lectura, el puntero de lectura se incrementa después de acceder al dato. Las señales de control (`o_fifomodule_FULL` y `o_fifomodule_EMPTY`) se actualizan para reflejar el estado del FIFO, protegiendo el almacenamiento de condiciones de sobreescritura y sublectura.
+
+
+
+
+
