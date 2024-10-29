@@ -194,6 +194,24 @@ En el Bloque Combinacional (*`always @(*)`*) se evalúa el siguiente estado en f
 El módulo FIFO funciona en tres estados principales: lectura, escritura, o ambas (lectura y escritura simultáneas). Los punteros de lectura y escritura permiten gestionar el flujo de datos secuencialmente. Durante una operación de escritura, el dato se almacena en la posición indicada por el puntero de escritura y luego se incrementa dicho puntero. Similarmente, en una operación de lectura, el puntero de lectura se incrementa después de acceder al dato. Las señales de control (`o_fifomodule_FULL` y `o_fifomodule_EMPTY`) se actualizan para reflejar el estado del FIFO, protegiendo el almacenamiento de condiciones de sobreescritura y sublectura.
 
 
+## Clock Wizard
+El Clock Wizard es un IP (que se refiere a Intellectual Property) integrado que permite generar y gestionar múltiples señales de reloj a partir de una única fuente de entrada. Este IP facilita el ajuste de frecuencias, fases y propiedades de las señales de reloj en un diseño de FPGA sin necesidad de configurar manualmente los bloques de MMCM (Mixed-Mode Clock Manager) o PLL (Phase-Locked Loop).
+
+Se tuvo que hacer uso del mismo integrado, para poder dejar el clock por defecto de la placa (a 100 MHz), y asi generar otra salida de clock de la mitad de frecuencia, a 50 MHz. Esto sera muy util en futuros trabajos del desarrollo de la materia.
+
+Se deja a continuacion, un breve paso a paso de la implementacion del [clkwiz_50M](TP2-UART\Paso_clk_wiz.md).
 
 
+```
+clk_wiz_0 clkwiz_50M
+(
+    // Clock out ports
+    .clk_out50MHz(clk_out50MHz),    // output clk_out50MHz
+    // Status and control signals
+    .reset(i_reset),                // input reset
+    .locked(locked),                // output locked
+   // Clock in ports
+    .clk_in1(i_clk)                 // input clk_in1
+);
+```
 

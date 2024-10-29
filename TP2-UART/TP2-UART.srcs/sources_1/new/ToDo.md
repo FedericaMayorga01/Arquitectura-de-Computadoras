@@ -40,5 +40,5 @@ IMPORTANTE:
 
 ### Quinta review
 25. Ya atacado el README.md:
-    - Flashee e hice algo del Tx, la parte de funcionamiento esta copypasteada mal, revisala plz.
-    - 
+    - Hecho lo de FIFO.
+    - Hecho lo del clock wizard.
