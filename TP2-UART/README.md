@@ -15,6 +15,10 @@ Consta de cinco modulos principales:
   - **Un circuito de interfaz:** contiene una maquina de estados para poder administrar los datos que llegan desde el receptor uart, enviarlos a la alu, recibir el resultado de la alu, y enviarlo al transmisor uart.
   - **Una unidad aritmetica logica:** es la encargada de realizar las operaciones con los datos que recibe, y enviar el resultado de ella.
 
+<p align="center">
+    <img src="./imgs/uart_schematic.jpg"><br>
+    <em>Esquemático completo del trabajo.</em>
+</p>
 
 ## Baud Rate Generator
 Para una velocidad de 19200 baudios, la frecuencia de muestreo debe ser de 307200 ticks por segundo (es decir, 19200 * 16). Dado que la frecuencia de reloj del sistema es de 50 MHz, el generador de velocidad de baudios necesita un contador mod-163[(50 * 10^6)/(307200) = 162.76], en el que se activa un tick de un ciclo de reloj una vez cada 163 ciclos de reloj.
@@ -88,6 +92,12 @@ El módulo usa una máquina de estados con los siguientes estados:
 Este módulo implementa la recepción de datos en serie (UART) mediante una máquina de estados que detecta el bit de inicio, lee los bits de datos y finaliza con el bit de stop. Los datos recibidos se almacenan en `o_rxmodule_DOUT`, y una señal `o_rxmodule_RXDONE` indica cuando se ha recibido un byte completo.
 
 
+<p align="center">
+    <img src="./imgs/rx_schematic.jpg"><br>
+    <em>Esquemático del módulo de Rx.</em>
+</p>
+
+
 ## Tx - UART
 Este código implementa un módulo de transmisión en serie (de forma similar al **receptor Rx - UART**), diseñado para enviar datos a través de una línea de transmisión de salida `o_txmodule_TX`. Este módulo recibe un dato de entrada paralelo, el cual se envía bit a bit, comenzando con un bit de inicio y terminando con un bit de parada. Este proceso está dividido en varios estados manejados por una máquina de estados finita (FSM) que controla la secuencia de transmisión.
 
@@ -144,6 +154,12 @@ En el Bloque Combinacional (*`always @(*)`*) se calcula el siguiente estado (`tx
 - `o_txmodule_TX` se asigna a `txmodule_reg`, que contiene el bit actual en transmisión.
 
 
+<p align="center">
+    <img src="./imgs/tx_schematic.jpg"><br>
+    <em>Esquemático del módulo de Tx.</em>
+</p>
+
+
 ## FIFO
 Este módulo fifo_module es una implementación de una FIFO (First In, First Out) en Verilog, la cual gestiona el almacenamiento y acceso secuencial de datos, entre dos sistemas que trabajan a diferentes velocidades. Es utilizada para almacenar temporalmente datos entre la escritura y la lectura, con base en una maquina de estados, permitiendo que los datos se lean en el mismo orden en que se escribieron.
 
@@ -188,6 +204,12 @@ En el Bloque Combinacional (*`always @(*)`*) se evalúa el siguiente estado en f
 
 ### Funcionamiento
 El módulo FIFO funciona en tres estados principales: lectura, escritura, o ambas (lectura y escritura simultáneas). Los punteros de lectura y escritura permiten gestionar el flujo de datos secuencialmente. Durante una operación de escritura, el dato se almacena en la posición indicada por el puntero de escritura y luego se incrementa dicho puntero. Similarmente, en una operación de lectura, el puntero de lectura se incrementa después de acceder al dato. Las señales de control (`o_fifomodule_FULL` y `o_fifomodule_EMPTY`) se actualizan para reflejar el estado del FIFO, protegiendo el almacenamiento de condiciones de sobreescritura y sublectura.
+
+
+<p align="center">
+    <img src="./imgs/fifo_schematic.jpg"><br>
+    <em>Esquemático del módulo FIFO.</em>
+</p>
 
 
 ## Interfaz
@@ -250,8 +272,20 @@ Se asignan valores a las señales de salida en función de los registros, facili
 Por ejemplo, entre `o_interfacemodule_DATAA` y `interfacemodule_dataAreg`.
 
 
+<p align="center">
+    <img src="./imgs/interface_schematic.jpg"><br>
+    <em>Esquemático del módulo de Interfaz.</em>
+</p>
+
+
 ## ALU
 Este módulo ya fue implementado en el [Trabajo Practico 1](https://github.com/FedericaMayorga01/Arquitectura-de-Computadoras/tree/ramasorpresa/TP1-ALU) de la materia. No se ampliara su explicacion por este motivo, pero se trata del mismo módulo.
+
+
+<p align="center">
+    <img src="./imgs/alu_schematic.jpg"><br>
+    <em>Esquemático del módulo ALU.</em>
+</p>
 
 
 ## Clock Wizard
@@ -274,6 +308,12 @@ clk_wiz_0 clkwiz_50M
     .clk_in1(i_clk)                 // input clk_in1
 );
 ```
+
+<p align="center">
+    <img src="./imgs/clkwiz_schematic.jpg"><br>
+    <em>Esquemático del módulo clock generado.</em>
+</p>
+
 
 ## Python
 Este código en Python permite la comunicación entre la computadora y la placa Nexys4DDR, a través de un puerto serial. La aplicación envía comandos y datos a la placa, esta realiza las operaciones aritméticas y lógicas, y luego se recibe el resultado de la operación desde el dispositivo. Las operaciones soportadas incluyen ADD, SUB, AND, OR, XOR, NOR, SRA (shift right arithmetic) y SRL (shift right logical), que se envían mediante códigos de operación (opcodes). Como anteriormente se habia implementado en el desarrollo del modulo ALU en el [Trabajo Practico 1](https://github.com/FedericaMayorga01/Arquitectura-de-Computadoras/tree/ramasorpresa/TP1-ALU).
