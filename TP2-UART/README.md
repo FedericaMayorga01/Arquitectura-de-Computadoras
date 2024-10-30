@@ -275,3 +275,23 @@ clk_wiz_0 clkwiz_50M
 );
 ```
 
+## Python
+Este código en Python permite la comunicación entre la computadora y la placa Nexys4DDR, a través de un puerto serial. La aplicación envía comandos y datos a la placa, esta realiza las operaciones aritméticas y lógicas, y luego se recibe el resultado de la operación desde el dispositivo. Las operaciones soportadas incluyen ADD, SUB, AND, OR, XOR, NOR, SRA (shift right arithmetic) y SRL (shift right logical), que se envían mediante códigos de operación (opcodes). Como anteriormente se habia implementado en el desarrollo del modulo ALU en el [Trabajo Practico 1](https://github.com/FedericaMayorga01/Arquitectura-de-Computadoras/tree/ramasorpresa/TP1-ALU).
+
+
+Se establecen la velocidad de transmisión en baudios (`BAUDRATE`) y el puerto serial (`SERIAL_PORT`) por donde se comunicarán la computadora y la placa.
+
+Luego, se puede observar el Diccionario de Operaciones (`OPCODES`), donde se convierten los nombres de operaciones en códigos hexadecimales, de modo que el código puede enviar estos valores a la placa y ejecutarlos como instrucciones.
+
+
+Este programa se ejecuta en un bucle continuo que hace lo siguiente:
+1. Solicita al usuario los operandos en formato binario de 8 bits.
+2. Verifica que los operandos sean válidos y permite al usuario reintentarlo en caso de error.
+3. Recibe el tipo de operación (suma, resta, etc.), valida la entrada y convierte la operación en un código de operación (opcode).
+4. Envía el código de operación y los operandos al dispositivo a través del puerto serial.
+5. Lee y muestra el resultado, que llega desde el dispositivo en formato binario de 8 bits.
+
+<p align="center">
+    <img src="./imgs/python_terminal.jpg"><br>
+    <em>Salida de terminal por Python.</em>
+</p>
