@@ -320,7 +320,7 @@ Este módulo ya fue implementado en el [Trabajo Practico 1](https://github.com/F
 </p>
 
 
-## Clock Wizard
+## Clock Wizard :mage:
 El Clock Wizard es un IP (que se refiere a Intellectual Property) integrado que permite generar y gestionar múltiples señales de reloj a partir de una única fuente de entrada. Este IP facilita el ajuste de frecuencias, fases y propiedades de las señales de reloj en un diseño de FPGA sin necesidad de configurar manualmente los bloques de MMCM (Mixed-Mode Clock Manager) o PLL (Phase-Locked Loop).
 
 Se tuvo que hacer uso del mismo integrado, para poder dejar el clock por defecto de la placa (a 100 MHz), y asi generar otra salida de clock de la mitad de frecuencia, a 50 MHz. Esto sera muy util en futuros trabajos del desarrollo de la materia.
