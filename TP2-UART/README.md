@@ -325,7 +325,7 @@ El Clock Wizard es un IP (que se refiere a Intellectual Property) integrado que 
 
 Se tuvo que hacer uso del mismo integrado, para poder dejar el clock por defecto de la placa (a 100 MHz), y asi generar otra salida de clock de la mitad de frecuencia, a 50 MHz. Esto sera muy util en futuros trabajos del desarrollo de la materia.
 
-Se deja a continuación, un breve paso a paso de la implementación del [clkwiz_50M](https://github.com/FedericaMayorga01/Arquitectura-de-Computadoras/blob/ramasorpresa/TP2-UART/Paso_clk_wiz.md).
+Se deja en el link a continuación, un breve paso a paso de la implementación del [clkwiz_50M](https://github.com/FedericaMayorga01/Arquitectura-de-Computadoras/blob/ramasorpresa/TP2-UART/Paso_clk_wiz.md).
 
 
 ```
