@@ -64,8 +64,8 @@ Este código en Verilog implementa un receptor de datos en serie (modulación UA
   - `o_rxmodule_DOUT`: El byte recibido en paralelo.
 
 
-**Estados:**
-El módulo usa una máquina de estados con los siguientes estados:
+### Máquina de Estados (FSM)
+El módulo usa una máquina de estados con los siguientes estados, definidos como parámetros locales de 2 bits (`localparam`):
   - `RXM_IDLE_STATE` **(00)**: Estado de espera, esperando el bit de inicio de la trama (que es un 0 en UART).
   - `RXM_START_STATE` **(01)**: Estado que verifica la duración del bit de inicio.
   - `RXM_DATA_STATE` **(10)**: Estado de lectura de los bits de datos.
@@ -82,11 +82,25 @@ El módulo usa una máquina de estados con los siguientes estados:
     - Coloca el nuevo bit recibido (`i_rxmodule_RX`) en el bit más significativo de `rxmodule_bitsreasnextreg`.
   
 
-**Funcionamiento:**
-  - **Estado `RXM_IDLE_STATE`**: El módulo permanece en este estado hasta que se detecta un 0 en `i_rxmodule_RX`, lo que indica el bit de inicio de una trama UART. Si se detecta un 0, pasa al estado `RXM_START_STATE`.
-  - **Estado `RXM_START_STATE`**: Este estado espera que el contador de ticks llegue a 7 (para sincronizarse con el centro del bit de inicio/start (que es un 0)). Una vez alcanzado el tick 7 (es decir, pasaron 8 ticks), pasa al estado `RXM_DATA_STATE` para empezar a recibir los bits de datos.
-  - **Estado `RXM_DATA_STATE`**: Este estado espera que el contador de ticks llegue a 15 (16 ticks) (para sincronizarse con el centro del primer data bit, y de los demas), y luego lee los bits de datos uno por uno en los bordes de `i_rxmodule_BRGTICKS`. Se construye el byte desplazando los bits hacia la derecha (`rxmodule_bitsreasnextreg = {i_rxmodule_RX, rxmodule_bitsreasreg[7:1]}`) y se incrementa el contador de bits `rxmodule_nbrecreg`. Una vez recibidos todos los bits (`NB_RXMODULE_DATA`) (8 bits), pasa al estado `RXM_STOP_STATE`.
-  - **Estado `RXM_STOP_STATE`**: Este estado verifica que se ha recibido correctamente el bit de stop (que debería ser un 1). Cuando se completa el bit de stop (después de `SB_RXMODULE_TICKS` ticks (en este caso, son 16 ticks)), el módulo vuelve al estado `RXM_IDLE_STATE` y activa `o_rxmodule_RXDONE` para indicar que se ha recibido un byte completo.
+En el Bloque Secuencial (*`always @(posedge i_clk)`*) se encuentra que esta controlado por el reloj `i_clk`, este bloque actualiza el estado del módulo y los registros cuando `i_reset` no está activado.
+
+En el Bloque Combinacional (*`always @(*)`*) decide el próximo estado y las actualizaciones de los registros, según el estado actual del módulo (`rxmodule_statereg`) y las señales de entrada (`i_rxmodule_RX` y `i_rxmodule_BRGTICKS`).
+
+
+<p align="center">
+    <img src="./imgs/FMS_Rx.jpg"><br>
+    <em>Diagrama de estados del Rx.</em>
+</p>
+
+
+## Funcionamiento
+  1. **Estado `RXM_IDLE_STATE`**: El módulo permanece en este estado hasta que se detecta un 0 en `i_rxmodule_RX`, lo que indica el bit de inicio de una trama UART. Si se detecta un 0, pasa al estado `RXM_START_STATE`.
+  
+  2. **Estado `RXM_START_STATE`**: Este estado espera que el contador de ticks llegue a 7 (para sincronizarse con el centro del bit de inicio/start (que es un 0)). Una vez alcanzado el tick 7 (es decir, pasaron 8 ticks), pasa al estado `RXM_DATA_STATE` para empezar a recibir los bits de datos.
+  
+  3. **Estado `RXM_DATA_STATE`**: Este estado espera que el contador de ticks llegue a 15 (16 ticks) (para sincronizarse con el centro del primer data bit, y de los demas), y luego lee los bits de datos uno por uno en los bordes de `i_rxmodule_BRGTICKS`. Se construye el byte desplazando los bits hacia la derecha (`rxmodule_bitsreasnextreg = {i_rxmodule_RX, rxmodule_bitsreasreg[7:1]}`) y se incrementa el contador de bits `rxmodule_nbrecreg`. Una vez recibidos todos los bits (`NB_RXMODULE_DATA`) (8 bits), pasa al estado `RXM_STOP_STATE`.
+  
+  4. **Estado `RXM_STOP_STATE`**: Este estado verifica que se ha recibido correctamente el bit de stop (que debería ser un 1). Cuando se completa el bit de stop (después de `SB_RXMODULE_TICKS` ticks (en este caso, son 16 ticks)), el módulo vuelve al estado `RXM_IDLE_STATE` y activa `o_rxmodule_RXDONE` para indicar que se ha recibido un byte completo.
 
 
 **Salida de Datos:**
@@ -105,32 +119,32 @@ Este módulo implementa la recepción de datos en serie (UART) mediante una máq
 
 
 ## Tx - UART
-Este código implementa un módulo de transmisión en serie (de forma similar al **receptor Rx - UART**), diseñado para enviar datos a través de una línea de transmisión de salida `o_txmodule_TX`. Este módulo recibe un dato de entrada paralelo, el cual se envía bit a bit, comenzando con un bit de inicio y terminando con un bit de parada. Este proceso está dividido en varios estados manejados por una máquina de estados finita (FSM) que controla la secuencia de transmisión.
+Este código implementa un módulo de transmisión en serie (de forma similar al **receptor Rx - UART**), diseñado para enviar datos a través de una línea de transmisión de salida `o_txmodule_TX`. Este módulo recibe un dato de entrada paralelo, el cual se envía bit a bit, comenzando con un bit de inicio y terminando con un bit de stop. Este proceso está dividido en varios estados manejados por una máquina de estados finita (FSM) que controla la secuencia de transmisión.
 
 *(Note que la implementacion de este modulo de transmision será de una estructura muy similar al anterior módulo).*
 
 **Parámetros:**
-`NB_TXMODULE_DATA`: Define el tamaño del dato a transmitir en bits, (en este caso, 8 bits por ser de formato byte).
-`SB_TXMODULE_TICKS`: Define la cantidad de ticks de reloj necesarios para cada bit de parada.
+- `NB_TXMODULE_DATA`: Define el tamaño del dato a transmitir en bits, (en este caso, 8 bits por ser de formato byte).
+- `SB_TXMODULE_TICKS`: Define la cantidad de ticks de reloj necesarios para cada bit de stop.
 
 
 **Entradas y salidas:**
-`i_clk` y `i_reset`: De la misma forma, ya presentada anterioremente.
-`i_txmodule_TXSTART`: Señal que indica el inicio de la transmisión.
-`i_txmodule_BRGTICKS`: De la misma forma, ya presentada anterioremente, sirve para mantener el tiempo de cada bit transmitido.
-`i_txmodule_DIN`: Dato paralelo de entrada a ser transmitido.
+- `i_clk` y `i_reset`: De la misma forma, ya presentada anterioremente.
+- `i_txmodule_TXSTART`: Señal que indica el inicio de la transmisión.
+- `i_txmodule_BRGTICKS`: De la misma forma, ya presentada anterioremente, sirve para mantener el tiempo de cada bit transmitido.
+- `i_txmodule_DIN`: Dato paralelo de entrada a ser transmitido.
 
 
-`o_txmodule_TXDONE`: Señal que indica la finalización de la transmisión.
-`o_txmodule_TX`: Salida de datos en serie, donde se envían los bits uno a uno.
+- `o_txmodule_TXDONE`: Señal que indica la finalización de la transmisión.
+- `o_txmodule_TX`: Salida de datos en serie, donde se envían los bits uno a uno.
 
 
 ### Máquina de Estados (FSM)
 Los estados son definidos como parámetros locales de 2 bits (`localparam`) y son:
-`TXM_IDLE_STATE` **(00)**: Estado inicial en espera de la señal de inicio (`i_txmodule_TXSTART`).
-`TXM_START_STATE` **(01)**: Estado que envía el bit de inicio.
-`TXM_DATA_STATE` **(10)**: Estado que envía cada bit de datos en secuencia.
-`TXM_STOP_STATE` **(11)**: Estado que envía el bit de parada y luego retorna al estado de espera.
+- `TXM_IDLE_STATE` **(00)**: Estado inicial en espera de la señal de inicio (`i_txmodule_TXSTART`).
+- `TXM_START_STATE` **(01)**: Estado que envía el bit de inicio.
+- `TXM_DATA_STATE` **(10)**: Estado que envía cada bit de datos en secuencia.
+- `TXM_STOP_STATE` **(11)**: Estado que envía el bit de stop y luego retorna al estado de espera.
 
 
 **Registros de Estado y Variables de Control**
@@ -144,6 +158,12 @@ Los estados son definidos como parámetros locales de 2 bits (`localparam`) y so
 En el Bloque Secuencial (*`always @(posedge i_clk)`*) se encuentra que esta controlado por el reloj `i_clk`, este bloque actualiza el estado del módulo y los registros cuando `i_reset` no está activado.
 
 En el Bloque Combinacional (*`always @(*)`*) se calcula el siguiente estado (`txmodule_nextstatereg`) y las actualizaciones de los registros de acuerdo con el estado actual.
+
+
+<p align="center">
+    <img src="./imgs/FMS_Tx.jpg"><br>
+    <em>Diagrama de estados del Rx.</em>
+</p>
 
 
 ### Funcionamiento
@@ -265,6 +285,12 @@ El módulo emplea registros (`reg`) para almacenar el estado actual y el siguien
 En el Bloque Secuencial (*`always @(posedge i_clk)`*) se encuentra que esta controlado por el reloj `i_clk`, este bloque actualiza el estado del módulo y los registros cuando `i_reset` no está activado.
 
 En el Bloque Combinacional (*`always @(*)`*) se calcula el siguiente estado (`interfacemodule_nextstatereg`) y las actualizaciones de los registros de acuerdo con el estado actual.
+
+
+<p align="center">
+    <img src="./imgs/FMS_Interface.jpg"><br>
+    <em>Diagrama de estados de la Interfaz.</em>
+</p>
 
 
 ### Funcionamiento
