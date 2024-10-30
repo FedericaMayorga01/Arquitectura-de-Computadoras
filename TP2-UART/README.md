@@ -38,6 +38,12 @@ Este módulo genera un pulso de “tick” a intervalos específicos que determi
 Este “tick” se usa para indicar el momento de muestreo en los módulos de recepción y transmisión UART.
 
 
+<p align="center">
+    <img src="./imgs/baudrg_schematic.jpg"><br>
+    <em>Esquemático del módulo Baud Rate Generator.</em>
+</p>
+
+
 ## Rx - UART
 Este código en Verilog implementa un receptor de datos en serie (modulación UART), donde se recibe un bit a la vez desde la entrada `i_rxmodule_RX` y se reconstruye el byte completo. Está estructurado como una máquina de estados finitos (FSM), que cambia de estado a medida que avanza el proceso de recepción de un byte.
 
