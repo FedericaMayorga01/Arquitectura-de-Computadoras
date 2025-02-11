@@ -2,8 +2,6 @@
 
 ## Objetivo
 
----
-
 El objetivo principal de este trabajo práctico final es implementar el pipeline de un procesador DLX (familia MIPS). Esto implica diseñar y construir un modelo que simule el funcionamiento de un procesador MIPS con segmentación.
 
 Para implementar el pipeline, hay que dividir la ejecución de las instrucciones en etapas secuenciales (IF, ID, EX, MEM, WB) y permitir que múltiples instrucciones se encuentren en diferentes etapas de ejecución al mismo tiempo. Se debe implementar un subconjunto específico de instrucciones MIPS, incluyendo instrucciones de tipo R, tipo I y tipo J, que se muestran a continuación:
