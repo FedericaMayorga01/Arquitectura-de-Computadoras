@@ -8,7 +8,7 @@ module top #(
     parameter PC_LEN = 32,
     parameter MEM_SIZE_ADDRESS_BITS = 10,
     parameter OPCODE_LEN = 6,
-    parameter REGISTER_BITS = 5, //Cantidad de bits que direccionan registros
+    parameter REGISTER_BITS = 5, //Cantidad de bits que direccionan registros: RS/RT/RD
     parameter IMMEDIATE_LEN = 16,
     parameter FUNCTION_LEN = 6
 )(
@@ -31,6 +31,9 @@ wire w_reset;
 
 wire o_locked;
 wire o_clk;
+
+
+
 
 //Debug unit
 debugUnit#(
@@ -62,7 +65,7 @@ cpu#(
     .DATA_LEN(CPU_DATA_LEN),
     .PC_LEN(PC_LEN),
     .MEM_SIZE_ADDRESS_BITS(MEM_SIZE_ADDRESS_BITS),
-    .OPCODE_LEN(OPCODE_LEN), 
+    .OPCODE_LEN(OPCODE_LEN),
     .REGISTER_BITS(REGISTER_BITS),
     .IMMEDIATE_LEN(IMMEDIATE_LEN),
     .FUNCTION_LEN(FUNCTION_LEN)
@@ -84,8 +87,8 @@ cpu#(
 clk_wiz_0 clkWiz (
     .clk_out1(o_clk),
     .reset(i_reset),
-    .locked(o_locked),      
-    .clk_in1(i_clk)      
+    .locked(o_locked),
+    .clk_in1(i_clk)
 );
 
 endmodule

@@ -135,7 +135,7 @@ always @(*) begin
             end
         end
 
-        FETCH_INSTRUCTION: begin           
+        FETCH_INSTRUCTION: begin
             if(i_rxEmpty) begin
                 r_stateNext = WAIT_RECEPTION;
                 r_waitNext = FETCH_INSTRUCTION;
@@ -308,9 +308,9 @@ always @(*) begin
             r_enable = 1'b1;
             r_reset = 1'b0;
         end
-        
+
         PREPARE_SEND: begin
-            r_writeInstruction = 1'b0;        
+            r_writeInstruction = 1'b0;
             r_writeUart = 1'b0;
             r_enable = 1'b0;
             r_readUart = 1'b0;
@@ -318,7 +318,7 @@ always @(*) begin
         end
 
         SEND_VALUES: begin
-            r_writeInstruction = 1'b0;        
+            r_writeInstruction = 1'b0;
             r_writeUart = 1'b1;
             r_enable = 1'b0;
             r_readUart = 1'b0;
