@@ -1,6 +1,6 @@
 # Trabajo Practico #3 - MIPS Processor Pipeline
 <p align="center">
-    <img src=".\img\image_tp3.webp"><br>
+    <img src=".\img\image_tp3.png"><br>
 </p>
 
 ## Objetivo
