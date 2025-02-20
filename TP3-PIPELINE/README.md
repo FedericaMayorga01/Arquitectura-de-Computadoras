@@ -1,23 +1,17 @@
-# MIPS Processor Pipeline
+# Trabajo Practico #3 - MIPS Processor Pipeline
+<p align="center">
+    <img src=".\img\image_tp3.webp"><br>
+</p>
 
-### Arquitectura de computadoras - Ingeniería en Computación
+## Objetivo
+El objetivo es describir el desarrollo e implementación de un pipeline de ejecución para un procesador MIPS utilizando Verilog. Se detallaran las etapas del pipeline, que son:
+- Instruction Fetch (IF)
+- Instruction Decode (ID)
+- Execute (EX)
+- Memory Access (MEM)
+- Write Back (WB)
 
-Autores: 
-- Octavio Ulla <octavio.ulla@mi.unc.edu.ar>
-- Francisco Cabrera <francisco.cabrera@mi.unc.edu.ar>
----
-
-## Introducción
-El presente informe detalla el desarrollo y la implementación del pipeline de ejecución de un procesador MIPS utilizando el lenguaje de descripción de hardware Verilog.
-
-Las etapas implementadas en el pipeline de ejecución son:
-- IF (Instruction Fetch): Búsqueda de la instrucción en la memoria de programa.
-- ID (Instruction Decode): Decodificación de la instrucción y lectura de registros.
-- EX (Execute): Ejecución de la instrucción.
-- MEM (Memory Access): Lectura o escritura de la memoria de datos.
-- WB (Write Back): Escritura de los resultados en los registros.
-
-El pipeline de ejecución tiene soporte para las siguientes instrucciones:
+El pipeline de ejecución esta preparado para manejar las siguientes instrucciones:
 - R-Type:
     - SLL, SRL, SRA, SLLV, SRLV, SRAV, ADDU, SUBU, AND, OR, XOR, NOR, SLT
 - I-Type:
@@ -25,111 +19,236 @@ El pipeline de ejecución tiene soporte para las siguientes instrucciones:
 - J-Type:
     - JR, JALR
 
-Además, el procesador implementado detecta y elimina los riesgos estructurales, de datos y de control.
+Además, se ha desarrollado una aplicación que permite ensamblar el código y cargar instrucciones en el procesador, facilitando la ejecución continua o paso a paso. Durante este proceso, la aplicación muestra el estado de los registros y la memoria. Por otro lado, el procesador implementado cuenta con la capacidad de detectar y eliminar los riesgos estructurales, de datos y de control, asegurando así un funcionamiento eficiente y libre de errores.
 
-Para la programación y uso del procesador, se desarrolló una aplicación que permite ensamblar el código para generar las instrucciones hexadecimales que serán cargadas a la memoria de programa. Dicha aplicación permite también la carga de estas instrucciones en el procesador a demás de la posibilidad de realizar la ejecución continua o paso a paso de un programa. En cada paso que se de desde la aplicación, se presentará en la misma el valor de los registros de procesador, la memoria de datos y el valor del program counter actual.
+---
 
 ## Etapas de ejecución
 
-Cada una de las etapas de ejecución dentro del pipeline se encarga de una parte de la ejecución de una instrucción. El procesador segmentado, permite que en cada pulso de clock se lance la ejecución de una nueva instrucción (si no hay riesgos). Por lo tanto, en cada una de las etapas del pipeline se estará ejecutando tareas de diferentes instrucciones.  
+Cada etapa del pipeline se encarga de ejecutar una parte específica del procesamiento de una instrucción. Gracias a la segmentación del procesador, es posible iniciar la ejecución de una nueva instrucción en cada ciclo de reloj, siempre que no existan riesgos. Esto implica que, simultáneamente, cada etapa del pipeline estará procesando tareas correspondientes a diferentes instrucciones.
 
-Para lograr esto, es necesario que se agreguen entre cada una de las etapas un buffer que conserve durante el periodo de reloj, las entradas de cada etapa y luego actualice dichas entradas con las salidas de la etapa anterior. 
+Para que este funcionamiento sea posible, es necesario incorporar buffers entre las etapas. Estos buffers se encargan de mantener las entradas de cada etapa durante un ciclo de reloj y actualizarlas con las salidas generadas por la etapa anterior al comienzo del siguiente ciclo.
 
-En la siguiente figura, se muestra un pipeline básico de un MIPS con las etapas y buffers correspondientes:
+A continuación, se presenta una figura que ilustra un pipeline básico de un procesador MIPS, mostrando sus etapas y los buffers asociados:
 
-![](./img/image.png)
+<p align="center">
+    <img src="./img/image.png"><br>
+    <em>Pipeline básico del MIPS.</em>
+</p>
 
-A continuación, se detalla cada una de las etapas implementadas en el pipeline.
+A continuación, se describen en detalle cada una de las etapas (o stages) que han sido implementadas en el pipeline.
 
 ### Instruction Fetch (IF)
-![Alt text](./img/IF.png)
+<p align="center">
+    <img src="./img/IF.png"><br>
+    <em>Esquematico de instructionFetchStage.</em>
+</p>
 
-Esta etapa es la encargada de buscar la instrucción apuntada por el contador de programa dentro de la memoria de instrucciones y presentarla a su salida para su proximo uso. También permite almacenar instrucciones dentro de la memoria.
+Esta etapa se encarga de acceder a la instrucción señalada por el valor del program counter (PC) en la memoria de instrucciones, presentándola como salida para su posterior uso en la siguiente etapa. Además, permite la escritura de nuevas instrucciones en la memoria de instrucciones, asegurando la flexibilidad del sistema.
 
-Esta etapa está formada por los siguientes módulos:
+Los módulos que conforman esta etapa son los siguientes:
 
-- **ProgramCounterMux:** Multiplexor que permite elegir la fuente de program counter. Este puede ser el PC actual incrementado en 4 o un PC producto de la ejecución de una instrucción de salto.
-- **ProgramCounter:** Este módulo mantiene el valor del program counter durante un ciclo de reloj.
-- **ProgramCounterIncrement:** Este módulo es un sumador, que en cada flanco de reloj incrementa el valor del program counter en 4.
-- **InstructionMemory:** Memoria en la cual se almacenan las instrucciones de un programa.
+- ``programCounterMux``: Multiplexor que selecciona la fuente del program counter. Las opciones incluyen el PC actual incrementado en 4 o el PC resultante de una instrucción de salto. Se implementa mediante un multiplexor de 2 a 1.
+
+- ``programCounter``: Este módulo mantiene el valor del program counter durante un ciclo de reloj. Si se activa la señal de reinicio, el contador se reinicia a cero. En cada flanco de reloj, el contador se actualiza según el valor de entrada, siempre que la señal de habilitación esté activa.
+
+- ``programCounterIncrement``: Es un sumador que incrementa el program counter en 4 para apuntar a la siguiente instrucción, teniendo en cuenta que las instrucciones están alineadas a 4 bytes en la memoria.
+
+- ``instructionMemory``: Este módulo almacena las instrucciones del programa. Permite leer la instrucción correspondiente al program counter. 
 
 
 ### Instruction Decode (ID)
+<p align="center">
+    <img src="./img/ID.png"><br>
+    <em>Esquematico de instructionDecodeStage.</em>
+</p>
 
-![Alt text](./img/ID.png)
+En esta etapa, la instrucción entregada es decodificada para extraer diversos componentes esenciales: el código de operación, los registros implicados, valores inmediatos y el código de función. A partir de esta decodificación, se generan **señales de control** específicas que guían la ejecución correcta en las etapas posteriores del pipeline.
 
-En esta etapa es donde se decodifica la instrucción que es presentada por la unidad de búsqueda. Al decodificarla, se obtiene: El código de operación, registros involucrados, valores inmediatos y código de función. A partir de la decodificación se generan las señales de control que serán usadas por las etapas siguientes para realizar la correcta ejecución de la instrucción.
+Esta etapa comprende los siguientes submódulos:
 
-Esta etapa está formada por los siguientes sub módulos:
-
-- **Registers:** Banco de registros.
-- **ControlUnit:** Unidad que genera las señales de control.
-- **SignExtend:** Extensor de signo para valores inmediatos.
-- **BranchControl:** Unidad de control para instrucciones de tipo branch. Este módulo se encarga de realizar el cálculo de la dirección de salto y la evaluación de la condición (Se encuentra en la etapa de decode para la implementación de saltos retardados).
-- **MUXD1:** Este multiplexor es el encargado de insertar stalls en el pipeline en función de una señal de control.
-- **MUXD1F y MUXD2F:** Estos multiplexores se utilizan para elegir la fuente de los datos, esto es, salida de registro, cortocircuito de la etapa de memoria, cortocircuito de la etapa de ejecución. Estos mux son controlados por la unidad de corto circuito.
+- ``registers``: Banco de registros, que proporciona almacenamiento temporal y acceso rápido a los datos necesarios para las instrucciones. Este módulo soporta la lectura y escritura de múltiples registros según las señales de control proporcionadas.
+- ``controlUnit``: Responsable de generar las señales de control necesarias para todas las etapas. Entre estas señales destacan el control de salto (``o_jumpType``, ``o_branch``), selección de operaciones aritméticas (``o_aluOp``), etc.
+- ``signExtend``: Extiende los valores inmediatos a 32 bits según el bit de signo, permitiendo la correcta representación de números negativos en operaciones aritméticas y de salto.
+- ``branchControl``: Unidad encargada del cálculo de la dirección de salto y la evaluación de la condición de branch. Su función es crítica en la implementación de instrucciones de saltos y la resolución de dependencias de control.
+- ``MUXD1``: Multiplexor encargado de insertar **stalls** en el pipeline en respuesta a las señales de control, garantizando la sincronización del flujo de datos.
+- ``MUXD1F`` y ``MUXD2F``: Multiplexores que seleccionan la fuente de los datos entre diferentes opciones: la salida del banco de registros, el cortocircuito desde la etapa de memoria o la etapa de ejecución. La unidad de cortocircuito controla estos mux para evitar stalls innecesarios y optimizar el flujo del pipeline.
 
 
 ### Execute (EX)
-![Alt text](./img/EX.png)
+<p align="center">
+    <img src="./img/EX.png"><br>
+    <em>Esquematico de executionStage.</em>
+</p>
 
-En esta etapa se realizan los cálculos que requiera la instrucción. 
+En esta etapa se llevan a cabo los cálculos requeridos por las instrucciones, como operaciones aritméticas, lógicas y de comparación. Los resultados obtenidos se utilizan en las siguientes etapas del pipeline para completar la ejecución del programa.
 
-Este módulo esta compuesto por los siguientes sub módulos:
+Módulos que componen esta etapa:
 
-- **AluControl:** Se encarga de, a partir de algunas señales de control generadas en la etapa de decode, entregar a la alu el código de operación correcto (suma, resta, shift, etc).
-- **MUXD1 y MUXD2:** Dependiendo del tipo de instrucción, los registros (o datos) que intervienen en el cálculo pueden ser diferentes. Con estos multiplexores se eligen los operandos que serán enviados a la ALU.
-- **ALU:** Unidad aritmético lógica que realiza operaciones sobre dos valores de entrada.
-- **MUXWR:** Elige el registro de destino en el que se almacenará un valor.
+- ``ALUControl``: Este módulo interpreta las señales de control provenientes de la etapa de decodificación y determina el código de operación correspondiente para la ALU (``o_opSelector``). Las señales que controla incluyen operaciones como suma, resta, desplazamientos (shift) y comparaciones.
+- ``MUXD1`` y ``MUXD2``: Estos multiplexores seleccionan los operandos para la ALU en función del tipo de instrucción (controlados por la señal ``i_aluSrc``, que determina la fuente de los operandos). ``MUXD1`` permite elegir entre el primer operando o un valor de desplazamiento, mientras que ``MUXD2`` selecciona entre el segundo operando o un valor inmediato.
+- ``ALU``: La Unidad Aritmético-Lógica recibe los operandos y el código de operación proporcionado por ``ALUControl`` y realiza operaciones como suma, resta, AND, OR, XOR, NOR, desplazamientos lógicos y comparaciones.
+- ``MUXWR``: Multiplexor que decide el registro de destino donde se almacenará el resultado de la ``ALU``. Las opciones incluyen el registro de destino especificado en la instrucción, el registro ``$zero`` o tambien ``$ra``.
+
 
 ### Memory Access (MEM)
-![Alt text](./img/MEM.png)
+<p align="center">
+    <img src="./img/MEM.png"><br>
+    <em>Esquematico de memoryStage.</em>
+</p>
 
-En esta etapa se realizan las lecturas y escrituras de la memoria de datos.
+En esta etapa se realizan las operaciones de lectura y escritura sobre la memoria de datos, necesarias para completar la ejecución de ciertas instrucciones del programa.
 
-Este módulo, unicamente está formado por un sub módulo:
+Esta etapa está compuesta por los siguientes módulos:
 
-- **dataMemory:** Bloque de memoria que permite la lectura y escritura de valores.
+- ``dataMemory``: Módulo encargado de la lectura y escritura de datos en memoria. La dirección de memoria y los datos a escribir son proporcionados por la ``ALU`` y el registro de datos. El control de escritura se realiza mediante la señal ``i_memWrite``. El tamaño de los datos (byte, halfword o word) se selecciona mediante la señal ``i_loadStoreType``, y la interpretación del signo se controla con la señal ``i_unsigned``.
+- ``memoryMask``: Este módulo ajusta el formato de los datos leídos de la memoria según el tamaño especificado (_BYTE_, _HALFWORD_ o _WORD_). También se encarga de extender el signo si los datos son interpretados como valores con signo.
+- ``branchControl``: Aunque su función principal es calcular las direcciones de salto y evaluar condiciones para instrucciones de tipo branch, este módulo también se relaciona con el control de flujo en la memoria cuando se procesan estas instrucciones.
+
+El flujo general es el siguiente: al recibir una señal de escritura (``i_memWrite`` activa), se almacena el valor indicado en la dirección especificada, respetando el tamaño y formato seleccionados. Para la lectura, se extraen los datos de la dirección correspondiente, ajustándolos según las configuraciones de tamaño y signo antes de ser enviados a la siguiente etapa.
+
 
 ### Write Back (WB)
-![Alt text](./img/WB.png)
+<p align="center">
+    <img src="./img/WB.png"><br>
+    <em>Esquematico de writebackStage.</em>
+</p>
 
-Esta etapa se encarga de la escritura de los resultados en los registros. El multiplexor interno del módulo se encarga de elegir cual es el valor que será escrito efectivamente en los registros.
+En esta etapa se realiza la escritura de los resultados en los registros, tomando el valor adecuado según la instrucción ejecutada. El proceso está controlado por un multiplexor interno, que selecciona cuál de los valores disponibles será finalmente almacenado en el registro de destino.
+
+Módulos que componen esta etapa:
+
+- ``writebackStage``: Este módulo coordina el flujo de datos hacia los registros. Recibe tres posibles valores de entrada: el resultado de la ALU (``i_aluResult``), un dato leído desde la memoria (``i_readData``), y la dirección de retorno (``i_returnPC``). El multiplexor interno, controlado por la señal ``i_memToReg``, selecciona el valor correcto para ser enviado como salida (``o_writeData``). Las opciones son:
+  - **00**: Selección del resultado de la ALU.
+  - **01**: Selección del dato leído de la memoria.
+  - **10**: Selección de la dirección de retorno.
+
+En adicion a las etapas o stages referidos y representados a lo largos de este informe, se encuentra un ultimo buffer.
+
+- ``memoryWritebackBuffer``: Este módulo actúa como un buffer entre la etapa de memoria y la etapa de escritura. Almacena los datos y señales de control necesarios para completar la escritura en el registro correspondiente.
+  - Controla el registro en el que se debe escribir mediante la señal ``i_writeRegister``.
+  - Permite habilitar o deshabilitar la escritura con la señal ``i_regWrite``.
+  - Implementa un mecanismo de freno (``i_halt``) y permite reiniciar el contenido con la señal ``i_reset``.
+
+El flujo de trabajo general comienza con la selección del valor a escribir, que es determinado por el multiplexor en función de las señales de control. Luego, este valor es almacenado en el registro correspondiente, asegurando la correcta actualización de los datos para las siguientes instrucciones.
+
+---
 
 ## Riesgos
-Para la detección y eliminación de riesgos se agregaron dos nuevos módulos.
+Para la detección y eliminación de riesgos se agregaron dos módulos sobre la implementacion ya mencionada:
 
 ### Forwarding Unit
-![Alt text](./img/FU.png)
+<p align="center">
+    <img src="./img/FU.png"><br>
+    <em>Esquematico de forwardingUnit.</em>
+</p>
 
-Esta unidad, genera señales de control que controlan los multiplexores mencionados en la etapa de decode para cambiar la fuente de los operandos de la instrucción. Se encarga de verificar la presencia de riesgos de datos y eliminarlos generando estos "cortocircuitos". Para la detección de los riesgos realiza comparaciones entre los registros que se usan en las diferentes instrucciones que se encuentran en el pipeline.
+Esta unidad es responsable de generar señales de control que gestionan los multiplexores utilizados en la etapa de decodificación para modificar la fuente de los operandos de las instrucciones. Su función principal es detectar y resolver riesgos de datos, eliminándolos mediante la generación de "cortocircuitos" (forwarding).
+
+El funcionamiento del módulo es comparar los registros involucrados en las diferentes instrucciones presentes en el pipeline para identificar posibles riesgos de datos. Estos riesgos ocurren cuando una instrucción utiliza datos que aún no han sido escritos por una instrucción anterior.
+
+Podemos identificar algunas de sus entradas y salidas:
+- ``i_rs`` y ``i_rt``: Registros fuente de la instrucción actual.
+- ``i_rdE`` y ``i_rdM``: Registros de destino de las instrucciones en las etapas de ejecución y memoria, respectivamente.
+- ``i_regWriteE`` y ``i_regWriteM``: Señales de control que indican si las instrucciones en las etapas de ejecución y memoria escribirán en un registro.
+- ``o_operandACtl`` y ``o_operandBCtl``: Señales de control de dos bits que determinan la fuente de los operandos A y B:
+  - **00**: Sin cortocircuito, el operando proviene directamente del banco de registros.
+  - **10**: Cortocircuito desde la etapa de memoria.
+  - **11**: Cortocircuito desde la etapa de ejecución.
+
+---
+La detección de riesgos se basa en las siguientes condiciones:
+- Si ``i_rdE`` coincide con ``i_rs`` y la señal ``i_regWriteE`` está activa, se genera un cortocircuito para el operando A.
+- Si ``i_rdE`` coincide con ``i_rt`` y la señal ``i_regWriteE`` está activa, se genera un cortocircuito para el operando B.
+
+---
+Condiciones similares se aplican para las comparaciones con ``i_rdM`` y la señal ``i_regWriteM``, que indican riesgos en la etapa de memoria.
+De este modo, la unidad de forwarding garantiza que los datos necesarios estén disponibles para las instrucciones actuales, evitando que el pipeline se detenga por riesgos de datos.
+
 
 ## Hazard Detector
-![Alt text](./img/HD.png)
+<p align="center">
+    <img src="./img/HD.png"><br>
+    <em>Esquematico de hazardDetector.</em>
+</p>
 
-Este módulo se encarga de detectar riesgos (de datos o de control) y en caso de ser necesario, insertar burbujas (stalls) dentro del pipeline para dar tiempo a que el riesgo ya no exista. Para la detección de los riesgos realiza la comparación de registros y señales de control.
+Este módulo es responsable de la detección de riesgos, tanto de datos como de control, en el pipeline. Cuando se identifica un riesgo, se inserta una burbuja (stall) para dar tiempo a que el riesgo se resuelva antes de que la instrucción que lo provoca avance.
+
+El funcionamiento esta en la detección de riesgos, que se realiza mediante la comparación de registros fuente de las instrucciones en la etapa de decodificación con los registros destino de las instrucciones en etapas anteriores, así como mediante la evaluación de las señales de control.
+
+Podemos identificar algunas de sus entradas y salidas:
+- ``i_rsID`` y ``i_rtID``: Registros fuente de la instrucción en la etapa de decodificación.
+- ``i_rtE`` y ``i_rtM``: Registros destino de las instrucciones en las etapas de ejecución y memoria, respectivamente.
+- ``i_memReadE`` y ``i_memReadM``: Señales que indican si las instrucciones en las etapas de ejecución y memoria están leyendo de la memoria.
+- ``o_stall``: Señal que se activa cuando se detecta un riesgo, lo que provoca la inserción de una burbuja en el pipeline.
+
+---
+Si una instrucción en la etapa de ejecución tiene activada la señal ``i_memReadE`` y su registro destino (``i_rtE``) coincide con alguno de los registros fuente (``i_rsID`` o ``i_rtID``) de la instrucción en la etapa de decodificación, se activa la señal ``o_stall``.
+Si una instrucción en la etapa de memoria tiene activada la señal ``i_memReadM`` y su registro destino (``i_rtM``) coincide con alguno de los registros fuente de la instrucción en decodificación, también se activa la señal ``o_stall``.
+
+---
+
+Este mecanismo asegura que el pipeline no avance hasta que el riesgo desaparezca, garantizando una ejecución correcta de las instrucciones en presencia de dependencias de datos.
+
 
 ## Unidad de debug
-Se implementó una unidad que se conecta al procesador para poder realizar la programación, depuración y ejecución del mismo. 
+<p align="center">
+    <img src="./img/TOP.png"><br>
+    <em>Esquematico de top.</em>
+</p>
 
-![Alt text](./img/TOP.png)
+Se implementó una unidad de depuración conectada al procesador, diseñada para facilitar la programación, depuración y ejecución del mismo. Esta unidad está compuesta por los siguientes módulos:
 
-Esta unidad de debug cuenta con un módulo UART que recibe comandos desde una PC para realizar las acciones antes mencionadas. Además envía a la PC el estado del procesador para poder realizar el debug.
+- ``UART``: Este módulo es responsable de recibir comandos desde una PC y enviar el estado del procesador. Actúa como la interfaz de comunicación serie entre el sistema de depuración y la PC, utilizando un protocolo UART para asegurar una transmisión confiable.
+- ``DebugInterface``: Se encarga de interpretar los comandos recibidos desde el módulo UART. Este módulo analiza las instrucciones para determinar la acción que debe llevarse a cabo sobre el procesador, tales como:
+  - Establecer puntos de interrupción (breakpoints).
+  - Iniciar o detener la ejecución del procesador.
+  - Leer o escribir valores en registros específicos.
+  - Consultar el estado de la memoria del procesador.
 
-![Alt text](./img/DU.png)
 
-Como puede verse en la imagen, la unidad de debug también cuenta con módulo llamado debugInterface que es el encargado de interpretar los comandos provenientes de la UART para realizar las acciones sobre el procesador.
+    El ``debugInterface`` también contiene lógica de control para coordinar el acceso a los registros internos del procesador y manejar las señales de control requeridas durante el proceso de depuración.
+
+<p align="center">
+    <img src="./img/DU.png"><br>
+    <em>Esquematico de debugUnit.</em>
+</p>
+
+- ``DebugUnit``: Este módulo es el núcleo que conecta todos los elementos de la unidad de depuración. Además de gestionar la interacción entre la ``UART`` y el ``debugInterface``, se encarga de mantener un registro del estado del procesador y proporcionar acceso en tiempo real al mismo para el envío de datos de depuración.
 
 
-## IDE
+## Interfaz
+<p align="center">
+    <img src=""><br>
+    <em>Presentacion de la aplicacion.</em>
+</p>
 
-Se desarrolló una aplicación (directorio PyMips) para la programación y uso del procesador. Para su uso, simplemente correr el archivo mipsIde.py que se encuentra en el directorio (se debe configurar el puerto com en el cual se encuentra la placa). En la ventana principal se encuentra un cuadro de texto para escribir el código fuente, un cuadro de texto que muestra el código ensamblado, tablas para mostrar el valor de los registros y memoria y diferentes botones para ensamblar, programar, reiniciar y ejecutar programas sobre el procesador.
+Se desarrolló una aplicación llamada **PyMips** para facilitar la programación y el control del procesador. La aplicación puede ejecutarse fácilmente corriendo el archivo ``mipsIde.py`` (en _Linux_) o ``mipsIdeWin.py`` (en _Windows_). Antes de iniciar, es necesario configurar el puerto de comunicación serial correspondiente para asegurar la conexión con la placa del procesador.
 
-![Alt text](./img/IDE.png)
+Funcionalidades principales de la interfaz son las siguientes:
+- **Editor de Código**: Un cuadro de texto amplio permite escribir el código fuente en lenguaje ensamblador MIPS.
+- **Visor de Código Ensamblado**: Otro cuadro muestra el código ensamblado después de realizar el proceso de construcción (build).
+- **Visualización de Registros y Memoria**: Tablas dinámicas muestran el contenido actual de los registros del procesador y la memoria de datos, junto con el contador de programa (PC).
+
+Los diferentes botones y sus funciones son:
+- **Build**: Ensambla el código fuente y muestra el código máquina resultante.
+- **Program**: Envía el programa ensamblado al procesador mediante la interfaz serial.
+- **Run**: Ejecuta el programa en el procesador.
+- **Step**: Permite la ejecución paso a paso para facilitar la depuración.
+- **Reset**: Reinicia el procesador y el programa cargado.
+- **Save**: Guarda el código fuente en un archivo ``.asm``.
+- **Open**: Abre un archivo de código fuente para cargarlo en el editor.
+
+
+La comunicación se realiza mediante un módulo ``UART`` configurado a _115200 baudios_, con la función de transmitir y recibir comandos e instrucciones entre la PC y la placa del procesador.
+
+Esta aplicación ofrece una plataforma visual y fácil de usar para la programación, depuración y ejecución de programas en el procesador MIPS.
+
 
 ## Análisis temporal
-Se realizaron pruebas para ver la máxima frecuencia en la que puede funcionar el sistema completo (Procesador y Debug Unit). Estas pruebas dieron como resultado que la máxima frecuencia de trabajo puede ser de **79MHz**. Al generar un clock de 80MHz de frecuencia se presenta el siguiente warning:
+Se llevaron a cabo pruebas para determinar la frecuencia máxima de operación del sistema completo, que incluye tanto el procesador como la Debug Unit. Los resultados indicaron que la mayor frecuencia estable alcanzada fue de ?? MHz. Al aumentar la frecuencia, el sistema genera la siguiente advertencia:
 
-![](./img/80MHz.png)
-
-También se realizaron las pruebas únicamente sobre el procesador (sin la debug unit) obteniendo resultados diferentes. Soportó hasta un clock de 500 MHz. 
+<p align="center">
+    <img src=""><br>
+    <em>Warning de frecuencia en VIVADO.</em>
+</p>
