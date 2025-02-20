@@ -219,7 +219,7 @@ Se implementó una unidad de depuración conectada al procesador, diseñada para
 
 ## Interfaz
 <p align="center">
-    <img src=""><br>
+    <img src="./img/interfaz.png"><br>
     <em>Presentacion de la aplicacion.</em>
 </p>
 
