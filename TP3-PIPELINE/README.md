@@ -246,9 +246,35 @@ Esta aplicación ofrece una plataforma visual y fácil de usar para la programac
 
 
 ## Análisis temporal
-Se llevaron a cabo pruebas para determinar la frecuencia máxima de operación del sistema completo, que incluye tanto el procesador como la Debug Unit. Los resultados indicaron que la mayor frecuencia estable alcanzada fue de ?? MHz. Al aumentar la frecuencia, el sistema genera la siguiente advertencia:
+Se llevaron a cabo pruebas para determinar la frecuencia máxima de operación del sistema completo, que incluye tanto el procesador como la Debug Unit. Los resultados indicaron que la mayor frecuencia estable alcanzada fue de **57MHz**. Al aumentar la frecuencia, el sistema genera la siguiente advertencia:
+
+<div style="display: flex; justify-content: center; align-items: center;">
+  <div style="margin-right: 10px;">
+    <img src="./img/58MHz.png" alt="Warning"><br>
+    <em>Warning de frecuencia en VIVADO.</em>
+  </div>
+  <div>
+    <img src="./img/60MHz.png" alt="Max Frequency"><br>
+    <em>Prueba de máxima frecuencia en VIVADO.</em>
+  </div>
+</div>
+
+En cambio, en una frecuencia menor a la mayor frecuencia estable, nos demuestra que el sistema se mantiene en perfectas condiciones, sin la presencia de paths criticos, donde no se cumple con los requisitos de timing. Siguiendo esta metodología, la menor frecuencia alcanzada fue de 10MHz.
 
 <p align="center">
-    <img src=""><br>
-    <em>Warning de frecuencia en VIVADO.</em>
+    <img src="./img/50MHz.png"><br>
+    <em>Design timing summary intermedio observado.</em>
 </p>
+
+Y vemos como en este rango de frecuencias de **57 - 10MHz**, no obtenemos mas critical warnings, los requisitos de timing fueron alcanzados y hasta en la metrica de **WNS** (Worst Negative Slack) valores positivos, lo cual significa que incluso para el path mas critico del diseño "sobro" tiempo del periodo de la señal utilizada.
+
+<div style="display: flex; justify-content: center; align-items: center;">
+  <div style="margin-right: 10px;">
+    <img src="./img/All-user-specified-timing-constraints-are-met.png"><br>
+    <em>Design timing summary observado.</em>
+  </div>
+  <div>
+    <img src="./img/40MHz.png"><br>
+    <em>Prueba de mínima frecuencia en VIVADO.</em>
+  </div>
+</div>
