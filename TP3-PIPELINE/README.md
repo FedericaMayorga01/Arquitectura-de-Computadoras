@@ -38,7 +38,7 @@ A continuación, se presenta una figura que ilustra un pipeline básico de un pr
 
 A continuación, se describen en detalle cada una de las etapas (o stages) que han sido implementadas en el pipeline.
 
-### Instruction Fetch (IF)
+## Instruction Fetch (IF)
 <p align="center">
     <img src="./img/IF.png"><br>
     <em>Esquematico de instructionFetchStage.</em>
@@ -57,7 +57,7 @@ Los módulos que conforman esta etapa son los siguientes:
 - ``instructionMemory``: Este módulo almacena las instrucciones del programa. Permite leer la instrucción correspondiente al program counter. 
 
 
-### Instruction Decode (ID)
+## Instruction Decode (ID)
 <p align="center">
     <img src="./img/ID.png"><br>
     <em>Esquematico de instructionDecodeStage.</em>
@@ -75,7 +75,7 @@ Esta etapa comprende los siguientes submódulos:
 - ``MUXD1F`` y ``MUXD2F``: Multiplexores que seleccionan la fuente de los datos entre diferentes opciones: la salida del banco de registros, el cortocircuito desde la etapa de memoria o la etapa de ejecución. La unidad de cortocircuito controla estos mux para evitar stalls innecesarios y optimizar el flujo del pipeline.
 
 
-### Execute (EX)
+## Execute (EX)
 <p align="center">
     <img src="./img/EX.png"><br>
     <em>Esquematico de executionStage.</em>
@@ -91,7 +91,7 @@ Módulos que componen esta etapa:
 - ``MUXWR``: Multiplexor que decide el registro de destino donde se almacenará el resultado de la ``ALU``. Las opciones incluyen el registro de destino especificado en la instrucción, el registro ``$zero`` o tambien ``$ra``.
 
 
-### Memory Access (MEM)
+## Memory Access (MEM)
 <p align="center">
     <img src="./img/MEM.png"><br>
     <em>Esquematico de memoryStage.</em>
@@ -108,7 +108,7 @@ Esta etapa está compuesta por los siguientes módulos:
 El flujo general es el siguiente: al recibir una señal de escritura (``i_memWrite`` activa), se almacena el valor indicado en la dirección especificada, respetando el tamaño y formato seleccionados. Para la lectura, se extraen los datos de la dirección correspondiente, ajustándolos según las configuraciones de tamaño y signo antes de ser enviados a la siguiente etapa.
 
 
-### Write Back (WB)
+## Write Back (WB)
 <p align="center">
     <img src="./img/WB.png"><br>
     <em>Esquematico de writebackStage.</em>
@@ -166,7 +166,7 @@ Condiciones similares se aplican para las comparaciones con ``i_rdM`` y la seña
 De este modo, la unidad de forwarding garantiza que los datos necesarios estén disponibles para las instrucciones actuales, evitando que el pipeline se detenga por riesgos de datos.
 
 
-## Hazard Detector
+### Hazard Detector
 <p align="center">
     <img src="./img/HD.png"><br>
     <em>Esquematico de hazardDetector.</em>
@@ -215,6 +215,19 @@ Se implementó una unidad de depuración conectada al procesador, diseñada para
 </p>
 
 - ``DebugUnit``: Este módulo es el núcleo que conecta todos los elementos de la unidad de depuración. Además de gestionar la interacción entre la ``UART`` y el ``debugInterface``, se encarga de mantener un registro del estado del procesador y proporcionar acceso en tiempo real al mismo para el envío de datos de depuración.
+
+<p align="center">
+    <img src="./img/TP3_FMS_DebugUnit(dark).png"><br>
+    <em>Diagrama de estados de la MS en Debug Unit.</em>
+</p>
+
+En el diagrama de estados, varias señales y registros juegan un papel crucial en la coordinación entre la UART y la CPU:
+- ``i_rxEmpty``: Señala si la UART ha recibido datos que aún no han sido leídos.
+- ``i_dataToRead``: Contiene los datos que se han leído desde la UART.
+- ``i_txFull``: Indica si la UART está lista para aceptar nuevos datos para transmisión.
+- ``i_halt``: Informa si la CPU ha detenido su ejecución.
+- ``r_byteCounter``: Realiza el conteo de los bytes recibidos o enviados.
+- ``r_regMemAddress``: Almacena la dirección de memoria del registro al que se está accediendo.
 
 
 ## Interfaz
