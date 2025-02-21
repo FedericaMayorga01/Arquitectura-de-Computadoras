@@ -84,11 +84,15 @@ En esta etapa se llevan a cabo los cálculos requeridos por las instrucciones, c
 
 Módulos que componen esta etapa:
 
-- ``ALUControl``: Este módulo interpreta las señales de control provenientes de la etapa de decodificación y determina el código de operación correspondiente para la ALU (``o_opSelector``). Las señales que controla incluyen operaciones como suma, resta, desplazamientos (shift) y comparaciones.
-- ``MUXD1`` y ``MUXD2``: Estos multiplexores seleccionan los operandos para la ALU en función del tipo de instrucción (controlados por la señal ``i_aluSrc``, que determina la fuente de los operandos). ``MUXD1`` permite elegir entre el primer operando o un valor de desplazamiento, mientras que ``MUXD2`` selecciona entre el segundo operando o un valor inmediato.
-- ``ALU``: La Unidad Aritmético-Lógica recibe los operandos y el código de operación proporcionado por ``ALUControl`` y realiza operaciones como suma, resta, AND, OR, XOR, NOR, desplazamientos lógicos y comparaciones.
-- ``MUXWR``: Multiplexor que decide el registro de destino donde se almacenará el resultado de la ``ALU``. Las opciones incluyen el registro de destino especificado en la instrucción, el registro ``$zero`` o tambien ``$ra``.
+- ``ALUControl``: Este módulo interpreta las señales de control provenientes de la etapa de decodificación y determina la operación a realizar por la ALU (``o_opSelector``) en la etapa de ejecución. Verifica si ingreso una instruccion tipo R, LOAD/STORE, o inmediata.
+- ``MUXD1`` y ``MUXD2``: Estos multiplexores seleccionan los operandos para la ALU en función del tipo de instrucción (controlados por la señal ``i_aluSrc``, que determina la fuente de los operandos). ``MUXD1`` permite elegir entre el readdata1 o el desplazamiento(shamt), mientras que ``MUXD2`` selecciona entre readdata2 o un valor inmediato. Esto sucede ya que el primer operando (aluOperand1) casi siempre es rs (i_readData1), excepto en operaciones de shift, donde se usa shamt. Mientras que el segundo operando es el que varía más en función del tipo de instrucción:
+    - Instrucciones **tipo R**: Operan con dos registros (rs y rt). Ej: i_aluSrc[0] = 0, selecciona i_readData2 (registro rt).
+    - Instrucciones **tipo I**: Usan un inmediato en lugar del segundo registro(por ejemplo para calcular la posición de memoria en instrucciones LOAD/STORE). Ej: i_aluSrc[0] = 1, selecciona i_immediateExtendValue.
 
+- ``ALU``: La Unidad Aritmético-Lógica recibe los operandos y la operación que debe realizar, proporcionada por ``ALUControl``.
+- ``MUXWR``: Multiplexor que decide el registro de destino donde se almacenará el resultado de la ``ALU``, en base al valor de i_regDst, que viene de ser una de las salidas de la controlunit de la etapa anterior. Las opciones incluyen el registro destino es rd (para instrucciones tipo R), rt (para instrucciones tipo I), el registro 31(instrucciones JAL),o el registro 0.
+
+Vale la pena notar que en este modulo, al valor del program counter incrementado en 4 que proviene de la salida de la etapa de decodificacion de la instruccion, se le vuelven a sumar 4 bytes. La razón principal para este incremento adicional es el manejo de instrucciones delays slots, PC + 8 es la direccion de retorno en instrucciones como JAL o JR. Si no existiera el delay slot, habría un stall (detención del pipeline) en la ejecución, por lo tanto, en lugar de detener la ejecución, el procesador permite ejecutar una instrucción útil mientras se completa el salto.
 
 ## Memory Access (MEM)
 <p align="center">
@@ -117,19 +121,10 @@ En esta etapa se realiza la escritura de los resultados en los registros, tomand
 
 Módulos que componen esta etapa:
 
-- ``writebackStage``: Este módulo coordina el flujo de datos hacia los registros. Recibe tres posibles valores de entrada: el resultado de la ALU (``i_aluResult``), un dato leído desde la memoria (``i_readData``), y la dirección de retorno (``i_returnPC``). El multiplexor interno, controlado por la señal ``i_memToReg``, selecciona el valor correcto para ser enviado como salida (``o_writeData``). Las opciones son:
+- ``writebackStage``: Este módulo coordina el flujo de datos hacia los registros. Recibe tres posibles valores de entrada: el resultado de la ALU (``i_aluResult``), un dato leído desde la memoria (``i_readData``), y la dirección de retorno (``i_returnPC``). El multiplexor interno, controlado por la señal ``i_memToReg``, selecciona el valor correcto para ser enviado como salida (``o_writeData``), que será el valor a escribir en el banco de registros( en el registro indicado por writeRegister). Las opciones son:
   - **00**: Selección del resultado de la ALU.
   - **01**: Selección del dato leído de la memoria.
-  - **10**: Selección de la dirección de retorno.
-
-En adicion a las etapas o stages referidos y representados a lo largos de este informe, se encuentra un ultimo buffer.
-
-- ``memoryWritebackBuffer``: Este módulo actúa como un buffer entre la etapa de memoria y la etapa de escritura. Almacena los datos y señales de control necesarios para completar la escritura en el registro correspondiente.
-  - Controla el registro en el que se debe escribir mediante la señal ``i_writeRegister``.
-  - Permite habilitar o deshabilitar la escritura con la señal ``i_regWrite``.
-  - Implementa un mecanismo de freno (``i_halt``) y permite reiniciar el contenido con la señal ``i_reset``.
-
-El flujo de trabajo general comienza con la selección del valor a escribir, que es determinado por el multiplexor en función de las señales de control. Luego, este valor es almacenado en el registro correspondiente, asegurando la correcta actualización de los datos para las siguientes instrucciones.
+  - **10**: Selección de la dirección de retorno(para instrucciones JAL y JALR).
 
 ---
 
