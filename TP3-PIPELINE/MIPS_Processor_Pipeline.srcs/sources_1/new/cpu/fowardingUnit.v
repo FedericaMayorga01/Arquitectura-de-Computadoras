@@ -17,11 +17,11 @@ module fowardingUnit #(
     output reg [1:0] o_operandBCtl
 );
 
-wire rsHazardE = (i_rdE == i_rs);
-wire rtHazardE = (i_rdE == i_rt);
+wire rsHazardE = (i_rdE == i_rs); // instruccion anterior en etapa de ejecucion
+wire rtHazardE = (i_rdE == i_rt); // instruccion anterior en etapa de ejecucion
 
-wire rsHazardM = (i_rdM == i_rs);
-wire rtHazardM = (i_rdM == i_rt);
+wire rsHazardM = (i_rdM == i_rs); // instruccion anterior en etapa de memoria
+wire rtHazardM = (i_rdM == i_rt); // instruccion anterior en etapa de memoria
 
 always @(*) begin
     if(rsHazardE & i_regWriteE)

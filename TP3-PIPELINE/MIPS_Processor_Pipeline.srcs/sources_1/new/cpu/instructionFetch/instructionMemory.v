@@ -50,7 +50,7 @@ end
 
 reg [PC_LEN-1:0] r_mask = {{(PC_LEN-MEM_SIZE_ADDRESS_BITS-2){1'b0}}, {MEM_SIZE_ADDRESS_BITS{1'b1}}, 2'b00};
 
-//The PC is incremented by 4, so it discards the two lsb.
+//El PC se incrementa en 4, por lo que descarta los dos lsb.
 assign o_instruction = r_memoryBlock[(i_programCounter & r_mask) >> 2];
 
 endmodule

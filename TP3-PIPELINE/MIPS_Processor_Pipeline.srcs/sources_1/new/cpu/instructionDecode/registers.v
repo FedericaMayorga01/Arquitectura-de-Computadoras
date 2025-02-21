@@ -29,9 +29,9 @@ end
 
 always @(negedge i_clk) begin
     if(i_reset)
-        r_registers[0] = 0;
+        r_registers[0] <= 0;
     else if(i_regWrite)
-        r_registers[i_writeRegister] = i_writeData;
+        r_registers[i_writeRegister] <= i_writeData;
 end
 
 

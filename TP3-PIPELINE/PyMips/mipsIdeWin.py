@@ -15,7 +15,8 @@ class mipsIDE(QMainWindow):
     parser = assemblyParser(instructionTable, registerTable, 4)
     programValid = False
     #serialComPort = serial.Serial("/dev/pts/2", 115200, timeout=2)
-    serialComPort = serial.Serial("COM7", 115200, timeout=10)
+    #serialComPort = serial.Serial("COM7", 115200, timeout=10)
+    serialComPort = serial.Serial("COM7", 115200, timeout=30)
 
     def __init__(self):
         super().__init__()
@@ -156,7 +157,7 @@ class mipsIDE(QMainWindow):
             self.updateTable(data, self.memoryTable, 32, 64)
             self.updateTable(data, self.programCounter, 64, 65)
         else:
-            print("Time out")
+            print(f"Time out - Datos recibidos: {len(data)} bytes")
 
     def updateTable(self, data, table, startIndex, endIndex):
         for i in range(startIndex, endIndex):

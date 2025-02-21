@@ -33,14 +33,14 @@ ANDI r10, r5, 32            #syntax: ANDI rt, rs, imm  rt <-- rs AND imm
 ORI  r10, r5, 32            #syntax: ORI  rt, rs, imm  rt <-- rs OR imm
 XORI r10, r5, 32            #syntax: XORI rt, rs, imm  rt <-- rs XOR imm
 
-LUI r10, 45                 #syntax: LUI rt, imm  rt <-- imm || 0^16
+LUI  r10, 45                 #syntax: LUI rt, imm  rt <-- imm || 0^16
 
 SLTI r10, r5, 32            #syntax: SLTI rt, rs, imm  rt <-- (rs < imm)
  
-BEQ r10, r5, SALTO          #syntax: BEQ rs, rt, imm   if(rs==rt) branch
-BNE r10, r5, SALTO          #syntax: BEQ rs, rt, imm   if(rs==rt) branch
+BEQ  r10, r5, SALTO          #syntax: BEQ rs, rt, imm   if(rs==rt) branch
+BNE  r10, r5, SALTO          #syntax: BEQ rs, rt, imm   if(rs==rt) branch
 
-JR r10                      #syntax: JR rs  PC <-- rs
+JR   r10                      #syntax: JR rs  PC <-- rs
 JALR r10                    #syntax: JALR rs (rd = 31 implied)  rd <-- return address PC <-- rs
 JALR r20, r10               #syntax: JALR rd, rs                rd <-- return address PC <-- rs
 
