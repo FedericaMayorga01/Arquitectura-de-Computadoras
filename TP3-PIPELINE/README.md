@@ -48,14 +48,13 @@ Esta etapa se encarga de acceder a la instrucción señalada por el valor del pr
 
 Los módulos que conforman esta etapa son los siguientes:
 
-- ``programCounterMux``: Multiplexor que selecciona la fuente del program counter. Las opciones incluyen el PC actual incrementado en 4 o el PC resultante de una instrucción de salto. Se implementa mediante un multiplexor de 2 a 1.
-
 - ``programCounter``: Este módulo mantiene el valor del program counter durante un ciclo de reloj. Si se activa la señal de reinicio, el contador se reinicia a cero. En cada flanco de reloj, el contador se actualiza según el valor de entrada, siempre que la señal de habilitación esté activa.
 
 - ``programCounterIncrement``: Es un sumador que incrementa el program counter en 4 para apuntar a la siguiente instrucción, teniendo en cuenta que las instrucciones están alineadas a 4 bytes en la memoria.
 
-- ``instructionMemory``: Este módulo almacena las instrucciones del programa. Permite leer la instrucción correspondiente al program counter. 
+- ``instructionMemory``: Este módulo almacena las instrucciones del programa. Permite leer la instrucción correspondiente al program counter. La memoria tiene 2^10 = 1024 direcciones, como cada dirección almacena una palabra de 4 bytes, el tamaño total en bytes es de 4096 bytes = 4 KB.
 
+- ``programCounterMux``: Multiplexor que selecciona la fuente del program counter. Las opciones incluyen el PC actual incrementado en 4 o el PC resultante de una instrucción de salto. Se implementa mediante un multiplexor de 2 a 1. Este multiplexor es de vital importancia para el program counter, sus entradas provienen del modulo branchcontrol(decide si el procesador debe realizar un salto o continuar con la ejecución secuencial) que se encuentra en la etapa de instruction decode e indica cual sera la fuente del PC en funcion de la decisión que calculó el modulo branchcontrol.
 
 ## Instruction Decode (ID)
 <p align="center">
@@ -143,7 +142,7 @@ Para la detección y eliminación de riesgos se agregaron dos módulos sobre la 
     <em>Esquematico de forwardingUnit.</em>
 </p>
 
-Esta unidad es responsable de generar señales de control que gestionan los multiplexores utilizados en la etapa de decodificación para modificar la fuente de los operandos de las instrucciones. Su función principal es detectar y resolver riesgos de datos, eliminándolos mediante la generación de "cortocircuitos" (forwarding).
+Esta unidad es responsable de generar señales que gestionan los multiplexores utilizados en la etapa de decodificación para modificar la fuente de los operandos utilizados por la ALU en la etapa de ejecución. Su función principal es detectar y resolver riesgos de datos, eliminándolos mediante la generación de "cortocircuitos" (forwarding).
 
 El funcionamiento del módulo es comparar los registros involucrados en las diferentes instrucciones presentes en el pipeline para identificar posibles riesgos de datos. Estos riesgos ocurren cuando una instrucción utiliza datos que aún no han sido escritos por una instrucción anterior.
 
@@ -163,6 +162,13 @@ La detección de riesgos se basa en las siguientes condiciones:
 
 ---
 Condiciones similares se aplican para las comparaciones con ``i_rdM`` y la señal ``i_regWriteM``, que indican riesgos en la etapa de memoria.
+
+En cuanto a la **implementación de la anticipación de resultados**, se añaden dos mutiplexores(en la etapa de instructionDecode) a la entrada de la ALU y el control apropiado para detectar estas dependencias y anticipar los resultados cuando sea necesario. El primer multiplexor recibe el registro A proveniente de la etapa anterior, el resultado de la instrucción anterior que se encuentra a la salida de la ALU(etapa EX), y el resultado de la instrucción anterior de la anteirior que se encuentra a la salida de la memoria(etapa M). El otro multiplexor recibe estas dos mismas señales junto con el registro B. El control de los multiplexores se lleva a cabo por esta unidad, que es la que va a decidir que entrada usar. Debido a que algunas instrucciones no escriben en registros, se anticiparía un valor innecesario, por esto es que se comprueba si la señal RegWrite esta activa(esta señal de contrl indica que la instruccion va a escribir un registro); esto se logra examinando el campo de control WB del registro de segmentación durante las etapas de EX y MEM.
+<p align="center">
+    <img src="./img/forwardunit.png"><br>
+    <em>forwardingUnit.</em>
+</p>
+
 De este modo, la unidad de forwarding garantiza que los datos necesarios estén disponibles para las instrucciones actuales, evitando que el pipeline se detenga por riesgos de datos.
 
 
@@ -184,7 +190,13 @@ Podemos identificar algunas de sus entradas y salidas:
 
 ---
 Si una instrucción en la etapa de ejecución tiene activada la señal ``i_memReadE`` y su registro destino (``i_rtE``) coincide con alguno de los registros fuente (``i_rsID`` o ``i_rtID``) de la instrucción en la etapa de decodificación, se activa la señal ``o_stall``.
-Si una instrucción en la etapa de memoria tiene activada la señal ``i_memReadM`` y su registro destino (``i_rtM``) coincide con alguno de los registros fuente de la instrucción en decodificación, también se activa la señal ``o_stall``.
+Si una instrucción en la etapa de memoria tiene activada la señal ``i_memReadM`` y su registro destino (``i_rtM``) coincide con alguno de los registros fuente de la instrucción en decodificación, se activa la señal ``o_stall``.
+
+Esta unidad es la que ayuda a poder realizar el cortocircuito cuando existe previamente una instruccion LOAD. Se da cuenta que es esta instruccion al ejecutar i_memRead ya que LOAD es la única instrucción que lee de memoria. Al bloquearse la instruccion situada en la etapa de ID tambien se bloquea la instrucción que esta en la etapa IF, ya que sino perdería la instrucción buscada de memoria. La mitad posterior del pipeline que comienza en la etapa EX ejecuta instrucciones NOPs, esto se logra negando(poniendo a cero) las señales de control de las etapas EX/MEM y WB. Este proceso se logra a partir de un multiplexor que se encuentra en la etapa de instruction decode, el cual su salida es la entrada de la control unit(la cual es la encargada de generar las señales de control), por lo tanto si el selector del mux indica que existe un stall provoca que las señales de control que salen de la control unit sean = 0.
+<p align="center">
+    <img src="./img/.png"><br>
+    <em>Mux de instruction decode.</em>
+</p>
 
 ---
 
