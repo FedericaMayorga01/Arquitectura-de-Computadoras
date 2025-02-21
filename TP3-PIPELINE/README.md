@@ -194,7 +194,7 @@ Si una instrucción en la etapa de memoria tiene activada la señal ``i_memReadM
 
 Esta unidad es la que ayuda a poder realizar el cortocircuito cuando existe previamente una instruccion LOAD. Se da cuenta que es esta instruccion al ejecutar i_memRead ya que LOAD es la única instrucción que lee de memoria. Al bloquearse la instruccion situada en la etapa de ID tambien se bloquea la instrucción que esta en la etapa IF, ya que sino perdería la instrucción buscada de memoria. La mitad posterior del pipeline que comienza en la etapa EX ejecuta instrucciones NOPs, esto se logra negando(poniendo a cero) las señales de control de las etapas EX/MEM y WB. Este proceso se logra a partir de un multiplexor que se encuentra en la etapa de instruction decode, el cual su salida es la entrada de la control unit(la cual es la encargada de generar las señales de control), por lo tanto si el selector del mux indica que existe un stall provoca que las señales de control que salen de la control unit sean = 0.
 <p align="center">
-    <img src="./img/.png"><br>
+    <img src="./img/muxID.png"><br>
     <em>Mux de instruction decode.</em>
 </p>
 
