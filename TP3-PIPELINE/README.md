@@ -69,7 +69,19 @@ Esta etapa comprende los siguientes submódulos:
 - ``registers``: Banco de registros, que proporciona almacenamiento temporal y acceso rápido a los datos necesarios para las instrucciones. Este módulo soporta la lectura y escritura de múltiples registros según las señales de control proporcionadas. Tenemos 32 registros de 32 bits.
 - ``controlUnit``: Responsable de generar las señales de control necesarias para todas las etapas. Entre estas señales destacan el control de salto (``o_jumpType``, ``o_branch``), selección de operaciones aritméticas (``o_aluOp``), etc.
 - ``signExtend``: Extiende los valores inmediatos a 32 bits según el bit de signo, permitiendo la correcta representación de números negativos en operaciones aritméticas y de salto.
-- ``branchControl``: Unidad encargada del cálculo de la dirección de salto y la evaluación de la condición de branch. Su función es crítica en la implementación de instrucciones de saltos y la resolución de dependencias de control.
+- ``branchControl``: Este módulo decide si el procesador debe realizar un salto(y el calculo de la direccion a saltar) o continuar con la ejecución secuencial. Su funcionamiento es el siguiente:
+    - Cálculo del PC en saltos condicionales (BEQ / BNE):
+        - Se calcula la nueva dirección de PC sumando i_immediateExtendValue (desplazado 2 bits) al PC + 4.
+        - BEQ salta si i_readData1 == i_readData2, BNE si son distintos.
+        - Para Calcular la dirección del salto condicional, se calcula sumando o restando el desplazamiento inmediato (i_immediateExtendValue) al PC actual (i_incrementedPC)
+    - Cálculo del PC en saltos incondicionales (J, JR):
+        - Si i_jumpType = 1, el salto se hace al valor del registro (JR).
+        - Si i_jumpType = 0, el salto es a la dirección calculada con i_instrIndex (J, JAL).
+    - Decisión final:
+        - Si es J o JR, o_PCSrc = 1 y o_pcBranch = w_jumpPC.
+        - Si es BEQ o BNE, o_PCSrc = 1 solo si la comparación es verdadera.
+    - Las salidas o_PCSrc y o_PCBranch son fundamentales ya que indican respectivamente si el PC debe cambiar a otra dirección y la nueva dirección de PC si se toma un salto. Estas salidas son las entradas del multiplexor que se encuentra en la etapa de instruction fetch, para decidir el valor del program counter.
+  
 - ``MUXD1``: Multiplexor encargado de insertar **stalls** en el pipeline en respuesta a las señales de control, garantizando la sincronización del flujo de datos. Su salida, segun si es un stall o la instruccion a ejecutar, es entrada de la control unit que generara las señales de control.
 - ``MUXD1F`` y ``MUXD2F``: Multiplexores que seleccionan la fuente de los datos entre diferentes opciones: la salida del banco de registros, el cortocircuito desde la etapa de memoria o la etapa de ejecución. La unidad de cortocircuito controla estos mux para evitar stalls innecesarios y optimizar el flujo del pipeline.
 
@@ -104,9 +116,19 @@ En esta etapa se realizan las operaciones de lectura y escritura sobre la memori
 
 Esta etapa está compuesta por los siguientes módulos:
 
-- ``dataMemory``: Módulo encargado de la lectura y escritura de datos en memoria. La dirección de memoria y los datos a escribir son proporcionados por la ``ALU`` y el registro de datos. El control de escritura se realiza mediante la señal ``i_memWrite``. El tamaño de los datos (byte, halfword o word) se selecciona mediante la señal ``i_loadStoreType``, y la interpretación del signo se controla con la señal ``i_unsigned``.
-- ``memoryMask``: Este módulo ajusta el formato de los datos leídos de la memoria según el tamaño especificado (_BYTE_, _HALFWORD_ o _WORD_). También se encarga de extender el signo si los datos son interpretados como valores con signo.
-- ``branchControl``: Aunque su función principal es calcular las direcciones de salto y evaluar condiciones para instrucciones de tipo branch, este módulo también se relaciona con el control de flujo en la memoria cuando se procesan estas instrucciones.
+- ``dataMemory``: Módulo encargado de la lectura y escritura de datos en memoria. ``memoryBlock`` es la matriz que representa la memoria de 2^5=32 posiciones con 32 bits cada una.
+    - Lógica de lectura:
+        - Se obtiene el dato de memoria en w_readData.
+        - Luego, este valor se procesa con el módulo memoryMask, que se encarga de extraer correctamente bytes o halfwords y de hacer la extensión de signo si es necesario.
+    - Lógica de escritura: Si i_memWrite es 1, se ejecuta un case según i_loadStoreType:
+        - BYTE (2'b00): Se escribe un byte específico dentro de la palabra de 32 bits según i_address[1:0].
+        - HALFWORD (2'b01): Se escribe un halfword en la parte alta o baja de la palabra de 32 bits según i_address[1].
+        - WORD (2'b11): Se escribe una palabra completa de 32 bits.
+        - La escritura se realiza en el flanco de subida del reloj.
+    - Salidas:
+        -  o_memoryValue: Devuelve el contenido de memoryBlock en i_memoryAddress (se usa para depuración o para operaciones de monitoreo de memoria).
+        -  o_readData: Es el valor leído de memoria, ya procesado por memoryMask.
+- ``memoryMask``: Este módulo se encarga de extraer correctamente los datos de la memoria, dependiendo de su tamaño (byte, halfword o word). Además, maneja la extensión de signo.
 
 El flujo general es el siguiente: al recibir una señal de escritura (``i_memWrite`` activa), se almacena el valor indicado en la dirección especificada, respetando el tamaño y formato seleccionados. Para la lectura, se extraen los datos de la dirección correspondiente, ajustándolos según las configuraciones de tamaño y signo antes de ser enviados a la siguiente etapa.
 
