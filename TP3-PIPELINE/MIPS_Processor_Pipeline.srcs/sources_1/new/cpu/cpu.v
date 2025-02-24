@@ -397,10 +397,10 @@ hazardDetector #(
     .i_rsID(w_rsID),
     .i_rtID(w_rtID),
     .i_rtE(w_rtE),
-    .i_rtM(w_writeRegisterM),
+    //.i_rtM(w_writeRegisterM),
     //Control inputs
     .i_memReadE(w_memReadE),
-    .i_memReadM(w_memReadM),
+    //.i_memReadM(w_memReadM),
     //Control outputs
     .o_stall(w_stall)
 );

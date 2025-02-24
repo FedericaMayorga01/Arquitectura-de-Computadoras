@@ -8,10 +8,10 @@ module hazardDetector  #(
     input wire [REGISTER_BITS-1:0] i_rsID,
     input wire [REGISTER_BITS-1:0] i_rtID,
     input wire [REGISTER_BITS-1:0] i_rtE,
-    input wire [REGISTER_BITS-1:0] i_rtM,
+    //input wire [REGISTER_BITS-1:0] i_rtM,
     //Control inputs
     input wire i_memReadE,
-    input wire i_memReadM,
+    //input wire i_memReadM,
     //Control outputs
     output reg o_stall
 );

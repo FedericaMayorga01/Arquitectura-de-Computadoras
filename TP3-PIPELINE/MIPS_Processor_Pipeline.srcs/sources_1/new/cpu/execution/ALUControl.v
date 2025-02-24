@@ -22,10 +22,16 @@ localparam XORI = 3'b110;
 localparam SLTI = 3'b010;
 localparam LUI = 3'b111;
 
+localparam ADDIU = 3'b011;
+localparam SLTIU = 3'b001;
+
 localparam ADD = 6'b100000;
 localparam ADDU = 6'b100001;
 localparam SUBU = 6'b100011;
-    
+
+localparam ADDIU_FUNC = 6'b001011;
+localparam SLTIU_FUNC = 6'b010001;
+
 localparam AND = 6'b100100;
 localparam OR  = 6'b100101;
 localparam XOR = 6'b100110;
@@ -59,6 +65,8 @@ always @(*)
                         XORI: o_opSelector = XOR;
                         SLTI: o_opSelector = SLT;
                         LUI: o_opSelector = SET_UPPER;
+                        ADDIU: o_opSelector = ADDIU_FUNC;
+                        SLTIU: o_opSelector = SLTIU_FUNC;                        
                         default: o_opSelector  = 0;
                     endcase
                 end 

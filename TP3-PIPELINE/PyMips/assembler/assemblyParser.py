@@ -226,21 +226,47 @@ class assemblyParser():
             
 
 
+#    def hex2bin(self, hex_val, num_bits):
+#            tc = False
+#            if '-' in hex_val:
+#                tc = True
+#                hex_val = hex_val.replace('-', '')
+#
+#            bit_string = '0' * num_bits
+#            bin_val    = str(bin(int(hex_val, 16)))[2:]
+#            bit_string = bit_string[0: num_bits - len(bin_val)] + bin_val + bit_string[num_bits:]
+#
+#            if tc:
+#                bit_string = '1' + bit_string[1:]
+#
+#            return bit_string
+#    def hex2bin(self, hex_val, num_bits):
+#        val = int(hex_val, 16)  # Convertir a entero
+#        if val < 0:
+#            val = (1 << num_bits) + val  # Convertir a complemento a dos
+#        bit_string = format(val, f'0{num_bits}b')[-num_bits:]  # Asegurar que tenga num_bits
+#        return bit_string
     def hex2bin(self, hex_val, num_bits):
-            tc = False
-            if '-' in hex_val:
-                tc = True
-                hex_val = hex_val.replace('-', '')
-
+        # Manejo de números negativos
+        if isinstance(hex_val, str) and '-' in hex_val:
+            # Remover el signo negativo y convertir a entero
+            val = int(hex_val.replace('-', ''), 16)
+            # Calcular el complemento a dos
+            val = (1 << num_bits) - val
+            # Asegurar que tenga el número correcto de bits
+            bit_string = format(val, f'0{num_bits}b')
+        else:
+            # Para números positivos
             bit_string = '0' * num_bits
-            bin_val    = str(bin(int(hex_val, 16)))[2:]
+            # Convertir a binario, removiendo el '0b' del principio
+            if isinstance(hex_val, str):
+                bin_val = str(bin(int(hex_val, 16)))[2:]
+            else:
+                bin_val = str(bin(hex_val))[2:]
+            # Rellenar con ceros a la izquierda
             bit_string = bit_string[0: num_bits - len(bin_val)] + bin_val + bit_string[num_bits:]
 
-            if tc:
-                bit_string = '1' + bit_string[1:]
-
-            return bit_string
-    
+        return bit_string[-num_bits:]  # Asegurar que devolvemos exactamente num_bits    
 
     def bin2hex(self, bit_string):
         bit_string = '0b'+bit_string
@@ -261,6 +287,6 @@ class assemblyParser():
 
         if self.currentLocation %4 == 0:
             if(arguments != None):
-                self.outputArray[-1] += '    ' + instruction.ljust(5) + ', '.join(arguments)
+                self.outputArray[-1] += '    ' + instruction.ljust(6) + ', '.join(arguments)
             else:
-                self.outputArray[-1] += '    ' + instruction.ljust(5) 
+                self.outputArray[-1] += '    ' + instruction.ljust(6) 

@@ -15,8 +15,8 @@ class mipsIDE(QMainWindow):
     parser = assemblyParser(instructionTable, registerTable, 4)
     programValid = False
     #serialComPort = serial.Serial("/dev/pts/2", 115200, timeout=2)
-    #serialComPort = serial.Serial("COM7", 115200, timeout=10)
-    serialComPort = serial.Serial("COM7", 115200, timeout=30)
+    serialComPort = serial.Serial("COM7", 115200, timeout=10)
+    #serialComPort = serial.Serial("COM7", 115200, timeout=30)
 
     def __init__(self):
         super().__init__()

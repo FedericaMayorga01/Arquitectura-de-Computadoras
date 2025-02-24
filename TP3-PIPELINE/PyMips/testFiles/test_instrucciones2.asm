@@ -20,4 +20,8 @@ ANDI r14, r7, 255           # r14 = r7 AND 255 -> 0x00001111 AND 0x000000FF = 0x
 
 SH   r14, 8(r0)             # Guarda el halfword de r14 en MEM[2] -> MEM[2] = 0x0011  
 
+ADDIU r19, r5, 2           # r19 = r5 + (2) -> 0x4 + (2) = 0x6  
+SLTIU r20, r5, 10           # r20 = (r5 < 10) en sin signo -> r20 = (4 < 10) ? 1 : 0 -> 0x1  
+SLTU r18, r5, r6            # r18 = (r5 < r6) en sin signo -> r18 = (4 < 4) ? 0 : 0 -> 0x0  
+
 HALT

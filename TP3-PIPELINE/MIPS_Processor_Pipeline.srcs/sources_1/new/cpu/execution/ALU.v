@@ -20,6 +20,9 @@ module ALU #(
     localparam OR  = 6'b100101;
     localparam XOR = 6'b100110;
     localparam NOR = 6'b100111;
+
+    localparam ADDIU = 6'b001011;
+    localparam SLTIU = 6'b010001;
     
     localparam SRA = 6'b000011;
     localparam SRAV = 6'b000111;
@@ -30,6 +33,7 @@ module ALU #(
     localparam SLLV = 6'b000100;
     
     localparam SLT = 6'b101010;
+    localparam SLTU = 6'b101011;//new
     
     localparam SET_UPPER = 6'b001111;
     
@@ -43,7 +47,11 @@ module ALU #(
         begin
             case(i_opSelector)
                 ADD: tempResult = $signed(i_operandA) + $signed(i_operandB);            
-                ADDU: tempResult = i_operandA + i_operandB;                
+                ADDU: tempResult = i_operandA + i_operandB;
+                ADDIU: tempResult = $unsigned(i_operandA) + $unsigned(i_operandB);
+                //ADDIU: tempResult = i_operandA + i_operandB;
+                //ADDIU: tempResult = $signed(i_operandA) + $signed(i_operandB);
+
                 SUBU: tempResult = i_operandA - i_operandB;
                 
                 AND: tempResult = i_operandA & i_operandB;
@@ -56,10 +64,17 @@ module ALU #(
                 SRL: tempResult = i_operandB >> i_operandA;
                 SRLV: tempResult = i_operandB >> i_operandA;
                 
+                SLTU: tempResult = {31'b0, ($unsigned(i_operandA) < $unsigned(i_operandB))}; //new
+                //SLTU: tempResult = {31'b0, (i_operandA < i_operandB)}; //new
+                //SLTU: tempResult = i_operandA + i_operandB;
+
+                SLTIU: tempResult = {31'b0, ($unsigned(i_operandA) < $unsigned(i_operandB))}; //new
+                //SLTIU: tempResult = {31'b0, (i_operandA < i_operandB)}; //new
+
                 SLL: tempResult = i_operandB << i_operandA;
                 SLLV: tempResult = i_operandB << i_operandA;
                 
-                SLT: tempResult = $signed(i_operandA) < $signed(i_operandB);
+                SLT: tempResult = {31'b0, ($signed(i_operandA) < $signed(i_operandB))};
                 
                 SET_UPPER: tempResult = {i_operandB[DATA_LEN-1],i_operandB[14:0],{16{1'b0}}};
                 

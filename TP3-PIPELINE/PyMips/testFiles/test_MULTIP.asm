@@ -1,7 +1,8 @@
 ADDI r29,r0,2       # r29 = 0x2
 ADDI r30,r0,7       # r30 = 0x7
 
-JAL MUL             # Salta a MUL, guarda la direccion de retorno en r31
+ADDI r25, r0, 24     # r25 = 0x18 (Dirección de MUL segun el ensamblador) 
+JALR r25            # Salta a MUL(r25), guarda PC+4 en r31
 NOP
 HALT
 
