@@ -11,7 +11,7 @@ module ALUControl(
 );
 
 localparam LOAD_STORE = 2'b00;
-localparam BRANCH = 2'b01;
+localparam OTHERS = 2'b01;
 localparam R_TYPE = 2'b10;
 localparam IMMEDIATE = 2'b11;
 
@@ -22,15 +22,15 @@ localparam XORI = 3'b110;
 localparam SLTI = 3'b010;
 localparam LUI = 3'b111;
 
-localparam ADDIU = 3'b011;
-localparam SLTIU = 3'b001;
+localparam ADDIU = 3'b001;
+localparam SLTIU = 3'b011;
 
 localparam ADD = 6'b100000;
 localparam ADDU = 6'b100001;
 localparam SUBU = 6'b100011;
 
-localparam ADDIU_FUNC = 6'b001011;
-localparam SLTIU_FUNC = 6'b010001;
+localparam ADDIU_FUNC = 6'b001001;
+localparam SLTIU_FUNC = 6'b001011;
 
 localparam AND = 6'b100100;
 localparam OR  = 6'b100101;
@@ -55,6 +55,14 @@ always @(*)
                 //Load or store instruction ALU should add 
                 LOAD_STORE: o_opSelector = ADD;
                 //R-type instruction
+                OTHERS:o_opSelector = i_funct; 
+                    //begin
+                    //case(i_immediateFunct)
+                    //    SLT: o_opSelector = SLT;
+                    //    SLTU: o_opSelector = AND;                  
+                    //    default: o_opSelector  = 0;
+                    //endcase
+                //end                 
                 R_TYPE: o_opSelector = i_funct;
                 //Immediate instruction
                 IMMEDIATE: begin

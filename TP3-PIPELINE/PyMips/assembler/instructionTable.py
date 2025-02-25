@@ -13,9 +13,12 @@ instructionTable = {
     'OR' : ['0x00', 'rs', 'rt', 'rd', 'shamt', '0x25'], #Or, shamt = 0x00
     'XOR' : ['0x00', 'rs', 'rt', 'rd', 'shamt', '0x26'], #Xor, shamt = 0x00
     'NOR' : ['0x00', 'rs', 'rt', 'rd', 'shamt', '0x27'], #Nor, shamt = 0x00
-    'SLT' : ['0x00', 'rs', 'rt', 'rd', 'shamt', '0x2a'], #Set on Less Than, shamt = 0x00
-    'SLTU' : ['0x00', 'rs', 'rt', 'rd', 'shamt', '0x2b'], #Set on Less Than, shamt = 0x00
-
+    'JALR' : ['0x00', 'rs', 'rt', 'rd', 'shamt', '0x09'], #Jump And Link Register, rs, shamt = 0x00
+    #'JALR' : ['0x00', 'rs', '0x00', 'rd', '0x00', '0x09']
+    'JR' : ['0x00', 'rs', 'rt', 'rd', 'shamt', '0x08'], #Jump Register
+    #'JR' : ['0x00', 'rs', '0x00', '0x00', '0x00', '0x08']
+    'SLT' : ['0x01', 'rs', 'rt', 'rd', 'shamt', '0x2a'], #Set on Less Than, shamt = 0x00
+    'SLTU' : ['0x06', 'rs', 'rt', 'rd', 'shamt', '0x2b'], #Set on Less Than, shamt = 0x00
     #I type
     'LB' : ['0x20', 'rs', 'rt', 'imm'], #Load Byte
     'LH' : ['0x21', 'rs', 'rt', 'imm'], #Load Halfword
@@ -34,16 +37,13 @@ instructionTable = {
     'SLTI' : ['0x0a', 'rs', 'rt', 'imm'], #Set on Less Than Immediate
     'BEQ' : ['0x04', 'rs', 'rt', 'imm'], #Branch on Equal
     'BNE' : ['0x05', 'rs', 'rt', 'imm'], #Branch on Not Equal
-    'ADDIU' : ['0x0b', 'rs', 'rt', 'imm'], 
-    'SLTIU' : ['0x11', 'rs', 'rt', 'imm'], 
+    'ADDIU' : ['0x09', 'rs', 'rt', 'imm'], 
+    'SLTIU' : ['0x0b', 'rs', 'rt', 'imm'], 
 
 
+    #J type
     'J' : ['0x02', 'address'], #Jump
     'JAL' : ['0x03', 'address'], #Jump And Link
-    
-    #J type
-    'JALR' : ['0x00', 'rs', 'rt', 'rd', 'shamt', '0x09'], #Jump And Link Register, rs, shamt = 0x00
-    'JR' : ['0x00', 'rs', 'rt', 'rd', 'shamt', '0x08'], #Jump Register
 
     'NOP' : ['0x3f'],#111111
     'HALT' : ['0x38'] #111000

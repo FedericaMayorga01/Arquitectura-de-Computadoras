@@ -21,8 +21,8 @@ module ALU #(
     localparam XOR = 6'b100110;
     localparam NOR = 6'b100111;
 
-    localparam ADDIU = 6'b001011;
-    localparam SLTIU = 6'b010001;
+    localparam ADDIU = 6'b001001;
+    localparam SLTIU = 6'b001011;
     
     localparam SRA = 6'b000011;
     localparam SRAV = 6'b000111;
@@ -48,8 +48,8 @@ module ALU #(
             case(i_opSelector)
                 ADD: tempResult = $signed(i_operandA) + $signed(i_operandB);            
                 ADDU: tempResult = i_operandA + i_operandB;
-                ADDIU: tempResult = $unsigned(i_operandA) + $unsigned(i_operandB);
-                //ADDIU: tempResult = i_operandA + i_operandB;
+                //ADDIU: tempResult = $unsigned(i_operandA) + $unsigned(i_operandB);
+                ADDIU: tempResult = i_operandA + i_operandB;
                 //ADDIU: tempResult = $signed(i_operandA) + $signed(i_operandB);
 
                 SUBU: tempResult = i_operandA - i_operandB;
@@ -65,10 +65,12 @@ module ALU #(
                 SRLV: tempResult = i_operandB >> i_operandA;
                 
                 SLTU: tempResult = {31'b0, ($unsigned(i_operandA) < $unsigned(i_operandB))}; //new
-                //SLTU: tempResult = {31'b0, (i_operandA < i_operandB)}; //new
+                //SLTU: tempResult = {31'b0, ($unsigned(i_operandB) < $unsigned(i_operandA))};
                 //SLTU: tempResult = i_operandA + i_operandB;
+                //SLTU: tempResult = {31'b0, ($signed(i_operandA) < $signed(i_operandB))};
 
-                SLTIU: tempResult = {31'b0, ($unsigned(i_operandA) < $unsigned(i_operandB))}; //new
+                //SLTIU: tempResult = {31'b0, ($unsigned(i_operandA) < $unsigned(i_operandB))}; //new
+                SLTIU: tempResult = {31'b0, ($unsigned(i_operandA) < $unsigned(i_operandB))};
                 //SLTIU: tempResult = {31'b0, (i_operandA < i_operandB)}; //new
 
                 SLL: tempResult = i_operandB << i_operandA;

@@ -1,5 +1,3 @@
-`timescale 1ns / 1ns
-
 module debugInterface
 #(
     parameter UART_DATA_LEN = 8,
