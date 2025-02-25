@@ -55,7 +55,7 @@ always @(*)
                 //Load or store instruction ALU should add 
                 LOAD_STORE: o_opSelector = ADD;
                 //R-type instruction
-                OTHERS:o_opSelector = i_funct; 
+                //OTHERS:o_opSelector = i_funct; 
                     //begin
                     //case(i_immediateFunct)
                     //    SLT: o_opSelector = SLT;

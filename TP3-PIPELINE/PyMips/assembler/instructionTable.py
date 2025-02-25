@@ -17,8 +17,8 @@ instructionTable = {
     #'JALR' : ['0x00', 'rs', '0x00', 'rd', '0x00', '0x09']
     'JR' : ['0x00', 'rs', 'rt', 'rd', 'shamt', '0x08'], #Jump Register
     #'JR' : ['0x00', 'rs', '0x00', '0x00', '0x00', '0x08']
-    'SLT' : ['0x01', 'rs', 'rt', 'rd', 'shamt', '0x2a'], #Set on Less Than, shamt = 0x00
-    'SLTU' : ['0x06', 'rs', 'rt', 'rd', 'shamt', '0x2b'], #Set on Less Than, shamt = 0x00
+    'SLT' : ['0x00', 'rs', 'rt', 'rd', 'shamt', '0x2a'], #Set on Less Than, shamt = 0x00
+    'SLTU' : ['0x00', 'rs', 'rt', 'rd', 'shamt', '0x2b'], #Set on Less Than, shamt = 0x00
     #I type
     'LB' : ['0x20', 'rs', 'rt', 'imm'], #Load Byte
     'LH' : ['0x21', 'rs', 'rt', 'imm'], #Load Halfword

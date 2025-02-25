@@ -25,8 +25,8 @@ module controlUnit
 );
 
 localparam RTYPE = 6'b000000;
-localparam SLT = 6'b000001;
-localparam SLTU = 6'b000110;
+localparam SLT_FUNC = 6'b101010;
+localparam SLTU_FUNC = 6'b101011;
 localparam BEQ = 6'b000100;
 localparam ADDI = 6'b001000;
 localparam ADDIU = 6'b001001;
@@ -73,19 +73,36 @@ always @(*) begin
 
     case (i_opCode)
         RTYPE: begin
-            r_regDest = {i_opCode[0], 1'b1};
-            r_aluSrc = (r_isShamt) ? 2'b10 : 2'b00;
-            r_branch = i_opCode[1] | (!i_opCode[1] & i_funct[3]) ? 2'b10 : 2'b00;
-            r_regWrite = (!(i_opCode[1] | i_opCode[0])) ? r_isNotJR : i_opCode[0];
-            r_memToReg = {i_opCode[0] | r_isJARL, 1'b0};
-            r_jumpType = !i_opCode[1];
-            r_immediateFunct = 3'b000;
-            r_aluOp = 2'b10;
-            r_memRead = 1'b0;
-            r_memWrite = 1'b0;
-            r_halt = 1'b0;
-            r_loadStoreType = 2'b11;
-            r_unsigned = 0;
+            if(i_funct == SLT_FUNC || i_funct == SLTU_FUNC) begin
+                r_regDest = 2'b01;
+                r_aluOp = 2'b10;
+                r_immediateFunct = 3'b000;
+                r_aluSrc = 2'b00;
+                r_branch = 2'b00;
+                r_jumpType = 1'b0;
+                r_memRead = 1'b0;
+                r_memWrite = 1'b0;
+                r_regWrite = 1'b1;
+                r_memToReg = 2'b00;
+                r_halt = 1'b0;
+                r_loadStoreType = 2'b11;
+                r_unsigned = (i_funct == SLTU_FUNC);
+            end
+            else begin
+                r_regDest = {i_opCode[0], 1'b1};
+                r_aluSrc = (r_isShamt) ? 2'b10 : 2'b00;
+                r_branch = i_opCode[1] | (!i_opCode[1] & i_funct[3]) ? 2'b10 : 2'b00;
+                r_regWrite = (!(i_opCode[1] | i_opCode[0])) ? r_isNotJR : i_opCode[0];
+                r_memToReg = {i_opCode[0] | r_isJARL, 1'b0};
+                r_jumpType = !i_opCode[1];
+                r_immediateFunct = 3'b000;
+                r_aluOp = 2'b10;
+                r_memRead = 1'b0;
+                r_memWrite = 1'b0;
+                r_halt = 1'b0;
+                r_loadStoreType = 2'b11;
+                r_unsigned = 1'b0;
+            end
         end
         ADDI, ADDIU, SLTI, SLTIU, ANDI, ORI, XORI, LUI: begin
             r_regDest = 2'b00;
@@ -101,21 +118,6 @@ always @(*) begin
             r_halt = 1'b0;
             r_loadStoreType = 2'b11;
             r_unsigned = (i_opCode == ADDIU || i_opCode == SLTIU );
-        end
-        SLT, SLTU: begin
-            r_regDest = 2'b01;
-            r_aluOp = 2'b01;
-            r_immediateFunct = 3'b000;
-            r_aluSrc = 2'b00;
-            r_branch = 2'b00;
-            r_jumpType = 1'b0;
-            r_memRead = 1'b0;
-            r_memWrite = 1'b0;
-            r_regWrite = 1'b1;
-            r_memToReg = 2'b00;
-            r_halt = 1'b0;
-            r_loadStoreType = 2'b11;
-            r_unsigned = (i_opCode == SLTU);
         end
         LW, LWU, LB, LBU, LH, LHU: begin
             r_regDest = 2'b00;
@@ -160,7 +162,7 @@ always @(*) begin
             r_memToReg = 2'b00;
             r_halt = 1'b0;
             r_loadStoreType = 2'b11;
-            r_unsigned = 0;
+            r_unsigned = 2'b11;
         end
         NOP, HALT: begin
             r_regDest = 2'b00;
