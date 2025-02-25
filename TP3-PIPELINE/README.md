@@ -205,17 +205,16 @@ Podemos identificar algunas de sus entradas y salidas:
 - ``i_memReadE`` y ``i_memReadM``: Señales que indican si las instrucciones en las etapas de ejecución y memoria están leyendo de la memoria.
 - ``o_stall``: Señal que se activa cuando se detecta un riesgo, lo que provoca la inserción de una burbuja en el pipeline.
 
----
+
 Si una instrucción en la etapa de ejecución tiene activada la señal ``i_memReadE`` y su registro destino (``i_rtE``) coincide con alguno de los registros fuente (``i_rsID`` o ``i_rtID``) de la instrucción en la etapa de decodificación, se activa la señal ``o_stall``.
 Si una instrucción en la etapa de memoria tiene activada la señal ``i_memReadM`` y su registro destino (``i_rtM``) coincide con alguno de los registros fuente de la instrucción en decodificación, se activa la señal ``o_stall``.
 
 Esta unidad es la que ayuda a poder realizar el cortocircuito cuando existe previamente una instruccion LOAD. Se da cuenta que es esta instruccion al ejecutar i_memRead ya que LOAD es la única instrucción que lee de memoria. Al bloquearse la instruccion situada en la etapa de ID tambien se bloquea la instrucción que esta en la etapa IF, ya que sino perdería la instrucción buscada de memoria. La mitad posterior del pipeline que comienza en la etapa EX ejecuta instrucciones NOPs, esto se logra negando(poniendo a cero) las señales de control de las etapas EX/MEM y WB. Este proceso se logra a partir de un multiplexor que se encuentra en la etapa de instruction decode, el cual su salida es la entrada de la control unit(la cual es la encargada de generar las señales de control), por lo tanto si el selector del mux indica que existe un stall provoca que las señales de control que salen de la control unit sean = 0.
+
 <p align="center">
     <img src="./img/muxID.png"><br>
     <em>Mux de instruction decode.</em>
 </p>
-
----
 
 Este mecanismo asegura que el pipeline no avance hasta que el riesgo desaparezca, garantizando una ejecución correcta de las instrucciones en presencia de dependencias de datos.
 
@@ -228,25 +227,47 @@ Este mecanismo asegura que el pipeline no avance hasta que el riesgo desaparezca
 
 Se implementó una unidad de depuración conectada al procesador, diseñada para facilitar la programación, depuración y ejecución del mismo. Esta unidad está compuesta por los siguientes módulos:
 
-- ``UART``: Este módulo es responsable de recibir comandos desde una PC y enviar el estado del procesador. Actúa como la interfaz de comunicación serie entre el sistema de depuración y la PC, utilizando un protocolo UART para asegurar una transmisión confiable.
-- ``DebugInterface``: Se encarga de interpretar los comandos recibidos desde el módulo UART. Este módulo analiza las instrucciones para determinar la acción que debe llevarse a cabo sobre el procesador, tales como:
-  - Establecer puntos de interrupción (breakpoints).
-  - Iniciar o detener la ejecución del procesador.
-  - Leer o escribir valores en registros específicos.
-  - Consultar el estado de la memoria del procesador.
-
-
-    El ``debugInterface`` también contiene lógica de control para coordinar el acceso a los registros internos del procesador y manejar las señales de control requeridas durante el proceso de depuración.
+- ``debugUnitUart``: Este módulo es responsable de recibir comandos desde una PC y enviar el estado del procesador. Actúa como la interfaz de comunicación serie entre el sistema de depuración y la PC, utilizando un protocolo UART para asegurar una transmisión confiable.
+- ``debugInterface``: Se encarga de interpretar los comandos recibidos desde el módulo UART. Este módulo analiza las instrucciones para determinar la acción que debe llevarse a cabo sobre el procesador.También contiene lógica de control para coordinar el acceso a los registros internos del procesador y manejar las señales de control requeridas durante el proceso de depuración.
 
 <p align="center">
     <img src="./img/DU.png"><br>
     <em>Esquematico de debugUnit.</em>
 </p>
 
-- ``DebugUnit``: Este módulo es el núcleo que conecta todos los elementos de la unidad de depuración. Además de gestionar la interacción entre la ``UART`` y el ``debugInterface``, se encarga de mantener un registro del estado del procesador y proporcionar acceso en tiempo real al mismo para el envío de datos de depuración.
+El  módulo ``debugInterface`` implementa una máquina de estados finitos (FSM), que gestiona la comunicación entre la CPU y UART, permitiendo la carga de las instrucciones, ejecución paso a paso y transmisión de registros y valores del programa. Su funcionamiento general, estado por estado, es el siguiente:
+
+1. **IDLE**: En este estado, el sistema espera la recepción de un nuevo dato desde la interfaz UART. Si ``i_rxEmpty`` indica que hay datos disponibles, se avanza al estado de **DECODE** para interpretar el comando recibido. Además, este estado se usa como punto de reinicio al completar cualquier otra operación.
+
+2. **DECODE**: Una vez que se recibe un dato por UART, se entra en este estado para interpretar el comando. Dependiendo del valor de ``i_dataToRead``, la máquina cambia a diferentes estados:
+   - **FETCH INSTRUCTION** si el comando recibido es ``PROGRAM_CODE``.
+   - **STEP** si el comando recibido es ``STEP_CODE``.
+   - **RUN** si el comando recibido es ``RUN_CODE``.
+   - **RESET** si el comando recibido es ``RESET_CODE``.
+
+    Si ``i_rxEmpty`` indica que aún no ha llegado un dato completo, se avanza al estado de **WAIT RECEPTION**, antes de continuar.
+
+3. **FETCH INSTRUCTION**: Cuando el sistema se encuentra en modo de carga de instrucciones (``PROGRAM_CODE``), se entra en este estado. Aca, se espera a recibir cuatro bytes de datos desde UART, que conforman una instrucción completa de 32 bits. Estos bytes se almacenan en ``r_intructionToWriteNext``, desplazándose progresivamente en función del contador de bytes (``r_byteCounter``). Una vez que los cuatro bytes han sido recibidos, se avanza al estado de **WRITE INSTRUCTION**.
+
+4. **WRITE INSTRUCTION**: En este estado se marca la finalización del proceso de carga de una instrucción. La instrucción completa es enviada al CPU a través de ``o_instructionToWrite``, y se vuelve al estado de **IDLE**, lista para recibir el siguiente comando.
+
+5. **STEP**: Cuando se recibe el comando ``STEP_CODE``, se activa la ejecución de una sola instrucción en la CPU. Si la señal de ``i_halt`` indica que la CPU ha terminado su ejecución, se vuelve al estado de **IDLE**. Si no, se inicia la transmisión de datos con el estado de **PREPARE_SEND**, para reportar el estado de los registros y la memoria.
+
+6. **RUN**: Cuando se recibe el comando ``RUN_CODE``, es donde se permite que la CPU ejecute el programa sin intervención manual. Y permanece en este estado hasta que la señal de ``i_halt`` indica que la CPU ha terminado su ejecución. Aca, se pasa a **PREPARE SEND** para transmitir los datos finales de la ejecución.
+
+7. **PREPARE SEND**: En este estado, se prepara la transmisión de valores desde la CPU a través de la interfaz UART. Si la UART está ocupada (es decir, ``i_txFull``), se espera en el estado de **WAIT SEND** hasta que haya espacio disponible. Luego, extrae el primer byte del registro ``i_regMemValue`` y lo almacena en ``r_dataToWriteNext``, y a continuación incrementar el ``r_byteCounter`` y avanzar al estado de **SEND VALUES**.
+
+8. **SEND VALUES**: En este estado, los bytes restantes de ``i_regMemValue`` se transmiten uno por uno hasta completar los cuatro bytes de un registro. Si ``r_byteCounter`` llega a ``2’b11`` (indicando que todos los bytes de un registro fueron enviados), se incrementa ``r_regMemAddress`` para seleccionar el siguiente registro a transmitir. Si todos los registros han sido enviados (es decir, ``r_regMemAddress == 6’b111111``), se avanza al estado de **SEND PC** para transmitir el contador de programa.
+
+9. **SEND PC**: Después de enviar los valores de los registros, se transmite el valor del contador de programa (``i_programCounter``). Este dato también se envía en cuatro bytes. Una vez que todos los bytes del PC han sido enviados, se avanza al estado **FINISH SEND**.
+
+10. **FINISH SEND**: En este estado, se verifica que la transmisión de datos se realizó correctamente. Si la interfaz de UART está ocupada (``i_txFull``), se espera en **WAIT SEND** hasta que se libere. Una vez completada la transmisión, se vuelve al estado de **IDLE**, quedando lista para recibir nuevos comandos.
+
+11. **RESET**: Cuando se recibe el comando ``RESET_CODE``, se ejecuta la secuencia de reinicio y luego se avanza al estado de **IDLE**.
+
 
 <p align="center">
-    <img src="./img/TP3_FMS_DebugUnit(dark).png"><br>
+    <img src="./img/TP3_FMS_DebugUnit.png"><br>
     <em>Diagrama de estados de la MS en Debug Unit.</em>
 </p>
 
