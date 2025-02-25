@@ -35,7 +35,7 @@ always @(*) begin
             o_PCSrc = 1;
             o_pcBranch = w_jumpPC;
         end
-        default: begin 
+        default: begin // BEQ, BNE
             //Bit bajo de branch indica si es instruccion de branch
             //Bit alto indica si es equal o not equal
             o_PCSrc = i_branch[0] & (i_branch[1] ^ w_zero);       

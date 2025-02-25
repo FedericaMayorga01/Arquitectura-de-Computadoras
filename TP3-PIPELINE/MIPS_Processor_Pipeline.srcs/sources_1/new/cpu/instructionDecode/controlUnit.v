@@ -28,6 +28,7 @@ localparam RTYPE = 6'b000000;
 localparam SLT_FUNC = 6'b101010;
 localparam SLTU_FUNC = 6'b101011;
 localparam BEQ = 6'b000100;
+localparam BNE = 6'b000101;
 localparam ADDI = 6'b001000;
 localparam ADDIU = 6'b001001;
 localparam SLTI = 6'b001010;
@@ -149,7 +150,7 @@ always @(*) begin
             r_loadStoreType = i_opCode[1:0];
             r_unsigned = 0;
         end
-        BEQ: begin
+        BEQ,BNE: begin
             r_regDest = 2'b00;
             r_aluOp = 2'b01;
             r_immediateFunct = 3'b000;
@@ -162,7 +163,7 @@ always @(*) begin
             r_memToReg = 2'b00;
             r_halt = 1'b0;
             r_loadStoreType = 2'b11;
-            r_unsigned = 2'b11;
+            r_unsigned = 1'b0;
         end
         NOP, HALT: begin
             r_regDest = 2'b00;
