@@ -27,6 +27,8 @@ module controlUnit
 localparam RTYPE = 6'b000000;
 localparam SLT_FUNC = 6'b101010;
 localparam SLTU_FUNC = 6'b101011;
+localparam JALR_FUNC = 6'b001001;
+localparam JR_FUNC = 6'b001000;
 localparam BEQ = 6'b000100;
 localparam BNE = 6'b000101;
 localparam ADDI = 6'b001000;
@@ -48,6 +50,8 @@ localparam SH = 6'b101001;
 localparam SB = 6'b101000;
 localparam NOP = 6'b111111;
 localparam HALT = 6'b111000;
+localparam JAL = 6'b000011;
+localparam J = 6'b000010;
 
 reg r_regWrite;
 reg [1:0] r_aluSrc;
@@ -65,12 +69,12 @@ reg r_unsigned;
 
 reg r_isShamt;
 reg r_isNotJR;
-reg r_isJARL;
+reg r_isJALR;
 
 always @(*) begin
     r_isShamt = ~(i_funct[2] || i_funct[5]);
-    r_isNotJR = (i_funct != 6'b001000);
-    r_isJARL = i_funct[3] & i_funct[0];
+    r_isNotJR = (i_funct != JR_FUNC);
+    r_isJALR = (i_funct == JALR_FUNC);
 
     case (i_opCode)
         RTYPE: begin
@@ -90,12 +94,21 @@ always @(*) begin
                 r_unsigned = (i_funct == SLTU_FUNC);
             end
             else begin
-                r_regDest = {i_opCode[0], 1'b1};
+                r_regDest = 2'b01;
                 r_aluSrc = (r_isShamt) ? 2'b10 : 2'b00;
-                r_branch = i_opCode[1] | (!i_opCode[1] & i_funct[3]) ? 2'b10 : 2'b00;
+                //r_branch = i_opCode[1] | (!i_opCode[1] & i_funct[3]) ? 2'b10 : 2'b00;
+                //r_branch = {i_funct[0], 1'b1};
+                if(r_isJALR || !r_isNotJR) begin
+                    r_branch = 2'b10;
+                end
+                else begin
+                    r_branch = 2'b00;
+                end
                 r_regWrite = (!(i_opCode[1] | i_opCode[0])) ? r_isNotJR : i_opCode[0];
-                r_memToReg = {i_opCode[0] | r_isJARL, 1'b0};
-                r_jumpType = !i_opCode[1];
+                r_memToReg = {i_opCode[0] | r_isJALR, 1'b0};
+                //r_jumpType = !i_opCode[1];
+                //r_jumpType = (r_isJALR || !r_isNotJR);
+                r_jumpType = 1'b0;
                 r_immediateFunct = 3'b000;
                 r_aluOp = 2'b10;
                 r_memRead = 1'b0;
@@ -165,6 +178,21 @@ always @(*) begin
             r_loadStoreType = 2'b11;
             r_unsigned = 1'b0;
         end
+        JAL,J: begin
+            r_regDest = (i_opCode == JAL) ? 2'b11 : 2'b10; // true: JAL(reg31),false: J
+            r_aluOp = 2'b01;
+            r_immediateFunct = 3'b000;
+            r_aluSrc = 2'b01; // ver
+            r_branch = 2'b10;
+            r_jumpType = 1'b1;
+            r_memRead = 1'b0;
+            r_memWrite = 1'b0;
+            r_regWrite = (i_opCode == JAL) ? 1'b1 : 1'b0;
+            r_memToReg = (i_opCode == JAL) ? 2'b10 : 2'b00;
+            r_halt = 1'b0;
+            r_loadStoreType = 2'b11;
+            r_unsigned = 1'b0;
+        end
         NOP, HALT: begin
             r_regDest = 2'b00;
             r_aluOp = 2'b00;
@@ -178,7 +206,7 @@ always @(*) begin
             r_memToReg = 2'b00;
             r_halt = (i_opCode == HALT);
             r_loadStoreType = 2'b11;
-            r_unsigned = 0;
+            r_unsigned = 1'b0;
         end
         default: begin
             r_regDest = 2'b00;
@@ -193,7 +221,7 @@ always @(*) begin
             r_memToReg = 2'b00;
             r_halt = 1'b0;
             r_loadStoreType = 2'b11;
-            r_unsigned = 0;
+            r_unsigned = 1'b0;
         end
     endcase
 end
