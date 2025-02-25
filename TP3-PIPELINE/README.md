@@ -267,7 +267,7 @@ El  módulo ``debugInterface`` implementa una máquina de estados finitos (FSM),
 
 
 <p align="center">
-    <img src="./img/TP3_FMS_DebugUnit(dark).png"><br>
+    <img src="./img/TP3_FMS_DebugUnit.png"><br>
     <em>Diagrama de estados de la MS en Debug Unit.</em>
 </p>
 
