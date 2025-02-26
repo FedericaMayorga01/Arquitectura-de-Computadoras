@@ -97,14 +97,16 @@ En esta etapa se llevan a cabo los cálculos requeridos por las instrucciones, c
 Módulos que componen esta etapa:
 
 - ``ALUControl``: Este módulo interpreta las señales de control provenientes de la etapa de decodificación y determina la operación a realizar por la ALU (``o_opSelector``) en la etapa de ejecución. Verifica si ingreso una instruccion tipo R, LOAD/STORE, o inmediata.
-- ``MUXD1`` y ``MUXD2``: Estos multiplexores seleccionan los operandos para la ALU en función del tipo de instrucción (controlados por la señal ``i_aluSrc``, que determina la fuente de los operandos). ``MUXD1`` permite elegir entre el readdata1 o el desplazamiento(shamt), mientras que ``MUXD2`` selecciona entre readdata2 o un valor inmediato. Esto sucede ya que el primer operando (aluOperand1) casi siempre es rs (i_readData1), excepto en operaciones de shift, donde se usa shamt. Mientras que el segundo operando es el que varía más en función del tipo de instrucción:
-    - Instrucciones **tipo R**: Operan con dos registros (rs y rt). Ej: i_aluSrc[0] = 0, selecciona i_readData2 (registro rt).
-    - Instrucciones **tipo I**: Usan un inmediato en lugar del segundo registro(por ejemplo para calcular la posición de memoria en instrucciones LOAD/STORE). Ej: i_aluSrc[0] = 1, selecciona i_immediateExtendValue.
+- ``MUXD1`` y ``MUXD2``: Estos multiplexores seleccionan los operandos para la ALU en función del tipo de instrucción (controlados por la señal ``i_aluSrc``, que determina la fuente de los operandos). ``MUXD1`` permite elegir entre el readdata1 o el desplazamiento (``shamt``), mientras que ``MUXD2`` selecciona entre readdata2 o un valor inmediato. Esto sucede ya que el primer operando (``aluOperand1``) casi siempre es rs (``i_readData1``), excepto en operaciones de shift, donde se usa shamt. Mientras que el segundo operando es el que varía más en función del tipo de instrucción:
+    - Instrucciones **tipo R**: Operan con dos registros (rs y rt). 
+      - Ej: ``i_aluSrc[0] = 0``, selecciona ``i_readData2`` (registro rt).
+    - Instrucciones **tipo I**: Usan un inmediato en lugar del segundo registro(por ejemplo para calcular la posición de memoria en instrucciones LOAD/STORE). 
+      - Ej: ``i_aluSrc[0] = 1``, selecciona ``i_immediateExtendValue``.
 
 - ``ALU``: La Unidad Aritmético-Lógica recibe los operandos y la operación que debe realizar, proporcionada por ``ALUControl``.
-- ``MUXWR``: Multiplexor que decide el registro de destino donde se almacenará el resultado de la ``ALU``, en base al valor de i_regDst, que viene de ser una de las salidas de la controlunit de la etapa anterior. Las opciones incluyen el registro destino es rd (para instrucciones tipo R), rt (para instrucciones tipo I), el registro 31(instrucciones JAL),o el registro 0.
+- ``MUXWR``: Multiplexor que decide el registro de destino donde se almacenará el resultado de la ``ALU``, en base al valor de ``i_regDst``, que viene de ser una de las salidas de la controlunit de la etapa anterior. Las opciones incluyen el registro destino es rd (para instrucciones tipo R), rt (para instrucciones tipo I), el registro 31 (instrucciones JAL), o el registro 0.
 
-Vale la pena notar que en este modulo, al valor del program counter incrementado en 4 que proviene de la salida de la etapa de decodificacion de la instruccion, se le vuelven a sumar 4 bytes. La razón principal para este incremento adicional es el manejo de instrucciones delays slots, PC + 8 es la direccion de retorno en instrucciones como JAL o JR. Si no existiera el delay slot, habría un stall (detención del pipeline) en la ejecución, por lo tanto, en lugar de detener la ejecución, el procesador permite ejecutar una instrucción útil mientras se completa el salto.
+Vale la pena denotar que en este módulo, el valor del _program counter incrementado en 4_ que proviene de la salida de la etapa de decodificación de la instrucción, se le vuelven a sumar 4. La razón principal para este incremento adicional es el manejo de instrucciones _delays slots_, PC + 8 es la dirección de retorno en instrucciones como JAL o JR. Si no existiera el _delay slot_, habría un stall (detención del pipeline) en la ejecución, por lo tanto, en lugar de detener la ejecución, el procesador permite ejecutar una instrucción útil mientras se completa el salto.
 
 ## Memory Access (MEM)
 <p align="center">
@@ -118,19 +120,19 @@ Esta etapa está compuesta por los siguientes módulos:
 
 - ``dataMemory``: Módulo encargado de la lectura y escritura de datos en memoria. ``memoryBlock`` es la matriz que representa la memoria de 2^5=32 posiciones con 32 bits cada una.
     - Lógica de lectura:
-        - Se obtiene el dato de memoria en w_readData.
+        - Se obtiene el dato de memoria en ``w_readData``.
         - Luego, este valor se procesa con el módulo memoryMask, que se encarga de extraer correctamente bytes o halfwords y de hacer la extensión de signo si es necesario.
-    - Lógica de escritura: Si i_memWrite es 1, se ejecuta un case según i_loadStoreType:
-        - BYTE (2'b00): Se escribe un byte específico dentro de la palabra de 32 bits según i_address[1:0].
-        - HALFWORD (2'b01): Se escribe un halfword en la parte alta o baja de la palabra de 32 bits según i_address[1].
-        - WORD (2'b11): Se escribe una palabra completa de 32 bits.
+    - Lógica de escritura: Si i_memWrite es 1, se ejecuta un case según ``i_loadStoreType``:
+        - BYTE (**2'b00**): Se escribe un byte específico dentro de la palabra de 32 bits según ``i_address[1:0]``.
+        - HALFWORD (**2'b01**): Se escribe un halfword en la parte alta o baja de la palabra de 32 bits según ``i_address[1]``.
+        - WORD (**2'b11**): Se escribe una palabra completa de 32 bits.
         - La escritura se realiza en el flanco de subida del reloj.
     - Salidas:
-        -  o_memoryValue: Devuelve el contenido de memoryBlock en i_memoryAddress (se usa para depuración o para operaciones de monitoreo de memoria).
-        -  o_readData: Es el valor leído de memoria, ya procesado por memoryMask.
+        -  ``o_memoryValue``: Devuelve el contenido de memoryBlock en ``i_memoryAddress`` (se usa para depuración o para operaciones de monitoreo de memoria).
+        -  ``o_readData``: Es el valor leído de memoria, ya procesado por memoryMask.
 - ``memoryMask``: Este módulo se encarga de extraer correctamente los datos de la memoria, dependiendo de su tamaño (byte, halfword o word). Además, maneja la extensión de signo.
 
-El flujo general es el siguiente: al recibir una señal de escritura (``i_memWrite`` activa), se almacena el valor indicado en la dirección especificada, respetando el tamaño y formato seleccionados. Para la lectura, se extraen los datos de la dirección correspondiente, ajustándolos según las configuraciones de tamaño y signo antes de ser enviados a la siguiente etapa.
+El flujo general es el siguiente: al recibir una señal de escritura (``i_memWrite``), se almacena el valor indicado en la dirección especificada, respetando el tamaño y formato seleccionados. Para la lectura, se extraen los datos de la dirección correspondiente, ajustándolos según las configuraciones de tamaño y signo antes de ser enviados a la siguiente etapa.
 
 
 ## Write Back (WB)
@@ -180,7 +182,8 @@ La detección de riesgos se basa en las siguientes condiciones:
 ---
 Condiciones similares se aplican para las comparaciones con ``i_rdM`` y la señal ``i_regWriteM``, que indican riesgos en la etapa de memoria.
 
-En cuanto a la **implementación de la anticipación de resultados**, se añaden dos mutiplexores(en la etapa de instructionDecode) a la entrada de la ALU y el control apropiado para detectar estas dependencias y anticipar los resultados cuando sea necesario. El primer multiplexor recibe el registro A proveniente de la etapa anterior, el resultado de la instrucción anterior que se encuentra a la salida de la ALU(etapa EX), y el resultado de la instrucción anterior de la anteirior que se encuentra a la salida de la memoria(etapa M). El otro multiplexor recibe estas dos mismas señales junto con el registro B. El control de los multiplexores se lleva a cabo por esta unidad, que es la que va a decidir que entrada usar. Debido a que algunas instrucciones no escriben en registros, se anticiparía un valor innecesario, por esto es que se comprueba si la señal RegWrite esta activa(esta señal de contrl indica que la instruccion va a escribir un registro); esto se logra examinando el campo de control WB del registro de segmentación durante las etapas de EX y MEM.
+En cuanto a la **implementación de la anticipación de resultados**, se añaden dos mutiplexores (en la etapa de instructionDecode) a la entrada de la ALU y el control apropiado para detectar estas dependencias y anticipar los resultados cuando sea necesario. El primer multiplexor recibe el registro A proveniente de la etapa anterior, el resultado de la instrucción anterior que se encuentra a la salida de la ALU (**etapa EX**), y el resultado de la instrucción anterior de la anteirior que se encuentra a la salida de la memoria (**etapa M**). El otro multiplexor recibe estas dos mismas señales junto con el registro B. El control de los multiplexores se lleva a cabo por esta unidad, que es la que va a decidir que entrada usar. Debido a que algunas instrucciones no escriben en registros, se anticiparía un valor innecesario, por esto es que se comprueba si la señal RegWrite esta activa (esta señal de contrl indica que la instruccion va a escribir un registro); esto se logra examinando el campo de control **WB** del registro de segmentación durante las etapas de **EX** y **MEM**.
+
 <p align="center">
     <img src="./img/forwardunit.png"><br>
     <em>forwardingUnit.</em>
@@ -209,7 +212,7 @@ Podemos identificar algunas de sus entradas y salidas:
 Si una instrucción en la etapa de ejecución tiene activada la señal ``i_memReadE`` y su registro destino (``i_rtE``) coincide con alguno de los registros fuente (``i_rsID`` o ``i_rtID``) de la instrucción en la etapa de decodificación, se activa la señal ``o_stall``.
 Si una instrucción en la etapa de memoria tiene activada la señal ``i_memReadM`` y su registro destino (``i_rtM``) coincide con alguno de los registros fuente de la instrucción en decodificación, se activa la señal ``o_stall``.
 
-Esta unidad es la que ayuda a poder realizar el cortocircuito cuando existe previamente una instruccion LOAD. Se da cuenta que es esta instruccion al ejecutar i_memRead ya que LOAD es la única instrucción que lee de memoria. Al bloquearse la instruccion situada en la etapa de ID tambien se bloquea la instrucción que esta en la etapa IF, ya que sino perdería la instrucción buscada de memoria. La mitad posterior del pipeline que comienza en la etapa EX ejecuta instrucciones NOPs, esto se logra negando(poniendo a cero) las señales de control de las etapas EX/MEM y WB. Este proceso se logra a partir de un multiplexor que se encuentra en la etapa de instruction decode, el cual su salida es la entrada de la control unit(la cual es la encargada de generar las señales de control), por lo tanto si el selector del mux indica que existe un stall provoca que las señales de control que salen de la control unit sean = 0.
+Esta unidad es la que ayuda a poder realizar el cortocircuito cuando existe previamente una instruccion LOAD. Se da cuenta que es esta instruccion al ejecutar ``i_memRead`` ya que LOAD es la única instrucción que lee de memoria. Al bloquearse la instruccion situada en la etapa de **ID** tambien se bloquea la instrucción que esta en la etapa **IF**, ya que sino perdería la instrucción buscada de memoria. La mitad posterior del pipeline que comienza en la etapa EX ejecuta instrucciones NOPs, esto se logra negando (poniendo a cero) las señales de control de las etapas **EX/MEM** y **WB**. Este proceso se logra a partir de un multiplexor que se encuentra en la etapa de instruction decode, el cual su salida es la entrada de la control unit(la cual es la encargada de generar las señales de control), por lo tanto si el selector del mux indica que existe un stall provoca que las señales de control que salen de la control unit sean = 0.
 
 <p align="center">
     <img src="./img/muxID.png"><br>
@@ -257,7 +260,7 @@ El  módulo ``debugInterface`` implementa una máquina de estados finitos (FSM),
 
 7. **PREPARE SEND**: En este estado, se prepara la transmisión de valores desde la CPU a través de la interfaz UART. Si la UART está ocupada (es decir, ``i_txFull``), se espera en el estado de **WAIT SEND** hasta que haya espacio disponible. Luego, extrae el primer byte del registro ``i_regMemValue`` y lo almacena en ``r_dataToWriteNext``, y a continuación incrementar el ``r_byteCounter`` y avanzar al estado de **SEND VALUES**.
 
-8. **SEND VALUES**: En este estado, los bytes restantes de ``i_regMemValue`` se transmiten uno por uno hasta completar los cuatro bytes de un registro. Si ``r_byteCounter`` llega a ``2’b11`` (indicando que todos los bytes de un registro fueron enviados), se incrementa ``r_regMemAddress`` para seleccionar el siguiente registro a transmitir. Si todos los registros han sido enviados (es decir, ``r_regMemAddress == 6’b111111``), se avanza al estado de **SEND PC** para transmitir el contador de programa.
+8. **SEND VALUES**: En este estado, los bytes restantes de ``i_regMemValue`` se transmiten uno por uno hasta completar los cuatro bytes de un registro. Si ``r_byteCounter`` llega a ``2’b11`` (indicando que todos los bytes de un registro fueron enviados), se incrementa ``r_regMemAddress`` para seleccionar el siguiente registro a transmitir.
 
 9. **SEND PC**: Después de enviar los valores de los registros, se transmite el valor del contador de programa (``i_programCounter``). Este dato también se envía en cuatro bytes. Una vez que todos los bytes del PC han sido enviados, se avanza al estado **FINISH SEND**.
 
@@ -329,7 +332,7 @@ En cambio, en una frecuencia menor a la mayor frecuencia estable, nos demuestra 
     <em>Design timing summary intermedio observado.</em>
 </p>
 
-Y vemos como en este rango de frecuencias de **57 - 10MHz**, no obtenemos mas critical warnings, los requisitos de timing fueron alcanzados y hasta en la metrica de **WNS** (Worst Negative Slack) valores positivos, lo cual significa que incluso para el path mas critico del diseño "sobro" tiempo del periodo de la señal utilizada.
+Y vemos como en este rango de frecuencias de **10-57 MHz**, no obtenemos mas critical warnings, los requisitos de timing fueron alcanzados y hasta en la metrica de **WNS** (Worst Negative Slack) valores positivos, lo cual significa que incluso para el path mas critico del diseño "sobro" tiempo del periodo de la señal utilizada.
 
 <div style="display: flex; justify-content: center; align-items: center;">
   <div style="margin-right: 10px;">
