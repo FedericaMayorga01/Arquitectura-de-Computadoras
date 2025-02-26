@@ -4,7 +4,6 @@
 ## - rename the used ports (in each line, after get_ports) according to the top level signal names in the project
 
 ## Clock signal
-##set_property -dict { PACKAGE_PIN W5   IOSTANDARD LVCMOS33 } [get_ports i_clk]
 set_property IOSTANDARD LVCMOS33 [get_ports i_clk]
 set_property PACKAGE_PIN E3 [get_ports i_clk]
 create_clock -add -name sys_clk_pin -period 10.00 -waveform {0 5} [get_ports i_clk]
@@ -30,22 +29,6 @@ create_clock -add -name sys_clk_pin -period 10.00 -waveform {0 5} [get_ports i_c
 
 
 ## LEDs
-##set_property -dict { PACKAGE_PIN U16   IOSTANDARD LVCMOS33 } [get_ports o_instruction[0]]
-##set_property -dict { PACKAGE_PIN E19   IOSTANDARD LVCMOS33 } [get_ports o_instruction[1]]
-##set_property -dict { PACKAGE_PIN U19   IOSTANDARD LVCMOS33 } [get_ports o_instruction[2]]
-##set_property -dict { PACKAGE_PIN V19   IOSTANDARD LVCMOS33 } [get_ports o_instruction[3]]
-##set_property -dict { PACKAGE_PIN W18   IOSTANDARD LVCMOS33 } [get_ports o_instruction[4]]
-##set_property -dict { PACKAGE_PIN U15   IOSTANDARD LVCMOS33 } [get_ports o_instruction[5]]
-##set_property -dict { PACKAGE_PIN U14   IOSTANDARD LVCMOS33 } [get_ports o_instruction[6]]
-##set_property -dict { PACKAGE_PIN V14   IOSTANDARD LVCMOS33 } [get_ports o_instruction[7]]
-##set_property -dict { PACKAGE_PIN V13   IOSTANDARD LVCMOS33 } [get_ports o_instruction[8]]
-##set_property -dict { PACKAGE_PIN V3    IOSTANDARD LVCMOS33 } [get_ports o_instruction[9]]
-##set_property -dict { PACKAGE_PIN W3    IOSTANDARD LVCMOS33 } [get_ports o_instruction[10]]
-##set_property -dict { PACKAGE_PIN U3    IOSTANDARD LVCMOS33 } [get_ports o_instruction[11]]
-##set_property -dict { PACKAGE_PIN P3    IOSTANDARD LVCMOS33 } [get_ports o_instruction[12]]
-##set_property -dict { PACKAGE_PIN N3    IOSTANDARD LVCMOS33 } [get_ports o_instruction[13]]
-##set_property -dict { PACKAGE_PIN P1    IOSTANDARD LVCMOS33 } [get_ports o_instruction[14]]
-##set_property -dict { PACKAGE_PIN L1    IOSTANDARD LVCMOS33 } [get_ports o_instruction[15]]
 set_property -dict { PACKAGE_PIN H17   IOSTANDARD LVCMOS33 } [get_ports { o_instruction[0] }]; 
 set_property -dict { PACKAGE_PIN K15   IOSTANDARD LVCMOS33 } [get_ports { o_instruction[1] }]; 
 set_property -dict { PACKAGE_PIN J13   IOSTANDARD LVCMOS33 } [get_ports { o_instruction[2] }]; 
@@ -150,9 +133,7 @@ set_property -dict { PACKAGE_PIN N17   IOSTANDARD LVCMOS33 } [get_ports { i_rese
 
 
 ##USB-RS232 Interface
-##set_property -dict { PACKAGE_PIN B18   IOSTANDARD LVCMOS33 } [get_ports i_rx]
 set_property -dict { PACKAGE_PIN C4    IOSTANDARD LVCMOS33 } [get_ports { i_rx }];
-##set_property -dict { PACKAGE_PIN A18   IOSTANDARD LVCMOS33 } [get_ports o_tx]
 set_property -dict { PACKAGE_PIN D4    IOSTANDARD LVCMOS33 } [get_ports { o_tx }];
 
 
