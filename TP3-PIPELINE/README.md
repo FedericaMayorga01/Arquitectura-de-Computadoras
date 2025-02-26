@@ -114,8 +114,6 @@ Vale la pena denotar que en este módulo, el valor del _program counter incremen
     <em>Esquematico de memoryStage.</em>
 </p>
 
-En esta etapa se realizan las operaciones de lectura y escritura sobre la memoria de datos, necesarias para completar la ejecución de ciertas instrucciones del programa.
-
 Esta etapa está compuesta por los siguientes módulos:
 
 - ``dataMemory``: Módulo encargado de la lectura y escritura de datos en memoria. ``memoryBlock`` es la matriz que representa la memoria de 2^5=32 posiciones con 32 bits cada una.
