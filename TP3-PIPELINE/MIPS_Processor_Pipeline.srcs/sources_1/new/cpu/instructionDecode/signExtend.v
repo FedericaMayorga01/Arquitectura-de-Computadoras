@@ -8,7 +8,6 @@ module signExtend
     output wire [DATA_LEN-1:0] o_immediateExtendValue
 );
 
-//assign o_immediateExtendValue = {i_immediateValue[IMMEDIATE_LEN-1],{DATA_LEN-IMMEDIATE_LEN{1'b0}},i_immediateValue[IMMEDIATE_LEN-2:0]};
 assign o_immediateExtendValue = {{DATA_LEN-IMMEDIATE_LEN{i_immediateValue[IMMEDIATE_LEN-1]}}, i_immediateValue};
 
 

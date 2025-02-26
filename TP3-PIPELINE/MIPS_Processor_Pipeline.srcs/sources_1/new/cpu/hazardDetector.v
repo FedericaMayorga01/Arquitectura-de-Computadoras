@@ -17,11 +17,6 @@ module hazardDetector  #(
 );
 
 always @(*) begin
-    //if(i_memReadE & (i_rtE == i_rsID | i_rtE == i_rtID ))
-    //    o_stall = 1'b1;
-    //else if(i_memReadM & (i_rtM == i_rsID | i_rtM == i_rtID ))
-    //    o_stall = 1'b1;
-    //else o_stall = 1'b0;
     if (i_memReadE && ((i_rtE == i_rsID) || (i_rtE == i_rtID)))
         o_stall = 1'b1;
     else
