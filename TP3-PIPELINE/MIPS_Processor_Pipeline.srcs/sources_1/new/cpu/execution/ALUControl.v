@@ -54,15 +54,7 @@ always @(*)
             case(i_aluOP)
                 //Load or store instruction ALU should add 
                 LOAD_STORE: o_opSelector = ADD;
-                //R-type instruction
-                //OTHERS:o_opSelector = i_funct; 
-                    //begin
-                    //case(i_immediateFunct)
-                    //    SLT: o_opSelector = SLT;
-                    //    SLTU: o_opSelector = AND;                  
-                    //    default: o_opSelector  = 0;
-                    //endcase
-                //end                 
+                //R type instruction    
                 R_TYPE: o_opSelector = i_funct;
                 //Immediate instruction
                 IMMEDIATE: begin

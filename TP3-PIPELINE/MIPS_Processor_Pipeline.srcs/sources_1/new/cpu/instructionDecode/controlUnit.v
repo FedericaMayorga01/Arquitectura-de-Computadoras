@@ -96,8 +96,6 @@ always @(*) begin
             else begin
                 r_regDest = 2'b01;
                 r_aluSrc = (r_isShamt) ? 2'b10 : 2'b00;
-                //r_branch = i_opCode[1] | (!i_opCode[1] & i_funct[3]) ? 2'b10 : 2'b00;
-                //r_branch = {i_funct[0], 1'b1};
                 if(r_isJALR || !r_isNotJR) begin
                     r_branch = 2'b10;
                 end
@@ -106,8 +104,6 @@ always @(*) begin
                 end
                 r_regWrite = (!(i_opCode[1] | i_opCode[0])) ? r_isNotJR : i_opCode[0];
                 r_memToReg = {i_opCode[0] | r_isJALR, 1'b0};
-                //r_jumpType = !i_opCode[1];
-                //r_jumpType = (r_isJALR || !r_isNotJR);
                 r_jumpType = 1'b0;
                 r_immediateFunct = 3'b000;
                 r_aluOp = 2'b10;
@@ -179,10 +175,10 @@ always @(*) begin
             r_unsigned = 1'b0;
         end
         JAL,J: begin
-            r_regDest = (i_opCode == JAL) ? 2'b11 : 2'b10; // true: JAL(reg31),false: J
+            r_regDest = (i_opCode == JAL) ? 2'b11 : 2'b10; 
             r_aluOp = 2'b01;
             r_immediateFunct = 3'b000;
-            r_aluSrc = 2'b01; // ver
+            r_aluSrc = 2'b01; 
             r_branch = 2'b10;
             r_jumpType = 1'b1;
             r_memRead = 1'b0;

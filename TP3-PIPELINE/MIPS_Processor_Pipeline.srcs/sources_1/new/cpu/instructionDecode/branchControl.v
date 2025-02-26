@@ -53,12 +53,6 @@ always @(*) begin
             o_PCSrc = 0;
             o_pcBranch = 0;
         end
-        //default: begin // BEQ, BNE
-        //    //Bit bajo de branch indica si es instruccion de branch
-        //    //Bit alto indica si es equal o not equal
-        //    o_PCSrc = i_branch[0] & (i_branch[1] ^ w_zero);       
-        //    o_pcBranch = w_branchPC;
-        //end
     endcase
 end
 
