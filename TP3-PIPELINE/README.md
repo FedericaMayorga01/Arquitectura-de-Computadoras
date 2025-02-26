@@ -13,9 +13,9 @@ El objetivo es describir el desarrollo e implementación de un pipeline de ejecu
 
 El pipeline de ejecución esta preparado para manejar las siguientes instrucciones:
 - R-Type:
-    - SLL, SRL, SRA, SLLV, SRLV, SRAV, ADDU, SUBU, AND, OR, XOR, NOR, SLT
+    - SLL, SRL, SRA, SLLV, SRLV, SRAV, ADDU, SUBU, AND, OR, XOR, NOR, SLT, SLTU
 - I-Type:
-    - LB, LH, LW, LWU, LBU, LHU, SB, SH, SW, ADDI, ANDI, ORI, XORI, LUI, SLTI, BEQ, BNE, J, JAL
+    - LB, LH, LW, LWU, LBU, LHU, SB, SH, SW, ADDI, ADDIU, ANDI, ORI, XORI, LUI, SLTI, SLTIU, BEQ, BNE, J, JAL
 - J-Type:
     - JR, JALR
 
@@ -56,6 +56,7 @@ Los módulos que conforman esta etapa son los siguientes:
 
 - ``programCounterMux``: Multiplexor que selecciona la fuente del program counter. Las opciones incluyen el PC actual incrementado en 4 o el PC resultante de una instrucción de salto. Se implementa mediante un multiplexor de 2 a 1. Este multiplexor es de vital importancia para el program counter, sus entradas provienen del modulo branchcontrol(decide si el procesador debe realizar un salto o continuar con la ejecución secuencial) que se encuentra en la etapa de instruction decode e indica cual sera la fuente del PC en funcion de la decisión que calculó el modulo branchcontrol.
 
+
 ## Instruction Decode (ID)
 <p align="center">
     <img src="./img/ID.png"><br>
@@ -71,16 +72,16 @@ Esta etapa comprende los siguientes submódulos:
 - ``signExtend``: Extiende los valores inmediatos a 32 bits según el bit de signo, permitiendo la correcta representación de números negativos en operaciones aritméticas y de salto.
 - ``branchControl``: Este módulo decide si el procesador debe realizar un salto(y el calculo de la direccion a saltar) o continuar con la ejecución secuencial. Su funcionamiento es el siguiente:
     - Cálculo del PC en saltos condicionales (BEQ / BNE):
-        - Se calcula la nueva dirección de PC sumando i_immediateExtendValue (desplazado 2 bits) al PC + 4.
-        - BEQ salta si i_readData1 == i_readData2, BNE si son distintos.
-        - Para Calcular la dirección del salto condicional, se calcula sumando o restando el desplazamiento inmediato (i_immediateExtendValue) al PC actual (i_incrementedPC)
+        - Se calcula la nueva dirección de PC sumando ``i_immediateExtendValue`` (desplazado 2 bits) al PC + 4.
+        - BEQ salta si ``i_readData1 == i_readData2``, BNE si son distintos.
+        - Para Calcular la dirección del salto condicional, se calcula sumando o restando el desplazamiento inmediato (``i_immediateExtendValue``) al PC actual (``i_incrementedPC``)
     - Cálculo del PC en saltos incondicionales (J, JR):
-        - Si i_jumpType = 1, el salto se hace al valor del registro (JR).
-        - Si i_jumpType = 0, el salto es a la dirección calculada con i_instrIndex (J, JAL).
+        - Si ``i_jumpType = 1``, el salto se hace al valor del registro (JR).
+        - Si ``i_jumpType = 0``, el salto es a la dirección calculada con ``i_instrIndex`` (J, JAL).
     - Decisión final:
-        - Si es J o JR, o_PCSrc = 1 y o_pcBranch = w_jumpPC.
-        - Si es BEQ o BNE, o_PCSrc = 1 solo si la comparación es verdadera.
-    - Las salidas o_PCSrc y o_PCBranch son fundamentales ya que indican respectivamente si el PC debe cambiar a otra dirección y la nueva dirección de PC si se toma un salto. Estas salidas son las entradas del multiplexor que se encuentra en la etapa de instruction fetch, para decidir el valor del program counter.
+        - Si es J o JR, ``o_PCSrc = 1`` y ``o_pcBranch = w_jumpPC``.
+        - Si es BEQ o BNE, ``o_PCSrc = 1`` solo si la comparación es verdadera.
+    - Las salidas ``o_PCSrc`` y ``o_PCBranch`` son fundamentales ya que indican respectivamente si el PC debe cambiar a otra dirección y la nueva dirección de PC si se toma un salto. Estas salidas son las entradas del multiplexor que se encuentra en la etapa de instruction fetch, para decidir el valor del program counter.
   
 - ``MUXD1``: Multiplexor encargado de insertar **stalls** en el pipeline en respuesta a las señales de control, garantizando la sincronización del flujo de datos. Su salida, segun si es un stall o la instruccion a ejecutar, es entrada de la control unit que generara las señales de control.
 - ``MUXD1F`` y ``MUXD2F``: Multiplexores que seleccionan la fuente de los datos entre diferentes opciones: la salida del banco de registros, el cortocircuito desde la etapa de memoria o la etapa de ejecución. La unidad de cortocircuito controla estos mux para evitar stalls innecesarios y optimizar el flujo del pipeline.
@@ -108,6 +109,7 @@ Módulos que componen esta etapa:
 
 Vale la pena denotar que en este módulo, el valor del _program counter incrementado en 4_ que proviene de la salida de la etapa de decodificación de la instrucción, se le vuelven a sumar 4. La razón principal para este incremento adicional es el manejo de instrucciones _delays slots_, PC + 8 es la dirección de retorno en instrucciones como JAL o JR. Si no existiera el _delay slot_, habría un stall (detención del pipeline) en la ejecución, por lo tanto, en lugar de detener la ejecución, el procesador permite ejecutar una instrucción útil mientras se completa el salto.
 
+
 ## Memory Access (MEM)
 <p align="center">
     <img src="./img/MEM.png"><br>
@@ -127,7 +129,7 @@ Esta etapa está compuesta por los siguientes módulos:
         - La escritura se realiza en el flanco de subida del reloj.
     - Salidas:
         -  ``o_memoryValue``: Devuelve el contenido de memoryBlock en ``i_memoryAddress`` (se usa para depuración o para operaciones de monitoreo de memoria).
-        -  ``o_readData``: Es el valor leído de memoria, ya procesado por memoryMask.
+        -  ``o_readData``: Es el valor leído de memoria, ya procesado por ``memoryMask``.
 - ``memoryMask``: Este módulo se encarga de extraer correctamente los datos de la memoria, dependiendo de su tamaño (byte, halfword o word). Además, maneja la extensión de signo.
 
 El flujo general es el siguiente: al recibir una señal de escritura (``i_memWrite``), se almacena el valor indicado en la dirección especificada, respetando el tamaño y formato seleccionados. Para la lectura, se extraen los datos de la dirección correspondiente, ajustándolos según las configuraciones de tamaño y signo antes de ser enviados a la siguiente etapa.
@@ -210,7 +212,7 @@ Podemos identificar algunas de sus entradas y salidas:
 Si una instrucción en la etapa de ejecución tiene activada la señal ``i_memReadE`` y su registro destino (``i_rtE``) coincide con alguno de los registros fuente (``i_rsID`` o ``i_rtID``) de la instrucción en la etapa de decodificación, se activa la señal ``o_stall``.
 Si una instrucción en la etapa de memoria tiene activada la señal ``i_memReadM`` y su registro destino (``i_rtM``) coincide con alguno de los registros fuente de la instrucción en decodificación, se activa la señal ``o_stall``.
 
-Esta unidad es la que ayuda a poder realizar el cortocircuito cuando existe previamente una instruccion LOAD. Se da cuenta que es esta instruccion al ejecutar ``i_memRead`` ya que LOAD es la única instrucción que lee de memoria. Al bloquearse la instruccion situada en la etapa de **ID** tambien se bloquea la instrucción que esta en la etapa **IF**, ya que sino perdería la instrucción buscada de memoria. La mitad posterior del pipeline que comienza en la etapa EX ejecuta instrucciones NOPs, esto se logra negando (poniendo a cero) las señales de control de las etapas **EX/MEM** y **WB**. Este proceso se logra a partir de un multiplexor que se encuentra en la etapa de instruction decode, el cual su salida es la entrada de la control unit(la cual es la encargada de generar las señales de control), por lo tanto si el selector del mux indica que existe un stall provoca que las señales de control que salen de la control unit sean = 0.
+Esta unidad es la que ayuda a poder realizar el cortocircuito cuando existe previamente una instruccion LOAD. Se da cuenta que es esta instruccion al ejecutar ``i_memRead`` ya que LOAD es la única instrucción que lee de memoria. Al bloquearse la instruccion situada en la etapa de **ID** tambien se bloquea la instrucción que esta en la etapa **IF**, ya que sino perdería la instrucción buscada de memoria. La mitad posterior del pipeline que comienza en la etapa EX ejecuta instrucciones NOPs, esto se logra negando (poniendo a cero) las señales de control de las etapas **EX/MEM** y **WB**. Este proceso se logra a partir de un multiplexor que se encuentra en la etapa de instruction decode, el cual su salida es la entrada de la ``controlUnit`` (la cual es la encargada de generar las señales de control), por lo tanto si el selector del mux indica que existe un stall provoca que las señales de control que salen de la control unit sean iguales a 0.
 
 <p align="center">
     <img src="./img/muxID.png"><br>
@@ -219,6 +221,7 @@ Esta unidad es la que ayuda a poder realizar el cortocircuito cuando existe prev
 
 Este mecanismo asegura que el pipeline no avance hasta que el riesgo desaparezca, garantizando una ejecución correcta de las instrucciones en presencia de dependencias de datos.
 
+---
 
 ## Unidad de debug
 <p align="center">
@@ -322,6 +325,8 @@ Se llevaron a cabo pruebas para determinar la frecuencia máxima de operación d
     <em>Prueba de máxima frecuencia en VIVADO.</em>
   </div>
 </div>
+
+Se observa la presencia de **13 Number of Failing Endpoints**, cuyos critical paths provenian de la MemoryAccessStage (MEM), lo que nos inidica que estas mayores frecuencias propuestas no son suficientes para el correcto funcionamiento de este etapa. Es decir, un ciclo de clock no alcanza para que se desarrollen correctamente las acciones correspondientes a la etapa de MEM.
 
 En cambio, en una frecuencia menor a la mayor frecuencia estable, nos demuestra que el sistema se mantiene en perfectas condiciones, sin la presencia de paths criticos, donde no se cumple con los requisitos de timing. Siguiendo esta metodología, la menor frecuencia alcanzada fue de 10MHz.
 
