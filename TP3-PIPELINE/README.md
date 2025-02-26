@@ -174,12 +174,12 @@ Podemos identificar algunas de sus entradas y salidas:
   - **10**: Cortocircuito desde la etapa de memoria.
   - **11**: Cortocircuito desde la etapa de ejecución.
 
----
+
 La detección de riesgos se basa en las siguientes condiciones:
 - Si ``i_rdE`` coincide con ``i_rs`` y la señal ``i_regWriteE`` está activa, se genera un cortocircuito para el operando A.
 - Si ``i_rdE`` coincide con ``i_rt`` y la señal ``i_regWriteE`` está activa, se genera un cortocircuito para el operando B.
 
----
+
 Condiciones similares se aplican para las comparaciones con ``i_rdM`` y la señal ``i_regWriteM``, que indican riesgos en la etapa de memoria.
 
 En cuanto a la **implementación de la anticipación de resultados**, se añaden dos mutiplexores (en la etapa de instructionDecode) a la entrada de la ALU y el control apropiado para detectar estas dependencias y anticipar los resultados cuando sea necesario. El primer multiplexor recibe el registro A proveniente de la etapa anterior, el resultado de la instrucción anterior que se encuentra a la salida de la ALU (**etapa EX**), y el resultado de la instrucción anterior de la anteirior que se encuentra a la salida de la memoria (**etapa M**). El otro multiplexor recibe estas dos mismas señales junto con el registro B. El control de los multiplexores se lleva a cabo por esta unidad, que es la que va a decidir que entrada usar. Debido a que algunas instrucciones no escriben en registros, se anticiparía un valor innecesario, por esto es que se comprueba si la señal RegWrite esta activa (esta señal de contrl indica que la instruccion va a escribir un registro); esto se logra examinando el campo de control **WB** del registro de segmentación durante las etapas de **EX** y **MEM**.
