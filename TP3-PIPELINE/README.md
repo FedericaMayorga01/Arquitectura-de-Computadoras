@@ -66,7 +66,7 @@ En esta etapa, la instrucción entregada es decodificada para extraer diversos c
 
 Esta etapa comprende los siguientes submódulos:
 
-- ``registers``: Banco de registros, que proporciona almacenamiento temporal y acceso rápido a los datos necesarios para las instrucciones. Este módulo soporta la lectura y escritura de múltiples registros según las señales de control proporcionadas. Tenemos 32 registros de 32 bits.
+- ``registers``: Banco de registros, que proporciona almacenamiento temporal y acceso rápido a los datos necesarios para las instrucciones. Tenemos 32 registros de 32 bits.
 - ``controlUnit``: Responsable de generar las señales de control necesarias para todas las etapas. Entre estas señales destacan el control de salto (``o_jumpType``, ``o_branch``), selección de operaciones aritméticas (``o_aluOp``), etc.
 - ``signExtend``: Extiende los valores inmediatos a 32 bits según el bit de signo, permitiendo la correcta representación de números negativos en operaciones aritméticas y de salto.
 - ``branchControl``: Este módulo decide si el procesador debe realizar un salto(y el calculo de la direccion a saltar) o continuar con la ejecución secuencial. Su funcionamiento es el siguiente:
